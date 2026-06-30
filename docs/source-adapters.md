@@ -25,5 +25,11 @@ type SourceAdapter = {
 
 ## MVP
 
-The MVP uses generic URL pattern detection. Specific adapters come later only after real site behavior proves they are needed.
+The MVP uses generic URL pattern detection in `apps/extension/src/detector/mediaUrlClassifier.ts`. Specific adapters come later only after real site behavior proves they are needed.
 
+The generic classifier:
+
+- accepts common media playlist/file extensions such as `.m3u8`, `.mpd`, `.mp4`, and `.webm`
+- ignores common media segments such as `.ts` and `.m4s`
+- marks unsupported schemes such as `blob:` as unsupported
+- marks blocked or DRM-heavy platforms as unsupported before extension matching

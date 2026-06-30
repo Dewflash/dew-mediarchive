@@ -14,3 +14,8 @@
 - Ran `npm run build`: passed and produced `dist/manifest.json`, `dist/background.js`, and `dist/popup.html`.
 - Manual browser testing pending until media detection exists.
 - Added shared media detection types for candidates, unsupported media, provenance, and per-tab snapshots.
+- Added media URL classifier for supported direct media, ignored segment/noise URLs, unsupported schemes, blocked platforms, and DRM-likely sources.
+- Added Vitest and classifier unit tests.
+- Ran `npm run test`: 1 file passed, 9 tests passed.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.

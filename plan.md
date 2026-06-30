@@ -17,15 +17,16 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Scaffolded `apps/extension` as a Chromium Manifest V3 extension with TypeScript, Vite, and a React popup shell.
 - Verified Phase 1 with `npm run typecheck` and `npm run build`.
 - Added the Phase 2 shared media detection data model.
+- Added Phase 3 media URL classification helpers and unit tests.
+- Verified Phase 3 with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 
-1. Add URL classification helpers and tests.
-2. Add background request listener and per-tab storage.
-3. Add popup UI with copy action.
-4. Add badge updates.
-5. Build and typecheck.
-6. Document load-unpacked and manual `yt-dlp` verification.
+1. Add background request listener and per-tab storage.
+2. Add popup UI with copy action.
+3. Add badge updates.
+4. Build and typecheck.
+5. Document load-unpacked and manual `yt-dlp` verification.
 
 ## Open Questions
 

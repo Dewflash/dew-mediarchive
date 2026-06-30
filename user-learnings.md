@@ -96,3 +96,23 @@ Dew needs more than a URL:
 - which detector version found it
 
 That is why Phase 2 adds the shared model first. Phase 3 can now focus on detection behavior while emitting product-shaped records from the start.
+
+## Why Phase 3 Tests The Classifier Before Browser Scanning
+
+The browser will produce a lot of noisy requests: scripts, images, analytics, media chunks, playlists, and platform URLs. Before listening to live browser traffic, Dew needs a small decision function that can answer:
+
+```text
+Is this useful media?
+Is this unsupported?
+Should we ignore it?
+```
+
+This is why Phase 3 adds a tested classifier first. The tests prove common cases:
+
+- `.m3u8` becomes an HLS candidate
+- `.mpd` becomes a DASH candidate
+- `.mp4` becomes a video candidate
+- `.ts` chunks are ignored
+- YouTube-style hosts are blocked
+- premium streaming hosts are DRM-likely unsupported
+- `blob:` URLs are unsupported because they are not real downloadable network URLs

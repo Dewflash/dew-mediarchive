@@ -15,6 +15,7 @@
 Run from `apps/extension` once scaffolded:
 
 ```bash
+npm run test
 npm run typecheck
 npm run build
 ```
@@ -36,4 +37,3 @@ yt-dlp "PASTED_URL"
 ```
 
 10. Record result in `changelog.md`.
-
