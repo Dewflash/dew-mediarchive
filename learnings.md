@@ -16,6 +16,7 @@
 - Web requests can arrive concurrently. Snapshot writes must be serialized per tab or one read/modify/write cycle can overwrite another.
 - Put the media snapshot storage key and read/write helpers in shared code so popup and background code cannot silently drift.
 - Typed test fixtures should satisfy the same Chrome API types as production code. If the test cheats the shape, it can hide integration assumptions.
+- Popup tests should cover both success and failure states because clipboard access can fail even when the UI renders correctly.
 
 ## Mistakes To Avoid
 
@@ -31,3 +32,4 @@
 - Do not perform unqueued read/modify/write updates for per-tab detection snapshots.
 - Do not let clipboard failures fail silently; copy errors should be visible in the popup.
 - Do not treat runtime-passing tests as enough when TypeScript says the mock shape does not match the browser API.
+- Do not count component tests as a substitute for the final real toolbar-popup smoke test.

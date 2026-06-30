@@ -51,6 +51,7 @@ Verified:
 - `yt-dlp` downloaded the local MP4 successfully
 - downloaded file probes as 1.000000 seconds and 17122 bytes
 - headless Chrome requested the local smoke-test page and media file
+- automated popup tests prove snapshot rendering and clipboard success/failure behavior
 
 Pending:
 

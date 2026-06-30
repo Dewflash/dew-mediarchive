@@ -54,3 +54,8 @@
 - Added `requestBody` to the mocked request details and reran checks successfully.
 - Ran `npm run typecheck`: passed.
 - Ran `npm run build`: passed.
+- Added popup tests with Testing Library and jsdom.
+- Covered empty state, candidate rendering, Copy success, Copy failure, unsupported media rendering, and live session-storage updates.
+- Ran `npm run test`: 4 files, 23 tests passed.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.

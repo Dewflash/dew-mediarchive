@@ -31,12 +31,14 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Attempted a visible Chrome DevTools smoke test; Chrome loaded the local page and requested `sample.mp4`, but popup-visible proof still requires normal manual interaction.
 - Added focused background pipeline tests for request normalization, ignored requests, unsupported sources, session snapshots, concurrent appends, badge counts, and clearing.
 - Verified the stronger test suite with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Added popup tests for empty state, candidate rendering, Copy success, Copy failure, unsupported media, and live snapshot updates.
+- Verified popup behavior with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 
 1. Perform normal Chromium load-unpacked testing with the popup visible.
-2. Confirm the popup shows the local `sample.mp4` candidate.
-3. Confirm the popup Copy button copies the candidate URL.
+2. Confirm the popup shows the local `sample.mp4` candidate in a real toolbar popup.
+3. Confirm the real popup Copy button copies the candidate URL.
 4. Record any manual detection gaps.
 
 ## Open Questions

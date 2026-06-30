@@ -301,3 +301,24 @@ The new tests passed at runtime first, but TypeScript failed because the fake Ch
 That was useful. It means the tests were not accurately shaped like real browser events yet.
 
 The fix was to make the mocks match the type instead of weakening the production code. This keeps the tests honest.
+
+## Why We Added Popup Tests
+
+The remaining manual proof is the real Chrome toolbar popup. But we can still prove most popup behavior automatically:
+
+```text
+snapshot exists -> popup shows media
+candidate exists -> Copy button appears
+Copy succeeds -> button says Copied
+Copy fails -> error message appears
+unsupported item -> no Copy button
+storage changes -> popup updates live
+```
+
+These tests do not replace the final human-visible Chrome check, but they reduce the risk that the popup is broken while we wait for that check.
+
+## Why The Popup Tests Use jsdom
+
+The popup is a small React UI. Testing it in jsdom lets us render the component, mock Chrome extension APIs, and verify text/buttons without needing a full browser extension session each time.
+
+That is cheaper and more reliable than launching Chrome for every UI state.
