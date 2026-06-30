@@ -162,3 +162,31 @@ media A is accidentally lost
 The fix is a small per-tab write queue. For each tab, Dew applies snapshot updates one at a time.
 
 That keeps the MVP reliable without introducing a database yet.
+
+## Why Phase 5 Uses The Same Snapshot Store In Popup And Background
+
+The popup should not re-detect media. Detection belongs to the background worker because it sees network requests as they happen.
+
+The popup's job is simpler:
+
+```text
+read current tab snapshot
+show what the background found
+copy candidate URLs
+show unsupported/failure states
+```
+
+That is why Phase 5 moved the storage key into a shared helper. If the background and popup each invented their own storage key, a tiny mismatch would make the popup look empty even when detection worked.
+
+## Why Copy Failure Is A Real State
+
+Clipboard access can fail. The user might be in a browser context where copying is blocked or interrupted.
+
+Instead of pretending Copy always works, the popup now has:
+
+```text
+Copied
+Copy failed. Try again.
+```
+
+That follows the project rule that buttons should not silently do nothing.

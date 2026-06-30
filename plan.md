@@ -21,13 +21,14 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Verified Phase 3 with `npm run test`, `npm run typecheck`, and `npm run build`.
 - Added Phase 4 background request listener, per-tab session storage, and badge count updates.
 - Verified Phase 4 with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Added Phase 5 popup snapshot reading, media list rendering, copy action, and copy failure state.
+- Verified Phase 5 with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 
-1. Add popup UI that reads tab snapshots.
-2. Add copy action for candidate URLs.
-3. Build and typecheck.
-4. Document load-unpacked and manual `yt-dlp` verification.
+1. Document load-unpacked and manual `yt-dlp` verification.
+2. Perform manual browser testing on known authorized non-DRM media.
+3. Record manual test results and any detection gaps.
 
 ## Open Questions
 

@@ -14,6 +14,7 @@
 - Chrome runtime fields and installed TypeScript package fields may not always line up. When needed, model optional runtime fields narrowly instead of weakening all Chrome types.
 - Store detected media in `chrome.storage.session` for the MVP so the popup and background service worker share state without committing media URLs to durable browser storage.
 - Web requests can arrive concurrently. Snapshot writes must be serialized per tab or one read/modify/write cycle can overwrite another.
+- Put the media snapshot storage key and read/write helpers in shared code so popup and background code cannot silently drift.
 
 ## Mistakes To Avoid
 
@@ -27,3 +28,4 @@
 - Do not treat `blob:` URLs as downloadable media URLs; they are browser-local object references and need the underlying network request instead.
 - Do not make the popup re-scan the page. The background worker owns detection; the popup should read snapshots.
 - Do not perform unqueued read/modify/write updates for per-tab detection snapshots.
+- Do not let clipboard failures fail silently; copy errors should be visible in the popup.

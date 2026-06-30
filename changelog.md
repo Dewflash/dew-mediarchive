@@ -28,3 +28,9 @@
 - Ran `npm run test`: 1 file passed, 9 tests passed.
 - Ran `npm run typecheck`: passed.
 - Ran `npm run build`: passed.
+- Added shared media snapshot storage helpers for background and popup use.
+- Updated the popup to read the active tab snapshot from Chrome session storage.
+- Added popup states for loading, empty, error, candidates, unsupported sources, copy success, and copy failure.
+- Ran `npm run test`: 1 file passed, 9 tests passed.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.

@@ -1,15 +1,16 @@
 import type { DetectedMedia, MediaDetectionSnapshot } from "../shared";
+import {
+  readMediaDetectionSnapshot,
+  removeMediaDetectionSnapshot,
+  writeMediaDetectionSnapshot
+} from "../shared";
 
-const SNAPSHOT_KEY_PREFIX = "media-snapshot:";
 const tabWriteQueues = new Map<number, Promise<unknown>>();
 
 export async function readTabSnapshot(
   tabId: number
 ): Promise<MediaDetectionSnapshot | undefined> {
-  const key = getSnapshotKey(tabId);
-  const result = await chrome.storage.session.get(key);
-
-  return result[key] as MediaDetectionSnapshot | undefined;
+  return readMediaDetectionSnapshot(tabId);
 }
 
 export async function appendDetectedMedia(
@@ -25,7 +26,7 @@ export async function appendDetectedMedia(
 
 export async function clearTabSnapshot(tabId: number): Promise<void> {
   await enqueueTabWrite(tabId, async () => {
-    await chrome.storage.session.remove(getSnapshotKey(tabId));
+    await removeMediaDetectionSnapshot(tabId);
   });
 }
 
@@ -67,9 +68,7 @@ async function appendDetectedMediaNow(
     updatedAt: now
   };
 
-  await chrome.storage.session.set({
-    [getSnapshotKey(tabId)]: nextSnapshot
-  });
+  await writeMediaDetectionSnapshot(nextSnapshot);
 
   return nextSnapshot;
 }
@@ -108,8 +107,4 @@ function upsertById(
   const nextCandidates = [...existingCandidates];
   nextCandidates[existingIndex] = nextCandidate;
   return nextCandidates;
-}
-
-function getSnapshotKey(tabId: number): string {
-  return `${SNAPSHOT_KEY_PREFIX}${tabId}`;
 }

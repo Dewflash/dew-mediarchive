@@ -13,4 +13,9 @@ export type {
 } from "./media";
 
 export { DETECTION_MODEL_VERSION } from "./media";
-
+export {
+  getMediaSnapshotStorageKey,
+  readMediaDetectionSnapshot,
+  removeMediaDetectionSnapshot,
+  writeMediaDetectionSnapshot
+} from "./mediaSnapshotStorage";

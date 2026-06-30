@@ -47,6 +47,20 @@ webRequest.onBeforeRequest
 
 The popup should read the same snapshot instead of duplicating detection logic.
 
+## Popup Flow
+
+The popup reads the current tab's media snapshot from the shared storage helper.
+
+```text
+popup opens
+  -> find active tab
+  -> read session snapshot
+  -> render loading, empty, error, candidates, or unsupported states
+  -> copy candidate URL on request
+```
+
+The shared storage helper owns the snapshot key so the background worker and popup cannot drift.
+
 ## Future App Shape
 
 The final product should use a job-based local pipeline:

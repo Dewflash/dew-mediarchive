@@ -64,6 +64,98 @@ body {
   line-height: 1.5;
 }
 
+.popup__empty--error {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.media-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.media-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.media-item__content {
+  min-width: 0;
+}
+
+.media-item__header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.media-item__kind {
+  min-width: 0;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.media-item__status {
+  flex: none;
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.media-item__status--candidate {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.media-item__status--unsupported {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.media-item__url,
+.media-item__message {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.media-item__message {
+  color: #b91c1c;
+}
+
+.media-item__button {
+  min-width: 68px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  padding: 8px 10px;
+}
+
+.media-item__button:hover {
+  background: #1d4ed8;
+}
+
 @media (prefers-color-scheme: dark) {
   :root,
   body {
@@ -84,8 +176,29 @@ body {
     background: #1f2937;
   }
 
+  .popup__empty--error {
+    border-color: #7f1d1d;
+    background: #2a171b;
+  }
+
   .popup__empty p {
     color: #cbd5e1;
   }
-}
 
+  .media-item {
+    border-color: #334155;
+    background: #1f2937;
+  }
+
+  .media-item__kind {
+    color: #f8fafc;
+  }
+
+  .media-item__url {
+    color: #cbd5e1;
+  }
+
+  .media-item__message {
+    color: #fca5a5;
+  }
+}
