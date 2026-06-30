@@ -87,11 +87,22 @@ export function Popup() {
       const changedSnapshot = changes[key]?.newValue as
         | MediaDetectionSnapshot
         | undefined;
+      const tabId = activeTabId;
 
-      setPopupState({
-        status: "ready",
-        tabId: activeTabId,
-        snapshot: changedSnapshot
+      setPopupState((currentState) => {
+        if (
+          changedSnapshot === undefined &&
+          currentState.status === "ready" &&
+          currentState.snapshot?.candidates.length
+        ) {
+          return currentState;
+        }
+
+        return {
+          status: "ready",
+          tabId,
+          snapshot: changedSnapshot
+        };
       });
     };
 

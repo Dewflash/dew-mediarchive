@@ -22,6 +22,7 @@
 - A standalone `chrome-extension://.../popup.html` tab is useful for inspecting extension storage, but it is not proof of the real toolbar popup because Chrome treats that standalone page as the active tab.
 - An explicit `popup.html?tabId=<id>` path is useful for automation/debugging because it proves popup rendering against a known tab snapshot without changing normal toolbar active-tab behavior.
 - Clipboard writes from automated extension-page clicks can be blocked by Chrome. Treat that as a useful failure-state proof, not as human Copy proof.
+- The popup should keep the last non-empty candidate list stable while it is open. Temporary storage can clear for privacy, but the visible Copy surface should not disappear out from under the user.
 
 ## Mistakes To Avoid
 
@@ -41,3 +42,4 @@
 - Do not remove the page media-element fallback just because `webRequest` exists; the fallback is what produced the first clean runtime `sample.mp4` candidate.
 - Do not let the extension observe its own popup assets as media detections.
 - Do not claim explicit-tab popup rendering is the same as a real toolbar-popup proof.
+- Do not blindly replace a visible popup list with empty state just because session storage sent a clear event.

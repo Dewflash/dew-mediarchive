@@ -204,6 +204,50 @@ describe("Popup", () => {
     });
     expect(screen.getByText("cdn.example.test/live.mp4")).toBeInTheDocument();
   });
+
+  it("keeps the visible media list if the tab snapshot clears while open", async () => {
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/short.mp4")
+      ])
+    });
+
+    render(<Popup />);
+
+    expect(await screen.findByText("1 item found")).toBeInTheDocument();
+    expect(screen.getByText("cdn.example.test/short.mp4")).toBeInTheDocument();
+
+    storageChangeHandler?.(
+      {
+        "media-snapshot:7": {
+          oldValue: createSnapshot([
+            createCandidate("media-1", "https://cdn.example.test/short.mp4")
+          ])
+        }
+      },
+      "session"
+    );
+
+    expect(screen.getByText("1 item found")).toBeInTheDocument();
+    expect(screen.getByText("cdn.example.test/short.mp4")).toBeInTheDocument();
+  });
+
+  it("stays empty when an empty tab snapshot clears while open", async () => {
+    storageGet.mockResolvedValue({});
+
+    render(<Popup />);
+
+    expect(await screen.findByText("No media detected yet")).toBeInTheDocument();
+
+    storageChangeHandler?.(
+      {
+        "media-snapshot:7": {}
+      },
+      "session"
+    );
+
+    expect(screen.getByText("No media detected yet")).toBeInTheDocument();
+  });
 });
 
 function createSnapshot(

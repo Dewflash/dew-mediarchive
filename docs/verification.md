@@ -52,6 +52,7 @@ Verified:
 - downloaded file probes as 1.000000 seconds and 17122 bytes
 - headless Chrome requested the local smoke-test page and media file
 - automated popup tests prove snapshot rendering and clipboard success/failure behavior
+- automated popup tests prove visible candidates remain available if the tab snapshot clears while the popup is open
 - Chrome for Testing loaded the rebuilt extension from `apps/extension/dist`
 - Chrome for Testing loaded the local smoke page and requested `sample.mp4`
 - extension session storage contained exactly one `MP4 video` candidate for `http://127.0.0.1:8765/sample.mp4`

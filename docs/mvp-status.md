@@ -18,13 +18,14 @@ mvp-extension
 - Per-tab session snapshot storage in `chrome.storage.session`.
 - Badge count updates for supported candidates.
 - Popup states for loading, empty, error, candidates, unsupported media, Copy success, and Copy failure.
+- Open popup keeps the last non-empty media list visible even if the temporary tab snapshot clears.
 - Explicit popup verification URL: `popup.html?tabId=<tab-id>`.
 - Manual verification guide in `docs/mvp-manual-test.md`.
 - Architecture, adapter, archive, security, verification, learning, and changelog docs.
 
 ## What Is Proven
 
-- `npm run test` passes: 5 files, 29 tests.
+- `npm run test` passes: 5 files, 31 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -42,6 +43,7 @@ Copy
 ```
 
 - Automated Copy clicks can be blocked by Chrome, and Dew shows `Copy failed. Try again.`
+- Popup unit tests prove a visible media list is not removed when the tab snapshot clears while the popup is open.
 - The exact rendered candidate URL downloads successfully with `yt-dlp`.
 - The downloaded proof file probes as:
 

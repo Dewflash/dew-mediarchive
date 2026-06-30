@@ -433,3 +433,33 @@ Automation clicked Copy in the verification popup, but Chrome blocked clipboard 
 ```text
 Copy failed. Try again.
 ```
+
+## Why The Popup Keeps Links Visible While Open
+
+The browser and Dew can clear temporary detection records when a tab reloads, closes, or changes state. That is good for privacy because detected URLs are not permanent history.
+
+But it created a usability problem:
+
+```text
+short video is detected
+popup shows the link
+tab snapshot clears
+popup suddenly looks empty
+user cannot copy in time
+```
+
+The fix is:
+
+```text
+temporary storage can still clear
+but the already-open popup keeps the last non-empty list visible
+```
+
+This means Dew still follows the privacy rule:
+
+```text
+detected = temporary
+saved = permanent only after user action
+```
+
+while also giving the user a stable Copy surface. When the popup closes and opens again, it reads the current temporary state fresh.

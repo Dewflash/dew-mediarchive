@@ -87,3 +87,9 @@
 - Tried normal Google Chrome with a clean profile and extension flags; the DevTools target list exposed only built-in/component extensions, not the unpacked Dew worker.
 - Tried a visible toolbar proof pass in Chrome for Testing; the page requested `sample.mp4`, but screen capture for toolbar evidence failed with `could not create image from display`.
 - Added `docs/mvp-status.md` with the concise done/not-done handoff before pushing the branch.
+- Observed first-user feedback that short videos or pages with many changing videos can make the popup list disappear before Copy is clicked.
+- Updated the popup to keep the last non-empty media list visible while that popup instance is open if the backing tab snapshot clears.
+- Added popup tests for keeping visible media after a snapshot clear and staying empty when no media was ever detected.
+- Ran `npm run test`: 5 files, 31 tests passed.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.

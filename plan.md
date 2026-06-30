@@ -46,13 +46,15 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Confirmed automated Copy clicks are blocked by Chrome clipboard rules and surface the expected `Copy failed. Try again.` state.
 - Verified the exact rendered candidate URL downloads with `yt-dlp` and probes as 1.000000 seconds, 17122 bytes.
 - Verified this phase with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Stabilized the popup so a visible media list stays available while the popup is open, even if the tab's temporary snapshot clears underneath it.
+- Verified the stable popup behavior with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 
-1. Perform normal Chromium load-unpacked testing with the real toolbar popup visible.
-2. Confirm the toolbar popup shows the local `sample.mp4` candidate.
+1. Rebuild/reload the unpacked extension in normal Chrome.
+2. Re-test a short MP4 and a page with multiple videos to confirm visible links no longer disappear before Copy.
 3. Confirm a human click on the real popup Copy button copies the candidate URL.
-4. Record any manual detection gaps.
+4. Record any remaining manual detection gaps.
 
 ## Open Questions
 
