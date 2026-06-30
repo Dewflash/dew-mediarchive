@@ -8,6 +8,7 @@
 - Treat YouTube and premium streaming platforms as unsupported in the product path.
 - The sellable product is the desktop media archive app; the extension is a companion capture surface.
 - Vite config files use Node APIs, so the extension TypeScript config must include Node type context alongside Chrome extension types.
+- Define shared media records before detector behavior so extension layers and the later desktop app do not drift into incompatible shapes.
 
 ## Mistakes To Avoid
 
@@ -17,3 +18,4 @@
 - Do not log private URLs or page data while debugging.
 - Do not build polished app surfaces before proving media detection.
 - Do not place build tools in runtime dependencies; keep React runtime dependencies separate from Vite/TypeScript/dev tooling.
+- Do not pass bare media URL strings across layers once a structured detection record exists.

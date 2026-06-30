@@ -20,6 +20,19 @@ detect -> classify -> normalize -> present/copy
 - Presentation shows detected candidates and failure states.
 - Downloading, hashing, storage, indexing, and archive presentation belong to later phases.
 
+## Shared Detection Model
+
+The extension starts with a shared detection model in `apps/extension/src/shared/media.ts`. The model is intentionally created before request detection so background scripts, popup UI, future local receivers, and the desktop app can reuse the same concepts:
+
+- `DetectedMedia`
+- `MediaCandidate`
+- `UnsupportedMedia`
+- `MediaKind`
+- `UnsupportedReason`
+- `MediaDetectionSnapshot`
+
+This keeps the MVP from passing raw strings between layers.
+
 ## Future App Shape
 
 The final product should use a job-based local pipeline:
@@ -32,4 +45,3 @@ The final product should use a job-based local pipeline:
 - index jobs
 
 Jobs should be retryable, idempotent, and explicit about failure reasons.
-

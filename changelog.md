@@ -13,3 +13,4 @@
 - Added Node types and reran `npm run typecheck`: passed.
 - Ran `npm run build`: passed and produced `dist/manifest.json`, `dist/background.js`, and `dist/popup.html`.
 - Manual browser testing pending until media detection exists.
+- Added shared media detection types for candidates, unsupported media, provenance, and per-tab snapshots.

@@ -82,3 +82,17 @@ If all of those are mixed into one first commit, it becomes harder to know which
 The first `npm run typecheck` failed because `vite.config.ts` uses Node concepts such as path resolution, while the TypeScript config only knew about browser and Chrome extension types.
 
 The fix was to add Node type context. That is better than disabling strict checks because it keeps TypeScript useful while accurately describing the environment for each file.
+
+## Why Phase 2 Adds Types Before Detection
+
+It is tempting to jump straight into scanning browser requests, but that usually creates messy handoffs like "just pass this URL string to the popup."
+
+Dew needs more than a URL:
+
+- where it came from
+- when it was detected
+- what kind of media it appears to be
+- whether it is supported or blocked
+- which detector version found it
+
+That is why Phase 2 adds the shared model first. Phase 3 can now focus on detection behavior while emitting product-shaped records from the start.
