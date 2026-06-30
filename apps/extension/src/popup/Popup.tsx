@@ -22,6 +22,22 @@ export function Popup() {
 
     async function loadCurrentTabSnapshot() {
       try {
+        const requestedTabId = getRequestedTabId(window.location.search);
+
+        if (requestedTabId !== undefined) {
+          activeTabId = requestedTabId;
+          const snapshot = await readMediaDetectionSnapshot(requestedTabId);
+
+          if (isMounted) {
+            setPopupState({
+              status: "ready",
+              tabId: requestedTabId,
+              snapshot
+            });
+          }
+          return;
+        }
+
         const [activeTab] = await chrome.tabs.query({
           active: true,
           currentWindow: true
@@ -236,4 +252,20 @@ function formatUrl(url: string): string {
   } catch {
     return url;
   }
+}
+
+function getRequestedTabId(search: string): number | undefined {
+  const rawTabId = new URLSearchParams(search).get("tabId");
+
+  if (!rawTabId) {
+    return undefined;
+  }
+
+  const tabId = Number(rawTabId);
+
+  if (!Number.isInteger(tabId) || tabId < 0) {
+    return undefined;
+  }
+
+  return tabId;
 }

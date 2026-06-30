@@ -56,12 +56,16 @@ Verified:
 - Chrome for Testing loaded the local smoke page and requested `sample.mp4`
 - extension session storage contained exactly one `MP4 video` candidate for `http://127.0.0.1:8765/sample.mp4`
 - the runtime candidate used `page-video-element` provenance from the content-script fallback
+- explicit-tab popup verification rendered the stored smoke candidate with `1 item found`, `MP4 video`, `127.0.0.1/sample.mp4`, and a `Copy` button
+- automated Copy clicks are blocked by Chrome clipboard rules and correctly show `Copy failed. Try again.`
+- the exact rendered candidate URL downloaded successfully with `yt-dlp`
+- downloaded popup-proof file probes as 1.000000 seconds and 17122 bytes
 
 Pending:
 
 - normal Chromium window load-unpacked test
 - popup-visible candidate proof
-- manual Copy button proof from popup
+- human-click Copy button proof from the real toolbar popup
 
 ## Automation Limitation
 
@@ -71,4 +75,6 @@ Playwright-based extension inspection was attempted after the local smoke test. 
 - System Chrome launched through Playwright failed because macOS denied Chrome Crashpad access from the sandboxed automation process.
 - Headless Chrome could load the extension and page, but the MV3 service worker became idle before session storage could be inspected reliably.
 
-Use a normal Chromium window for the remaining popup proof.
+Chrome for Testing can load the unpacked extension and verify stored media plus explicit-tab popup rendering. It could not open the real toolbar popup through `chrome.action.openPopup()` in this environment because Chrome reported no active browser window. Normal Google Chrome launched from this sandbox did not expose the unpacked Dew extension target.
+
+Use a normal Chromium window for the remaining real toolbar-popup proof.

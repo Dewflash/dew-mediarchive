@@ -381,3 +381,55 @@ see the candidate
 click Copy
 paste into yt-dlp
 ```
+
+## Why We Added `popup.html?tabId=...`
+
+The real toolbar popup asks Chrome:
+
+```text
+what is the active browser tab?
+```
+
+That is correct for normal use. But when automation opens `chrome-extension://.../popup.html` as a normal tab, that extension page becomes the active tab. The popup then honestly says:
+
+```text
+No media detected yet
+```
+
+because it is looking at itself, not the smoke-test page.
+
+The explicit `tabId` query is a verification path:
+
+```text
+popup.html?tabId=137663063
+```
+
+It lets us say:
+
+```text
+show me the media snapshot for this known browser tab
+```
+
+Normal toolbar behavior is unchanged because real toolbar popup opens do not include this query string.
+
+This gave us stronger proof:
+
+```text
+Chrome loaded smoke page
+Chrome requested sample.mp4
+Dew stored the media snapshot
+popup rendered: 1 item found / MP4 video / Copy
+yt-dlp downloaded that exact rendered URL
+```
+
+The one remaining human proof is clipboard:
+
+```text
+click Copy in the real toolbar popup
+```
+
+Automation clicked Copy in the verification popup, but Chrome blocked clipboard access. Dew handled that correctly by showing:
+
+```text
+Copy failed. Try again.
+```

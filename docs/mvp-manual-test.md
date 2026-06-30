@@ -110,6 +110,18 @@ size: 17122 bytes
 
 Headless Chrome also requested the local smoke-test page and `sample.mp4`. Full popup-visible proof should still be performed in a normal Chromium window because the MV3 service worker was too ephemeral to inspect reliably in the headless DevTools run.
 
+Chrome for Testing has since verified more of the flow:
+
+```text
+popup verification URL: popup.html?tabId=<smoke-tab-id>
+rendered: 1 item found, MP4 video, 127.0.0.1/sample.mp4, Copy
+yt-dlp output: /private/tmp/dew-mediarchive-smoke/downloaded-from-popup-proof.mp4
+duration: 1.000000
+size: 17122 bytes
+```
+
+That explicit `tabId` URL is only for automation/debugging. The real first-user proof is still opening Dew from the toolbar while the media page is active.
+
 ## Failure Notes
 
 If the popup is empty:

@@ -74,3 +74,14 @@
 - Confirmed extension session storage contained exactly one smoke-page candidate: `http://127.0.0.1:8765/sample.mp4`, kind `mp4`, label `MP4 video`, provenance source `page-video-element`.
 - Repeated the clean Chrome for Testing smoke after the final content-script hardening and confirmed the rebuilt extension still stored exactly one `sample.mp4` MP4 candidate with `page-video-element` provenance.
 - Confirmed standalone popup URL rendering is not a substitute for toolbar-popup proof because Chrome treats the standalone extension page as the active tab.
+- Added an explicit `tabId` popup verification path so `popup.html?tabId=<id>` can render a known tab snapshot for automation/debugging.
+- Added popup tests for explicit tab rendering and invalid tab-id fallback.
+- Ran `npm run test`: 5 files, 29 tests passed.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.
+- Verified Chrome for Testing loaded the rebuilt extension, the smoke page requested `sample.mp4`, and `popup.html?tabId=137663063` rendered `1 item found`, `MP4 video`, `127.0.0.1/sample.mp4`, and `Copy`.
+- Clicked Copy in the automated explicit-tab popup; Chrome blocked clipboard access and Dew showed `Copy failed. Try again.`
+- Ran `yt-dlp` against the exact rendered candidate URL and downloaded `/private/tmp/dew-mediarchive-smoke/downloaded-from-popup-proof.mp4`.
+- Verified the popup-proof download with `ffprobe`: duration 1.000000, size 17122 bytes.
+- Tried `chrome.action.openPopup()` from Chrome for Testing after focusing the smoke tab; Chrome returned `Could not find an active browser window.`
+- Tried normal Google Chrome with a clean profile and extension flags; the DevTools target list exposed only built-in/component extensions, not the unpacked Dew worker.

@@ -37,12 +37,17 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Restricted background webRequest detection to `http` and `https` URLs so extension UI assets do not pollute media snapshots.
 - Verified the rebuilt extension in Chrome for Testing with a clean profile: the local smoke page requested `sample.mp4`, and extension session storage contained exactly one `MP4 video` candidate from `page-video-element`.
 - Verified the page fallback phase with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Added an explicit `tabId` popup verification path for automation/debugging while preserving normal toolbar active-tab behavior.
+- Verified `popup.html?tabId=<smoke-tab-id>` rendered the stored smoke candidate in Chrome for Testing: `1 item found`, `MP4 video`, `127.0.0.1/sample.mp4`, and `Copy`.
+- Confirmed automated Copy clicks are blocked by Chrome clipboard rules and surface the expected `Copy failed. Try again.` state.
+- Verified the exact rendered candidate URL downloads with `yt-dlp` and probes as 1.000000 seconds, 17122 bytes.
+- Verified this phase with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 
-1. Perform normal Chromium load-unpacked testing with the popup visible.
-2. Confirm the popup shows the local `sample.mp4` candidate in a real toolbar popup.
-3. Confirm the real popup Copy button copies the candidate URL.
+1. Perform normal Chromium load-unpacked testing with the real toolbar popup visible.
+2. Confirm the toolbar popup shows the local `sample.mp4` candidate.
+3. Confirm a human click on the real popup Copy button copies the candidate URL.
 4. Record any manual detection gaps.
 
 ## Open Questions

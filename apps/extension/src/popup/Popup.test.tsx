@@ -22,6 +22,7 @@ let storageChangeHandler:
 
 describe("Popup", () => {
   beforeEach(() => {
+    window.history.replaceState(null, "", "/popup.html");
     storageChangeHandler = undefined;
     storageGet.mockReset();
     storageAddListener.mockReset();
@@ -92,6 +93,41 @@ describe("Popup", () => {
     expect(await screen.findByText("1 item found")).toBeInTheDocument();
     expect(screen.getByText("MP4 video")).toBeInTheDocument();
     expect(screen.getByText("cdn.example.test/video.mp4")).toBeInTheDocument();
+  });
+
+  it("can render a requested tab snapshot for verification", async () => {
+    window.history.replaceState(null, "", "/popup.html?tabId=42");
+    storageGet.mockResolvedValue({
+      "media-snapshot:42": {
+        ...createSnapshot([
+          createCandidate("media-1", "https://cdn.example.test/video.mp4")
+        ]),
+        tabId: 42
+      }
+    });
+
+    render(<Popup />);
+
+    expect(await screen.findByText("1 item found")).toBeInTheDocument();
+    expect(screen.getByText("cdn.example.test/video.mp4")).toBeInTheDocument();
+    expect(tabsQuery).not.toHaveBeenCalled();
+  });
+
+  it("ignores invalid requested tab ids", async () => {
+    window.history.replaceState(null, "", "/popup.html?tabId=not-a-tab");
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+      ])
+    });
+
+    render(<Popup />);
+
+    expect(await screen.findByText("1 item found")).toBeInTheDocument();
+    expect(tabsQuery).toHaveBeenCalledWith({
+      active: true,
+      currentWindow: true
+    });
   });
 
   it("copies a candidate URL and shows copied state", async () => {

@@ -77,6 +77,16 @@ popup opens
 
 The shared storage helper owns the snapshot key so the background worker and popup cannot drift.
 
+For automation and debugging, the popup also accepts an explicit `tabId` query parameter:
+
+```text
+popup.html?tabId=<known-tab-id>
+  -> read that tab's session snapshot
+  -> render the same popup UI
+```
+
+Normal toolbar popup behavior is unchanged because toolbar opens do not include this query string.
+
 ## Future App Shape
 
 The final product should use a job-based local pipeline:
