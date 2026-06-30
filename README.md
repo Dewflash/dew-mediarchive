@@ -48,3 +48,15 @@ user-learnings.md  Plain-English decision notes for the project owner
 7. Open the Dew popup.
 8. Copy a detected media URL.
 9. Test it manually with `yt-dlp`.
+
+## Extension Commands
+
+From `apps/extension`:
+
+```bash
+npm install
+npm run typecheck
+npm run build
+```
+
+Load `apps/extension/dist` as the unpacked extension after a successful build.

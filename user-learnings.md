@@ -63,3 +63,22 @@ detect -> classify -> normalize -> present/copy
 
 This keeps early work small while still pointing toward the full product.
 
+## Why Phase 1 Is Only A Shell
+
+The first extension commit should prove the browser extension can build and load. It does not need detection yet.
+
+This separation keeps bugs easier to understand:
+
+```text
+Phase 1 problem: can the extension build?
+Phase 2 problem: are media records shaped correctly?
+Phase 3 problem: can the extension detect media requests?
+```
+
+If all of those are mixed into one first commit, it becomes harder to know which layer broke.
+
+## What The First Typecheck Failure Taught Us
+
+The first `npm run typecheck` failed because `vite.config.ts` uses Node concepts such as path resolution, while the TypeScript config only knew about browser and Chrome extension types.
+
+The fix was to add Node type context. That is better than disabling strict checks because it keeps TypeScript useful while accurately describing the environment for each file.

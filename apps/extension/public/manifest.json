@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Dew MediArchive",
+  "description": "Detect authorized non-DRM media candidates on the current page.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Dew MediArchive",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["activeTab", "storage", "tabs", "webRequest"],
+  "host_permissions": ["<all_urls>"]
+}
+
