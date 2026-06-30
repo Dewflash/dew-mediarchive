@@ -85,3 +85,5 @@
 - Verified the popup-proof download with `ffprobe`: duration 1.000000, size 17122 bytes.
 - Tried `chrome.action.openPopup()` from Chrome for Testing after focusing the smoke tab; Chrome returned `Could not find an active browser window.`
 - Tried normal Google Chrome with a clean profile and extension flags; the DevTools target list exposed only built-in/component extensions, not the unpacked Dew worker.
+- Tried a visible toolbar proof pass in Chrome for Testing; the page requested `sample.mp4`, but screen capture for toolbar evidence failed with `could not create image from display`.
+- Added `docs/mvp-status.md` with the concise done/not-done handoff before pushing the branch.

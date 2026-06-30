@@ -8,6 +8,10 @@ MVP extension foundation.
 
 Build a loadable Chromium extension that detects common media URLs, shows them in a popup, and supports manual copy-and-download verification with `yt-dlp`.
 
+## Handoff Status
+
+See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
+
 ## Completed
 
 - Repository cloned from `Dewflash/dew-mediarchive`.
