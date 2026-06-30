@@ -22,6 +22,8 @@ npm run build
 
 ## Manual Browser Check
 
+See `docs/mvp-manual-test.md` for the full first-user checklist.
+
 1. Open `chrome://extensions`.
 2. Enable Developer Mode.
 3. Load the extension build output.
@@ -37,3 +39,7 @@ yt-dlp "PASTED_URL"
 ```
 
 10. Record result in `changelog.md`.
+
+## Current Runtime Proof
+
+Static checks pass, and the extension build output exists. Manual browser loading and `yt-dlp` download proof are still pending because `yt-dlp` and `ffmpeg` are not installed in this environment at the time of writing.

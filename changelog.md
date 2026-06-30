@@ -34,3 +34,7 @@
 - Ran `npm run test`: 1 file passed, 9 tests passed.
 - Ran `npm run typecheck`: passed.
 - Ran `npm run build`: passed.
+- Added `docs/mvp-manual-test.md` with the load-unpacked and manual `yt-dlp` verification flow.
+- Checked local tool availability: `yt-dlp` not found, `ffmpeg` not found.
+- Confirmed extension build output exists in `apps/extension/dist`.
+- Manual browser and download proof remain pending.

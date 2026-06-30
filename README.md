@@ -60,3 +60,5 @@ npm run build
 ```
 
 Load `apps/extension/dist` as the unpacked extension after a successful build.
+
+For the full first-user check, follow `docs/mvp-manual-test.md`.

@@ -190,3 +190,29 @@ Copy failed. Try again.
 ```
 
 That follows the project rule that buttons should not silently do nothing.
+
+## Why Static Checks Are Not The Same As Runtime Proof
+
+So far, the code can pass:
+
+```text
+npm run test
+npm run typecheck
+npm run build
+```
+
+That proves the source code, types, bundle, and classifier tests are healthy.
+
+It does not prove that a real browser page has produced a downloadable media URL yet.
+
+The next kind of proof is manual runtime proof:
+
+```text
+load extension in Chrome
+play authorized non-DRM media
+copy candidate URL
+run yt-dlp on that URL
+confirm a file downloads
+```
+
+That final proof is still pending because `yt-dlp` and `ffmpeg` are not installed in this environment right now.

@@ -23,10 +23,12 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Verified Phase 4 with `npm run test`, `npm run typecheck`, and `npm run build`.
 - Added Phase 5 popup snapshot reading, media list rendering, copy action, and copy failure state.
 - Verified Phase 5 with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Added Phase 6 manual MVP verification guide.
+- Confirmed the extension build output exists.
 
 ## Next Steps
 
-1. Document load-unpacked and manual `yt-dlp` verification.
+1. Install or make available `yt-dlp` and `ffmpeg` for manual download proof.
 2. Perform manual browser testing on known authorized non-DRM media.
 3. Record manual test results and any detection gaps.
 
