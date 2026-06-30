@@ -273,6 +273,66 @@ click Copy
 run yt-dlp on pasted URL
 ```
 
+## Why We Added A Local Receiver
+
+The extension can see media URLs, but a browser extension should not directly own the final local archive. It has limited filesystem access, and it is not the right place to run download tools.
+
+The receiver is the small local backend that will let Dew move from this:
+
+```text
+popup Copy -> user pastes URL into yt-dlp
+```
+
+to this:
+
+```text
+popup Save -> local receiver -> yt-dlp saves the file
+```
+
+It runs on the user's own machine at `127.0.0.1`, accepts a small JSON download request, starts `yt-dlp`, and records the job result locally.
+
+## Why The Receiver Uses yt-dlp
+
+`yt-dlp` is the proven media download engine. Dew should not re-invent years of extractor behavior, playlist handling, redirects, and media container edge cases.
+
+In the MVP, Dew uses it as a local tool:
+
+```text
+Dew detects and queues the job
+yt-dlp performs the actual download
+Dew records whether it completed or failed
+```
+
+That keeps Dew focused on product workflow, privacy, provenance, and archive experience.
+
+## Why The Receiver Is Local-Only
+
+The receiver binds to `127.0.0.1`, which means it is intended to be reached from the same machine, not the public internet.
+
+It also rejects ordinary website origins. That matters because a random website should not be able to quietly ask Dew to save something just because the user has the receiver running.
+
+For the MVP, allowed callers are:
+
+```text
+the browser extension
+local development tools
+```
+
+## Why Save Is Not Wired Yet
+
+The receiver itself is now proven: it accepted the MDN flower MP4 URL, ran `yt-dlp`, saved the file, and `ffprobe` confirmed the file is valid.
+
+The next small phase is extension wiring:
+
+```text
+add Save button
+POST detected URL to receiver
+show queued/downloading/completed/failed
+keep Copy as fallback
+```
+
+This split is intentional. If Save has a problem later, we can tell whether the issue is in the extension UI or in the local receiver.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

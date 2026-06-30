@@ -93,3 +93,16 @@
 - Ran `npm run test`: 5 files, 31 tests passed.
 - Ran `npm run typecheck`: passed.
 - Ran `npm run build`: passed.
+- Scaffolded the local receiver in `apps/receiver`.
+- Added receiver endpoints for health checks, download job creation, job listing, and job lookup.
+- Added receiver validation for JSON request bodies, HTTP/HTTPS download URLs, optional page metadata, and media kind.
+- Added loopback/CORS guardrails so browser-extension origins and localhost tooling can call the receiver, while normal website origins are rejected.
+- Added an append-only JSONL job store for receiver job history.
+- Added a `yt-dlp` downloader that runs the binary with argument arrays instead of shell command interpolation.
+- Added receiver tests for health checks, CORS rejection, localhost tooling origins, job creation/completion, unsupported schemes, and malformed JSON.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.
+- Ran receiver `npm run test`: 1 file, 6 tests passed.
+- Smoke-tested the receiver against `https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4`.
+- Confirmed the receiver completed the job and saved `/private/tmp/dew-receiver-smoke/flower-[flower].mp4`.
+- Verified the receiver smoke output with `ffprobe`: duration 5.055000, size 1128375 bytes.

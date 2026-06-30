@@ -8,11 +8,20 @@
 - Popup lists detected media for the current tab.
 - Copy button writes the media URL to the clipboard.
 - At least one copied non-DRM media URL downloads successfully with `yt-dlp`.
+- Local receiver accepts a non-DRM media URL and saves a file with `yt-dlp`.
 - Unsupported sources are shown or filtered intentionally.
 
 ## Static Checks
 
-Run from `apps/extension` once scaffolded:
+Run from `apps/extension`:
+
+```bash
+npm run test
+npm run typecheck
+npm run build
+```
+
+Run from `apps/receiver`:
 
 ```bash
 npm run test
@@ -61,12 +70,20 @@ Verified:
 - automated Copy clicks are blocked by Chrome clipboard rules and correctly show `Copy failed. Try again.`
 - the exact rendered candidate URL downloaded successfully with `yt-dlp`
 - downloaded popup-proof file probes as 1.000000 seconds and 17122 bytes
+- receiver tests passed: 1 file, 6 tests
+- receiver typecheck passed
+- receiver build passed
+- receiver health endpoint returned `{ ok: true, name: "dew-mediarchive-receiver", version: "0.1.0" }`
+- receiver accepted the MDN flower MP4 URL as a download job
+- receiver completed the job through `yt-dlp`
+- receiver output file probes as 5.055000 seconds and 1128375 bytes
 
 Pending:
 
 - normal Chromium window load-unpacked test
 - popup-visible candidate proof
 - human-click Copy button proof from the real toolbar popup
+- extension Save button wiring to the receiver
 
 ## Automation Limitation
 

@@ -12,13 +12,20 @@ The MVP implements only the first user-visible slice:
 detect -> classify -> normalize -> present/copy
 ```
 
+The receiver phase implements the first local save backend slice:
+
+```text
+queue -> download
+```
+
 ## Boundaries
 
 - Detection observes browser requests and page context.
 - Classification decides whether a URL is a candidate, unsupported, or ignored.
 - Normalization converts raw browser data into stable project types.
 - Presentation shows detected candidates and failure states.
-- Downloading, hashing, storage, indexing, and archive presentation belong to later phases.
+- Downloading is owned by the local receiver.
+- Hashing, content-addressed storage, indexing, and archive presentation belong to later phases.
 
 ## Shared Detection Model
 
@@ -86,6 +93,46 @@ popup.html?tabId=<known-tab-id>
 ```
 
 Normal toolbar popup behavior is unchanged because toolbar opens do not include this query string.
+
+## Local Receiver Flow
+
+The receiver in `apps/receiver` is a local-only HTTP service. It listens on `127.0.0.1` and exposes a small job API:
+
+```text
+GET  /health
+GET  /downloads
+GET  /downloads/:id
+POST /downloads
+```
+
+The intended next extension flow is:
+
+```text
+popup Save
+  -> POST http://127.0.0.1:47321/downloads
+  -> receiver validates JSON and URL shape
+  -> job is appended to jobs.jsonl
+  -> yt-dlp runs with argument-array spawning
+  -> job becomes completed or failed
+```
+
+The receiver deliberately does not depend on the extension internals. It accepts a normalized download request:
+
+```text
+url, optional pageUrl, optional pageTitle, optional kind
+```
+
+That keeps the browser detection surface and the local save surface separated.
+
+## Receiver Storage
+
+The first receiver store is append-only JSONL:
+
+```text
+~/Movies/Dew MediArchive/.dew/jobs.jsonl
+```
+
+Each state transition writes a new complete job record. On startup, the receiver replays the file and keeps the latest record for each job id in memory. This is simple, inspectable, and good enough until archive storage, hashing, and indexing exist.
 
 ## Future App Shape
 

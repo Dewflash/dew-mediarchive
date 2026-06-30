@@ -23,6 +23,11 @@
 - An explicit `popup.html?tabId=<id>` path is useful for automation/debugging because it proves popup rendering against a known tab snapshot without changing normal toolbar active-tab behavior.
 - Clipboard writes from automated extension-page clicks can be blocked by Chrome. Treat that as a useful failure-state proof, not as human Copy proof.
 - The popup should keep the last non-empty candidate list stable while it is open. Temporary storage can clear for privacy, but the visible Copy surface should not disappear out from under the user.
+- Build the local receiver before wiring Save in the extension. The receiver contract can be proven independently, and the popup integration stays small.
+- Keep the first receiver framework-free. Node's built-in HTTP server is enough for a tiny loopback API and avoids adding app-server decisions too early.
+- The receiver should run `yt-dlp` with `spawn(command, args)`, not a shell string, so media URLs are passed as data instead of executable text.
+- The receiver should bind to loopback and reject normal website origins. A random website should not be able to trigger local downloads through the user's browser.
+- Store receiver job transitions as append-only JSONL for the MVP. It is inspectable, replayable, and easy to replace later with archive storage.
 
 ## Mistakes To Avoid
 
@@ -43,3 +48,6 @@
 - Do not let the extension observe its own popup assets as media detections.
 - Do not claim explicit-tab popup rendering is the same as a real toolbar-popup proof.
 - Do not blindly replace a visible popup list with empty state just because session storage sent a clear event.
+- Do not let arbitrary websites call the local receiver.
+- Do not run `yt-dlp` through shell interpolation.
+- Do not treat the receiver as archive storage. It is only the first save-job backend.

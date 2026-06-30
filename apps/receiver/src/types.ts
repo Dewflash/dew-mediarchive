@@ -1,0 +1,32 @@
+export type DownloadKind = "mp4" | "webm" | "audio" | "hls" | "dash" | "unknown";
+
+export type DownloadRequest = {
+  url: string;
+  pageUrl?: string;
+  pageTitle?: string;
+  kind?: DownloadKind;
+};
+
+export type DownloadJobStatus = "queued" | "downloading" | "completed" | "failed";
+
+export type DownloadJob = DownloadRequest & {
+  id: string;
+  status: DownloadJobStatus;
+  createdAt: string;
+  updatedAt: string;
+  outputPath?: string;
+  error?: string;
+};
+
+export type ReceiverConfig = {
+  host: string;
+  port: number;
+  downloadDir: string;
+  jobsPath: string;
+  ytDlpPath: string;
+  bodyLimitBytes: number;
+};
+
+export type Downloader = {
+  download(job: DownloadJob, config: ReceiverConfig): Promise<{ outputPath?: string }>;
+};

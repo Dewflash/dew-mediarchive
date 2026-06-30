@@ -13,8 +13,17 @@
 - Treat all external URLs as untrusted.
 - Sanitize display strings.
 - Never use external filenames directly for filesystem paths.
-- Block dangerous schemes for future download jobs.
-- Prevent path traversal in any future save path.
+- Receiver download jobs accept only `http` and `https` URLs.
+- Prevent path traversal in save paths.
+
+## Local Receiver
+
+- Bind to `127.0.0.1` by default.
+- Allow browser-extension origins and localhost tooling, not normal website origins.
+- Keep the request body small and require JSON.
+- Run `yt-dlp` with an argument array, not a shell command string.
+- Store receiver job records locally, not in a cloud service.
+- Keep raw tokenized URLs out of logs.
 
 ## Logging
 
@@ -23,4 +32,3 @@ Logs should use structured status and failure reasons. Avoid raw URLs when they 
 ## User Promise
 
 Dew is for archiving media the user is allowed to save. Unsupported or protected sources should be visible states, not hidden failures.
-

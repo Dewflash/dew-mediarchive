@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-MVP extension foundation.
+MVP local save receiver.
 
 ## Current Goal
 
-Build a loadable Chromium extension that detects common media URLs, shows them in a popup, and supports manual copy-and-download verification with `yt-dlp`.
+Build the first local save backend so the extension can move from Copy to Save without sending media URLs to a cloud service.
 
 ## Handoff Status
 
@@ -48,15 +48,22 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Verified this phase with `npm run test`, `npm run typecheck`, and `npm run build`.
 - Stabilized the popup so a visible media list stays available while the popup is open, even if the tab's temporary snapshot clears underneath it.
 - Verified the stable popup behavior with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Scaffolded `apps/receiver` as a local TypeScript service using Node's built-in HTTP server.
+- Added receiver endpoints for `/health`, `/downloads`, and `/downloads/:id`.
+- Added download-job validation for JSON bodies, HTTP/HTTPS URLs, optional page metadata, and media kind.
+- Added an append-only JSONL job store.
+- Added a `yt-dlp` downloader that spawns the binary with argument arrays rather than shell command strings.
+- Verified the receiver with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Smoke-tested the receiver with the MDN flower MP4 and verified the saved output with `ffprobe`.
 
 ## Next Steps
 
-1. Rebuild/reload the unpacked extension in normal Chrome.
-2. Re-test a short MP4 and a page with multiple videos to confirm visible links no longer disappear before Copy.
-3. Confirm a human click on the real popup Copy button copies the candidate URL.
-4. Record any remaining manual detection gaps.
+1. Add a Save button in the popup beside Copy.
+2. Have Save call `POST http://127.0.0.1:47321/downloads`.
+3. Show receiver states in the popup: receiver missing, queued, downloading, completed, failed.
+4. Keep Copy available as a fallback.
+5. Re-test a short MP4 and a page with multiple videos in normal Chrome.
 
 ## Open Questions
 
-- Whether to add a local receiver immediately after copy verification succeeds.
 - Which sample non-DRM pages should become the first manual test set.

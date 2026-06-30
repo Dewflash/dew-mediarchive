@@ -1,0 +1,17 @@
+{
+  "name": "dew-mediarchive-receiver",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.9"
+  }
+}

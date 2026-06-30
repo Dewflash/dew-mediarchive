@@ -1,6 +1,6 @@
 # Dew MediArchive
 
-Dew MediArchive is a local-first media archiving tool. The first milestone is a Chromium browser companion that detects common non-DRM media URLs on the current page and lets the user copy them for manual download verification.
+Dew MediArchive is a local-first media archiving tool. The first milestone is a Chromium browser companion that detects common non-DRM media URLs on the current page. The next MVP slice adds a local receiver that can accept a save job from the browser companion and download the media on the user's machine with `yt-dlp`.
 
 ## MVP Scope
 
@@ -12,6 +12,8 @@ The MVP should:
 - Show a badge when candidates are found.
 - List candidates in the popup.
 - Copy a detected media URL for manual `yt-dlp` testing.
+- Run a local receiver on `127.0.0.1` for future one-click Save jobs.
+- Save approved media through `yt-dlp` without sending URLs to a cloud service.
 - Mark obvious unsupported commercial/DRM-heavy platforms as unsupported.
 
 The MVP should not:
@@ -20,12 +22,14 @@ The MVP should not:
 - Download from YouTube or premium streaming platforms.
 - Store cookies, tokens, or private page content.
 - Include a desktop app, installer, payment, account system, or cloud sync.
+- Wire the extension Save button yet.
 
 ## Repository Layout
 
 ```text
 apps/
   extension/     Chromium extension MVP
+  receiver/      Local save receiver MVP
 
 docs/
   architecture.md
@@ -49,6 +53,16 @@ user-learnings.md  Plain-English decision notes for the project owner
 8. Copy a detected media URL.
 9. Test it manually with `yt-dlp`.
 
+## First Save Flow
+
+The local receiver is now available as the save backend. The extension does not call it yet, but this is the contract the next phase will use:
+
+```text
+popup Save -> POST /downloads -> receiver starts yt-dlp -> file saved locally
+```
+
+By default, saved files go to `~/Movies/Dew MediArchive`, and job history is appended to `~/Movies/Dew MediArchive/.dew/jobs.jsonl`.
+
 ## Extension Commands
 
 From `apps/extension`:
@@ -62,3 +76,38 @@ npm run build
 Load `apps/extension/dist` as the unpacked extension after a successful build.
 
 For the full first-user check, follow `docs/mvp-manual-test.md`.
+
+## Receiver Commands
+
+Install `yt-dlp` first if it is not already available:
+
+```bash
+brew install yt-dlp
+```
+
+From `apps/receiver`:
+
+```bash
+npm install
+npm run typecheck
+npm run build
+npm run start
+```
+
+Useful environment overrides:
+
+```bash
+DEW_DOWNLOAD_DIR=/path/to/downloads
+DEW_JOBS_PATH=/path/to/jobs.jsonl
+DEW_YT_DLP_PATH=/path/to/yt-dlp
+DEW_RECEIVER_PORT=47321
+```
+
+Smoke check:
+
+```bash
+curl http://127.0.0.1:47321/health
+curl -X POST http://127.0.0.1:47321/downloads \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4","kind":"mp4"}'
+```

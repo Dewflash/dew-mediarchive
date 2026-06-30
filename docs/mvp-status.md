@@ -20,6 +20,11 @@ mvp-extension
 - Popup states for loading, empty, error, candidates, unsupported media, Copy success, and Copy failure.
 - Open popup keeps the last non-empty media list visible even if the temporary tab snapshot clears.
 - Explicit popup verification URL: `popup.html?tabId=<tab-id>`.
+- Local receiver in `apps/receiver`.
+- Receiver endpoints for health checks, creating download jobs, listing jobs, and reading a job by id.
+- Receiver validation for JSON bodies, HTTP/HTTPS media URLs, optional page metadata, and media kind.
+- Receiver `yt-dlp` downloader that saves files locally without shell command interpolation.
+- Append-only receiver job history in JSONL.
 - Manual verification guide in `docs/mvp-manual-test.md`.
 - Architecture, adapter, archive, security, verification, learning, and changelog docs.
 
@@ -52,12 +57,23 @@ duration=1.000000
 size=17122
 ```
 
+- Receiver `npm run test` passes: 1 file, 6 tests.
+- Receiver `npm run typecheck` passes.
+- Receiver `npm run build` passes.
+- Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
+- The receiver smoke output probes as:
+
+```text
+duration=5.055000
+size=1128375
+```
+
 ## What Is Not Done Yet
 
 - Real toolbar-popup proof in normal Chromium is not complete.
 - Human Copy proof from the real toolbar popup is not complete.
-- Automatic local Save/download is not built.
-- Desktop app/local receiver is not built.
+- Extension Save button is not wired to the receiver yet.
+- Desktop app wrapper is not built.
 - Safari support is not built.
 - Persistent archive storage, hashing, indexing, search, import/export, and gallery views are not built.
 - YouTube and DRM-heavy platforms remain intentionally unsupported.
@@ -86,10 +102,10 @@ confirm download
 
 ## Recommended Next Phase
 
-Do the real manual toolbar check first. If it passes, build the local receiver and replace the MVP Copy loop with a Save flow:
+Wire the popup Save action to the local receiver:
 
 ```text
 popup Save -> local receiver -> yt-dlp job -> file saved locally
 ```
 
-If the toolbar check fails, fix that before adding Save.
+Keep Copy available as the fallback while Save is being proven.
