@@ -272,3 +272,32 @@ confirm candidate appears
 click Copy
 run yt-dlp on pasted URL
 ```
+
+## Why We Added More Tests Even Though The Popup Proof Is Still Manual
+
+The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.
+
+Rather than pretending that was complete, we strengthened the automated tests around the important background pipeline:
+
+```text
+browser request -> DetectedMedia record -> session snapshot -> badge count
+```
+
+The new tests cover:
+
+- supported media requests becoming candidates
+- non-media requests being ignored
+- blocked platforms becoming unsupported records
+- snapshots storing detected media
+- duplicate media being updated by ID
+- concurrent detections not overwriting each other
+- badge counts only counting supported candidates
+- clearing tab snapshots
+
+## What The Test Typecheck Failure Taught Us
+
+The new tests passed at runtime first, but TypeScript failed because the fake Chrome request objects were missing a field from the Chrome API type.
+
+That was useful. It means the tests were not accurately shaped like real browser events yet.
+
+The fix was to make the mocks match the type instead of weakening the production code. This keeps the tests honest.

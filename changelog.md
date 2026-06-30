@@ -46,3 +46,11 @@
 - Observed Dew's MV3 service worker target in headless Chrome, but DevTools storage inspection was unreliable because the worker went idle.
 - Tried Playwright-based extension inspection. Bundled Chromium was not installed, and system Chrome launch failed under automation because macOS denied Chrome Crashpad access from the sandboxed process.
 - Manual normal-window popup proof remains pending.
+- Launched a visible temporary Chrome profile with Dew loaded and navigated it to the local smoke page through DevTools.
+- Confirmed the local server received `index.html` and `sample.mp4` requests from that visible Chrome run.
+- Added unit coverage for background request normalization and media store behavior.
+- `npm run test` passed: 3 files, 17 tests.
+- `npm run typecheck` initially caught incomplete mocked Chrome request details in the new tests.
+- Added `requestBody` to the mocked request details and reran checks successfully.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.

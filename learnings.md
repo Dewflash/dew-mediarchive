@@ -15,6 +15,7 @@
 - Store detected media in `chrome.storage.session` for the MVP so the popup and background service worker share state without committing media URLs to durable browser storage.
 - Web requests can arrive concurrently. Snapshot writes must be serialized per tab or one read/modify/write cycle can overwrite another.
 - Put the media snapshot storage key and read/write helpers in shared code so popup and background code cannot silently drift.
+- Typed test fixtures should satisfy the same Chrome API types as production code. If the test cheats the shape, it can hide integration assumptions.
 
 ## Mistakes To Avoid
 
@@ -29,3 +30,4 @@
 - Do not make the popup re-scan the page. The background worker owns detection; the popup should read snapshots.
 - Do not perform unqueued read/modify/write updates for per-tab detection snapshots.
 - Do not let clipboard failures fail silently; copy errors should be visible in the popup.
+- Do not treat runtime-passing tests as enough when TypeScript says the mock shape does not match the browser API.

@@ -28,6 +28,9 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Installed `yt-dlp` and `ffmpeg` for local verification.
 - Verified `yt-dlp` can download a generated local MP4 fixture.
 - Confirmed headless Chrome requested the local smoke-test media file.
+- Attempted a visible Chrome DevTools smoke test; Chrome loaded the local page and requested `sample.mp4`, but popup-visible proof still requires normal manual interaction.
+- Added focused background pipeline tests for request normalization, ignored requests, unsupported sources, session snapshots, concurrent appends, badge counts, and clearing.
+- Verified the stronger test suite with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 
