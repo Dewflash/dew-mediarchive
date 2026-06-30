@@ -215,4 +215,38 @@ run yt-dlp on that URL
 confirm a file downloads
 ```
 
-That final proof is still pending because `yt-dlp` and `ffmpeg` are not installed in this environment right now.
+The media-tool part is now proven locally: `yt-dlp` downloaded a generated one-second MP4 from a localhost server, and `ffprobe` confirmed the downloaded file.
+
+The remaining proof is browser UI proof:
+
+```text
+load extension in normal Chrome
+play media
+see the popup candidate
+click Copy
+paste the copied URL into yt-dlp
+```
+
+## What The Headless Chrome Smoke Test Taught Us
+
+Headless Chrome can load the built extension and request the local smoke-test media page. The local server saw requests for both `index.html` and `sample.mp4`.
+
+However, Manifest V3 service workers are short-lived. Dew's service worker appeared as a DevTools target, then went idle before storage inspection was reliable.
+
+That means headless Chrome gave partial proof:
+
+```text
+extension build loads
+local media page loads
+browser requests media
+yt-dlp can download copied-style media URL
+```
+
+It did not fully prove:
+
+```text
+popup visibly shows candidate
+Copy button works from real popup
+```
+
+Those should be checked in a normal Chromium window next.

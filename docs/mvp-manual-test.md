@@ -31,8 +31,8 @@ ffmpeg -version
 Current workspace check:
 
 ```text
-yt-dlp: not found
-ffmpeg: not found
+yt-dlp: 2026.06.09
+ffmpeg: 8.1.2
 ```
 
 The extension can still be built and loaded without those tools. They are only needed for the final manual download verification step.
@@ -96,6 +96,20 @@ Expected result:
 
 Record the result in `changelog.md`.
 
+## Local Smoke Result
+
+The local media-download leg has been verified with a generated one-second MP4:
+
+```text
+source: http://127.0.0.1:8765/sample.mp4
+tool: yt-dlp 2026.06.09
+output: /private/tmp/dew-mediarchive-smoke/downloaded.mp4
+duration: 1.000000
+size: 17122 bytes
+```
+
+Headless Chrome also requested the local smoke-test page and `sample.mp4`. Full popup-visible proof should still be performed in a normal Chromium window because the MV3 service worker was too ephemeral to inspect reliably in the headless DevTools run.
+
 ## Failure Notes
 
 If the popup is empty:
@@ -116,4 +130,3 @@ If `yt-dlp` fails:
 - the stream may require session headers or cookies
 - the source may not be supported yet
 - the copied item may not be the best candidate from the page
-

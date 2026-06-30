@@ -42,4 +42,18 @@ yt-dlp "PASTED_URL"
 
 ## Current Runtime Proof
 
-Static checks pass, and the extension build output exists. Manual browser loading and `yt-dlp` download proof are still pending because `yt-dlp` and `ffmpeg` are not installed in this environment at the time of writing.
+Static checks pass, and the extension build output exists. `yt-dlp` and `ffmpeg` are installed locally.
+
+Verified:
+
+- local MP4 fixture generated with `ffmpeg`
+- localhost media server served `sample.mp4`
+- `yt-dlp` downloaded the local MP4 successfully
+- downloaded file probes as 1.000000 seconds and 17122 bytes
+- headless Chrome requested the local smoke-test page and media file
+
+Pending:
+
+- normal Chromium window load-unpacked test
+- popup-visible candidate proof
+- manual Copy button proof from popup

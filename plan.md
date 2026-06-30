@@ -25,12 +25,16 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Verified Phase 5 with `npm run test`, `npm run typecheck`, and `npm run build`.
 - Added Phase 6 manual MVP verification guide.
 - Confirmed the extension build output exists.
+- Installed `yt-dlp` and `ffmpeg` for local verification.
+- Verified `yt-dlp` can download a generated local MP4 fixture.
+- Confirmed headless Chrome requested the local smoke-test media file.
 
 ## Next Steps
 
-1. Install or make available `yt-dlp` and `ffmpeg` for manual download proof.
-2. Perform manual browser testing on known authorized non-DRM media.
-3. Record manual test results and any detection gaps.
+1. Perform normal Chromium load-unpacked testing with the popup visible.
+2. Confirm the popup shows the local `sample.mp4` candidate.
+3. Confirm the popup Copy button copies the candidate URL.
+4. Record any manual detection gaps.
 
 ## Open Questions
 

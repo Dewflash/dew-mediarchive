@@ -37,4 +37,11 @@
 - Added `docs/mvp-manual-test.md` with the load-unpacked and manual `yt-dlp` verification flow.
 - Checked local tool availability: `yt-dlp` not found, `ffmpeg` not found.
 - Confirmed extension build output exists in `apps/extension/dist`.
-- Manual browser and download proof remain pending.
+- Installed `yt-dlp` 2026.06.09 and `ffmpeg` 8.1.2 with Homebrew.
+- Generated a one-second local MP4 fixture with `ffmpeg`.
+- Served the fixture over localhost and verified `yt-dlp` downloaded it to `/private/tmp/dew-mediarchive-smoke/downloaded.mp4`.
+- Verified the downloaded MP4 with `ffprobe`: duration 1.000000, size 17122 bytes.
+- Launched headless Chrome with the built extension and local smoke-test page.
+- Confirmed the local server received requests for `index.html` and `sample.mp4` from Chrome.
+- Observed Dew's MV3 service worker target in headless Chrome, but DevTools storage inspection was unreliable because the worker went idle.
+- Manual normal-window popup proof remains pending.
