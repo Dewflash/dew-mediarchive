@@ -19,3 +19,9 @@ export {
   removeMediaDetectionSnapshot,
   writeMediaDetectionSnapshot
 } from "./mediaSnapshotStorage";
+export {
+  isPageMediaDetectedMessage,
+  PAGE_MEDIA_DETECTED_MESSAGE,
+  type ExtensionMessage,
+  type PageMediaDetectedMessage
+} from "./messages";

@@ -17,6 +17,9 @@
 - Put the media snapshot storage key and read/write helpers in shared code so popup and background code cannot silently drift.
 - Typed test fixtures should satisfy the same Chrome API types as production code. If the test cheats the shape, it can hide integration assumptions.
 - Popup tests should cover both success and failure states because clipboard access can fail even when the UI renders correctly.
+- MV3 network observation alone is not enough for the MVP. A real Chrome run loaded the page and requested `sample.mp4`, but no snapshot was stored until the extension also had a content-script media-element fallback.
+- The background network listener should watch only `http` and `https` URLs. Browser and extension-internal assets are not user media candidates and should not appear as unsupported archive items.
+- A standalone `chrome-extension://.../popup.html` tab is useful for inspecting extension storage, but it is not proof of the real toolbar popup because Chrome treats that standalone page as the active tab.
 
 ## Mistakes To Avoid
 
@@ -33,3 +36,5 @@
 - Do not let clipboard failures fail silently; copy errors should be visible in the popup.
 - Do not treat runtime-passing tests as enough when TypeScript says the mock shape does not match the browser API.
 - Do not count component tests as a substitute for the final real toolbar-popup smoke test.
+- Do not remove the page media-element fallback just because `webRequest` exists; the fallback is what produced the first clean runtime `sample.mp4` candidate.
+- Do not let the extension observe its own popup assets as media detections.

@@ -33,6 +33,10 @@ Build a loadable Chromium extension that detects common media URLs, shows them i
 - Verified the stronger test suite with `npm run test`, `npm run typecheck`, and `npm run build`.
 - Added popup tests for empty state, candidate rendering, Copy success, Copy failure, unsupported media, and live snapshot updates.
 - Verified popup behavior with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Added a content-script media-element fallback because real MV3 runtime proof showed the network-only listener did not reliably store the local MP4 candidate before the service worker idled.
+- Restricted background webRequest detection to `http` and `https` URLs so extension UI assets do not pollute media snapshots.
+- Verified the rebuilt extension in Chrome for Testing with a clean profile: the local smoke page requested `sample.mp4`, and extension session storage contained exactly one `MP4 video` candidate from `page-video-element`.
+- Verified the page fallback phase with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 

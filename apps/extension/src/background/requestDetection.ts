@@ -2,7 +2,8 @@ import { classifyMediaUrl } from "../detector/mediaUrlClassifier";
 import {
   DETECTION_MODEL_VERSION,
   type DetectedMedia,
-  type MediaKind
+  type MediaKind,
+  type PageMediaDetectedMessage
 } from "../shared";
 
 type RequestDetails = chrome.webRequest.WebRequestBodyDetails & {
@@ -37,6 +38,49 @@ export async function createDetectedMediaFromRequest(
       detectorVersion: DETECTION_MODEL_VERSION,
       requestId: details.requestId,
       initiator: details.initiator
+    }
+  };
+
+  if (classification.status === "candidate") {
+    return {
+      ...baseRecord,
+      status: "candidate",
+      label: classification.label
+    };
+  }
+
+  return {
+    ...baseRecord,
+    status: "unsupported",
+    unsupportedReason: classification.reason,
+    message: classification.message
+  };
+}
+
+export function createDetectedMediaFromPageMessage(
+  message: PageMediaDetectedMessage,
+  tabId: number
+): DetectedMedia | undefined {
+  const classification = classifyMediaUrl(message.url);
+
+  if (classification.status === "ignored") {
+    return undefined;
+  }
+
+  const now = new Date().toISOString();
+  const baseRecord = {
+    id: createMediaId(tabId, classification.normalizedUrl),
+    url: classification.normalizedUrl,
+    pageUrl: message.pageUrl,
+    pageTitle: message.pageTitle,
+    kind:
+      classification.status === "candidate"
+        ? classification.kind
+        : inferUnsupportedKind(classification.normalizedUrl),
+    detectedAt: now,
+    provenance: {
+      source: "page-video-element" as const,
+      detectorVersion: DETECTION_MODEL_VERSION
     }
   };
 

@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createDetectedMediaFromRequest } from "./requestDetection";
+import {
+  createDetectedMediaFromPageMessage,
+  createDetectedMediaFromRequest
+} from "./requestDetection";
 
 describe("createDetectedMediaFromRequest", () => {
   beforeEach(() => {
@@ -78,5 +81,42 @@ describe("createDetectedMediaFromRequest", () => {
       kind: "unknown",
       message: "This platform is intentionally unsupported."
     });
+  });
+
+  it("normalizes a page media message into a media candidate", () => {
+    const detectedMedia = createDetectedMediaFromPageMessage(
+      {
+        type: "dew:page-media-detected",
+        url: "http://127.0.0.1:8765/sample.mp4",
+        pageUrl: "http://127.0.0.1:8765/index.html",
+        pageTitle: "Dew Smoke Test"
+      },
+      42
+    );
+
+    expect(detectedMedia).toMatchObject({
+      status: "candidate",
+      kind: "mp4",
+      label: "MP4 video",
+      url: "http://127.0.0.1:8765/sample.mp4",
+      pageUrl: "http://127.0.0.1:8765/index.html",
+      pageTitle: "Dew Smoke Test",
+      provenance: {
+        source: "page-video-element"
+      }
+    });
+  });
+
+  it("ignores non-media page messages", () => {
+    const detectedMedia = createDetectedMediaFromPageMessage(
+      {
+        type: "dew:page-media-detected",
+        url: "https://example.test/player.js",
+        pageUrl: "https://example.test/watch"
+      },
+      42
+    );
+
+    expect(detectedMedia).toBeUndefined();
   });
 });

@@ -59,3 +59,18 @@
 - Ran `npm run test`: 4 files, 23 tests passed.
 - Ran `npm run typecheck`: passed.
 - Ran `npm run build`: passed.
+- In a real Chrome for Testing run, confirmed the local smoke page requested `index.html` and `sample.mp4`, but the network-only extension path did not leave a media snapshot in session storage.
+- Added a content script that scans page `video`, `audio`, and nested `source` elements, normalizes their media URLs, and sends validated detection messages to the background worker.
+- Added page-message normalization so page media detections reuse the same classifier, snapshot store, badge update path, and provenance model as network detections.
+- Added runtime validation for extension messages so malformed messages cannot throw the background listener.
+- Switched content-script message sending to callback form and consumed `chrome.runtime.lastError` so extension teardown does not create unhandled promise rejections.
+- Added unit tests for page-message detection and message validation.
+- Restricted the background network listener to `http` and `https` request URLs after runtime testing showed extension popup assets could otherwise appear as unsupported candidates.
+- Ran `npm run test`: 5 files, 27 tests passed.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.
+- Rebuilt and launched the extension in Chrome for Testing with a clean profile.
+- Confirmed the local server received `index.html` and `sample.mp4` requests from the clean browser run.
+- Confirmed extension session storage contained exactly one smoke-page candidate: `http://127.0.0.1:8765/sample.mp4`, kind `mp4`, label `MP4 video`, provenance source `page-video-element`.
+- Repeated the clean Chrome for Testing smoke after the final content-script hardening and confirmed the rebuilt extension still stored exactly one `sample.mp4` MP4 candidate with `page-video-element` provenance.
+- Confirmed standalone popup URL rendering is not a substitute for toolbar-popup proof because Chrome treats the standalone extension page as the active tab.

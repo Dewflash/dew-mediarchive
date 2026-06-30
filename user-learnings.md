@@ -322,3 +322,62 @@ These tests do not replace the final human-visible Chrome check, but they reduce
 The popup is a small React UI. Testing it in jsdom lets us render the component, mock Chrome extension APIs, and verify text/buttons without needing a full browser extension session each time.
 
 That is cheaper and more reliable than launching Chrome for every UI state.
+
+## Why We Added A Page Media Fallback
+
+The real Chrome runtime taught us an important thing: seeing the browser request `sample.mp4` does not automatically mean the extension has stored a useful candidate.
+
+In Manifest V3, the background worker can sleep quickly. In our smoke run, Chrome loaded the page and requested the MP4, but the network-only path did not leave a media snapshot behind.
+
+So the MVP now has two detection surfaces:
+
+```text
+network listener -> catches media requests when the background worker sees them
+content script -> scans video/audio elements on the page and reports their resolved media URLs
+```
+
+The content script is the fallback that produced the first clean runtime candidate:
+
+```text
+http://127.0.0.1:8765/sample.mp4 -> MP4 video -> page-video-element
+```
+
+This does not mean Dew downloads everything on every site. It means the MVP can detect straightforward authorized media that appears in normal `video` or `audio` elements, even when the background worker would otherwise miss the request.
+
+## Why We Filter Extension-Internal Requests
+
+When we opened the standalone extension popup during runtime testing, Chrome also requested the popup's own JavaScript and CSS files.
+
+Those are not user media. They are Dew's own UI files.
+
+The background network listener now watches only:
+
+```text
+http://*/*
+https://*/*
+```
+
+That prevents browser or extension-internal URLs from polluting the media list while still allowing normal website media URLs through.
+
+## What The Latest Runtime Proof Actually Proves
+
+The latest clean Chrome test proves:
+
+```text
+real browser loaded rebuilt extension
+real browser loaded smoke page
+smoke page requested sample.mp4
+extension session storage contained one MP4 candidate
+candidate came from the page media-element fallback
+```
+
+It still does not prove the real toolbar popup visually showed the candidate, because opening `chrome-extension://.../popup.html` as a standalone tab makes Chrome treat that extension page as the active tab.
+
+So the honest remaining proof is still:
+
+```text
+open Dew from the toolbar on the smoke page
+see the candidate
+click Copy
+paste into yt-dlp
+```

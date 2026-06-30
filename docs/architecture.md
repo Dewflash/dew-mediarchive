@@ -35,7 +35,7 @@ This keeps the MVP from passing raw strings between layers.
 
 ## Background Detection Flow
 
-The background service worker listens to request URLs, classifies them, and stores structured media snapshots per tab in Chrome session storage.
+The background service worker listens to HTTP/HTTPS request URLs, classifies them, and stores structured media snapshots per tab in Chrome session storage.
 
 ```text
 webRequest.onBeforeRequest
@@ -46,6 +46,22 @@ webRequest.onBeforeRequest
 ```
 
 The popup should read the same snapshot instead of duplicating detection logic.
+
+## Page Media Fallback
+
+The extension also injects a content script on pages. It scans `video`, `audio`, and nested `source` elements, normalizes resolved media URLs, and sends page media messages to the background worker.
+
+```text
+content script scans media elements
+  -> chrome.runtime.sendMessage(page media URL)
+  -> background validates message shape
+  -> classifyMediaUrl(url)
+  -> create DetectedMedia with page-video-element provenance
+  -> append to tab snapshot
+  -> update extension badge
+```
+
+This fallback exists because Manifest V3 service workers are short-lived. Runtime testing showed that the local page could request `sample.mp4` while the network-only path failed to leave a stored candidate. The content script produced the first clean real-browser `sample.mp4` candidate.
 
 ## Popup Flow
 

@@ -4,7 +4,15 @@ import {
   readTabSnapshot,
   updateBadgeForSnapshot
 } from "./mediaStore";
-import { createDetectedMediaFromRequest } from "./requestDetection";
+import {
+  createDetectedMediaFromPageMessage,
+  createDetectedMediaFromRequest
+} from "./requestDetection";
+import {
+  isPageMediaDetectedMessage,
+  PAGE_MEDIA_DETECTED_MESSAGE,
+  type ExtensionMessage
+} from "../shared";
 
 chrome.runtime.onInstalled.addListener(() => {
   void chrome.action.setBadgeText({ text: "" });
@@ -29,8 +37,14 @@ chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
     void handleBeforeRequest(details);
   },
-  { urls: ["<all_urls>"] }
+  { urls: ["http://*/*", "https://*/*"] }
 );
+
+chrome.runtime.onMessage.addListener((message: unknown, sender) => {
+  if (isPageMediaDetectedMessage(message)) {
+    void handlePageMediaDetected(message, sender);
+  }
+});
 
 async function handleBeforeRequest(
   details: chrome.webRequest.WebRequestBodyDetails
@@ -63,4 +77,28 @@ async function updateActiveTabBadge(tabId: number): Promise<void> {
 async function clearTabAndBadge(tabId: number): Promise<void> {
   await clearTabSnapshot(tabId);
   await updateBadgeForSnapshot(tabId, undefined);
+}
+
+async function handlePageMediaDetected(
+  message: ExtensionMessage,
+  sender: chrome.runtime.MessageSender
+): Promise<void> {
+  if (message.type !== PAGE_MEDIA_DETECTED_MESSAGE || sender.tab?.id === undefined) {
+    return;
+  }
+
+  const detectedMedia = createDetectedMediaFromPageMessage(message, sender.tab.id);
+
+  if (!detectedMedia) {
+    return;
+  }
+
+  const snapshot = await appendDetectedMedia(
+    sender.tab.id,
+    detectedMedia.pageUrl,
+    detectedMedia.pageTitle,
+    detectedMedia
+  );
+
+  await updateBadgeForSnapshot(sender.tab.id, snapshot);
 }
