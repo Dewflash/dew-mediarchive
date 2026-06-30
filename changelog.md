@@ -44,4 +44,5 @@
 - Launched headless Chrome with the built extension and local smoke-test page.
 - Confirmed the local server received requests for `index.html` and `sample.mp4` from Chrome.
 - Observed Dew's MV3 service worker target in headless Chrome, but DevTools storage inspection was unreliable because the worker went idle.
+- Tried Playwright-based extension inspection. Bundled Chromium was not installed, and system Chrome launch failed under automation because macOS denied Chrome Crashpad access from the sandboxed process.
 - Manual normal-window popup proof remains pending.

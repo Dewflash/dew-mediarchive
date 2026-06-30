@@ -250,3 +250,25 @@ Copy button works from real popup
 ```
 
 Those should be checked in a normal Chromium window next.
+
+## Why The Remaining Test Is Manual
+
+We tried to automate the popup proof with Playwright. Two environment limits got in the way:
+
+- Playwright's bundled Chromium browser is not installed here.
+- System Chrome launched through Playwright is blocked by macOS Crashpad permissions in this sandbox.
+
+That does not mean Dew failed. It means this environment cannot reliably inspect the extension popup through Playwright right now.
+
+The next proof should be done in a normal Chrome window:
+
+```text
+chrome://extensions
+Load unpacked -> apps/extension/dist
+open local or real authorized media page
+start playback
+open Dew popup
+confirm candidate appears
+click Copy
+run yt-dlp on pasted URL
+```

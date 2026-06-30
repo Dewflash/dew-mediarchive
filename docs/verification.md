@@ -57,3 +57,13 @@ Pending:
 - normal Chromium window load-unpacked test
 - popup-visible candidate proof
 - manual Copy button proof from popup
+
+## Automation Limitation
+
+Playwright-based extension inspection was attempted after the local smoke test. It could not complete in this environment:
+
+- Playwright's bundled Chromium was not installed.
+- System Chrome launched through Playwright failed because macOS denied Chrome Crashpad access from the sandboxed automation process.
+- Headless Chrome could load the extension and page, but the MV3 service worker became idle before session storage could be inspected reliably.
+
+Use a normal Chromium window for the remaining popup proof.
