@@ -19,3 +19,12 @@
 - Ran `npm run test`: 1 file passed, 9 tests passed.
 - Ran `npm run typecheck`: passed.
 - Ran `npm run build`: passed.
+- Added background request detection wiring with `chrome.webRequest.onBeforeRequest`.
+- Added per-tab media snapshot storage in `chrome.storage.session`.
+- Added badge count updates for candidate media.
+- `npm run typecheck` initially failed because the Chrome type package did not expose `documentUrl` on the selected request detail type.
+- Treated `documentUrl` as an optional runtime field and reran checks successfully.
+- Added a per-tab write queue so concurrent request detections do not overwrite each other in session storage.
+- Ran `npm run test`: 1 file passed, 9 tests passed.
+- Ran `npm run typecheck`: passed.
+- Ran `npm run build`: passed.

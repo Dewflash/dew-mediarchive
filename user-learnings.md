@@ -116,3 +116,49 @@ This is why Phase 3 adds a tested classifier first. The tests prove common cases
 - YouTube-style hosts are blocked
 - premium streaming hosts are DRM-likely unsupported
 - `blob:` URLs are unsupported because they are not real downloadable network URLs
+
+## Why Phase 4 Uses Browser Session Storage
+
+The extension has two main surfaces:
+
+```text
+background worker: watches network requests
+popup: shows what was found
+```
+
+Those two surfaces need to share state. For the MVP, Dew uses Chrome session storage so detected media is available to the popup but not saved permanently in the browser.
+
+That is a privacy-friendly MVP choice:
+
+```text
+close/reload browser session -> temporary detection state can disappear
+future desktop app -> owns durable archive history
+```
+
+## What The Phase 4 Typecheck Failure Taught Us
+
+The browser may provide request context fields that the installed TypeScript package does not model on the exact event type we used.
+
+Instead of turning off type safety, we narrowed the mismatch:
+
+```text
+this request detail may optionally include documentUrl
+```
+
+That keeps the rest of the Chrome API typing strict while acknowledging a small runtime/type-package gap.
+
+## Why Phase 4 Added A Per-Tab Write Queue
+
+When a video starts playing, the browser may fire several matching network requests very quickly. If two detections update storage at the same time, this bad sequence can happen:
+
+```text
+request A reads old snapshot
+request B reads old snapshot
+request A writes media A
+request B writes media B
+media A is accidentally lost
+```
+
+The fix is a small per-tab write queue. For each tab, Dew applies snapshot updates one at a time.
+
+That keeps the MVP reliable without introducing a database yet.

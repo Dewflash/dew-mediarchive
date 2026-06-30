@@ -11,6 +11,9 @@
 - Define shared media records before detector behavior so extension layers and the later desktop app do not drift into incompatible shapes.
 - Classify blocked/DRM-likely domains before extension matching so a protected platform URL cannot look supported just because it has a familiar media-looking path.
 - Ignore segment files such as `.ts` and `.m4s` in the generic classifier because playlist/manifest URLs are more useful for `yt-dlp` than individual chunks.
+- Chrome runtime fields and installed TypeScript package fields may not always line up. When needed, model optional runtime fields narrowly instead of weakening all Chrome types.
+- Store detected media in `chrome.storage.session` for the MVP so the popup and background service worker share state without committing media URLs to durable browser storage.
+- Web requests can arrive concurrently. Snapshot writes must be serialized per tab or one read/modify/write cycle can overwrite another.
 
 ## Mistakes To Avoid
 
@@ -22,3 +25,5 @@
 - Do not place build tools in runtime dependencies; keep React runtime dependencies separate from Vite/TypeScript/dev tooling.
 - Do not pass bare media URL strings across layers once a structured detection record exists.
 - Do not treat `blob:` URLs as downloadable media URLs; they are browser-local object references and need the underlying network request instead.
+- Do not make the popup re-scan the page. The background worker owns detection; the popup should read snapshots.
+- Do not perform unqueued read/modify/write updates for per-tab detection snapshots.

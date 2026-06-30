@@ -33,6 +33,20 @@ The extension starts with a shared detection model in `apps/extension/src/shared
 
 This keeps the MVP from passing raw strings between layers.
 
+## Background Detection Flow
+
+The background service worker listens to request URLs, classifies them, and stores structured media snapshots per tab in Chrome session storage.
+
+```text
+webRequest.onBeforeRequest
+  -> classifyMediaUrl(url)
+  -> create DetectedMedia
+  -> append to tab snapshot
+  -> update extension badge
+```
+
+The popup should read the same snapshot instead of duplicating detection logic.
+
 ## Future App Shape
 
 The final product should use a job-based local pipeline:
