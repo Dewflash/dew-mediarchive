@@ -225,3 +225,4 @@
 - Ran receiver `npm run build`: passed.
 - `Dew.command` passed `zsh -n` syntax validation and is executable.
 - Reran `DEW_RECEIVER_PORT=54988 npm run dew:check` outside the sandbox: passed.
+- Hardened `Dew.command` for double-click usage by adding Homebrew paths, preflighting `node` and `npm`, and pausing on startup failure so errors remain readable.

@@ -129,6 +129,7 @@ Verified:
 - receiver tests prove `yt-dlp` progress-template parsing and job progress exposure
 - `npm run dew:check` passed on a throwaway port outside the sandbox
 - `Dew.command` passed shell syntax validation and has executable permissions
+- `Dew.command` passed shell syntax validation after adding Homebrew PATH and readable failure handling
 - `npm run dew` launched the receiver on a throwaway port, and `/health`, `/library`, plus `/export/archive.json` responded
 - a real `yt-dlp` smoke against the larger Blender Big Buck Bunny MP4 emitted progress-template lines from 0% to 100%
 - a full receiver API smoke on a throwaway port saved the larger Blender Big Buck Bunny MP4 and recorded progress snapshots from 0% through 100% in `jobs.jsonl`

@@ -206,7 +206,7 @@ npm run dew
 npm run dew:check
 ```
 
-`Dew.command` is the personal-tool launcher. Double-clicking it starts the same receiver and opens the local library. `npm run dew` remains the developer fallback. The launcher builds the receiver, checks `yt-dlp`, checks the configured loopback port, prints the library/download/job/archive paths, and starts the receiver. It is still a personal-tool launcher, not a packaged desktop app.
+`Dew.command` is the personal-tool launcher. Double-clicking it starts the same receiver and opens the local library. The command file adds common Homebrew binary paths before starting, preflights `node` and `npm`, and keeps the Terminal window open on startup failure so the error stays visible. `npm run dew` remains the developer fallback. The launcher builds the receiver, checks `yt-dlp`, checks the configured loopback port, prints the library/download/job/archive paths, and starts the receiver. It is still a personal-tool launcher, not a packaged desktop app.
 
 ## Future App Shape
 

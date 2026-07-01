@@ -86,6 +86,8 @@ Dew.command
 
 This starts the local receiver and opens the library page.
 
+`Dew.command` adds the usual Homebrew paths before starting, checks that `node` and `npm` are available, then keeps the Terminal window open if startup fails so the error can be read. You can make a desktop shortcut by creating a macOS alias to this file.
+
 Developer fallback from the repository root:
 
 ```bash

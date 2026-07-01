@@ -48,6 +48,7 @@
 - Network-only stream candidates may not have element context. The popup should use page title as a readable fallback before using the raw source URL as the title.
 - Popup state is not durable by itself. Any user-visible long-running receiver job needs a session-backed job id so the popup can restore progress after being closed.
 - For the personal MVP, a double-click launcher is enough to remove the normal Terminal workflow without taking on full app packaging yet.
+- Double-clicked macOS command files can have a thinner PATH than a normal developer terminal. Keep the personal launcher explicit about Homebrew paths and readable failure output.
 - Downloadable candidates should render before unsupported observations. Unsupported items are useful transparency, but they should not lead the user's decision flow.
 
 ## Mistakes To Avoid
