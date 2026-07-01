@@ -398,6 +398,59 @@ does the extension still build?
 
 Both kinds of proof matter. Manual smoke proves the product path. Tests make the repo safe to continue from.
 
+## Why We Added Archive Records After Save Worked
+
+The Save button proves Dew can download a file. But a useful archive needs more than a file sitting in a folder.
+
+Dew also needs a durable record that can answer:
+
+```text
+where did this come from?
+which page was it saved from?
+what kind of media was it?
+where is the local file?
+how big is it?
+what is its file hash?
+when was it captured?
+```
+
+That is why the receiver now writes:
+
+```text
+.dew/jobs.jsonl      operational job history
+.dew/archive.jsonl   one archive record per completed save
+```
+
+Jobs are about process:
+
+```text
+queued -> downloading -> completed
+```
+
+Archive records are about the saved item:
+
+```text
+source URL + page context + local path + byte size + SHA-256
+```
+
+This matters because the future library view should read clean archive records, not reconstruct meaning from every job transition.
+
+## Why We Hash The File
+
+The SHA-256 hash gives Dew a stable fingerprint of the downloaded bytes.
+
+That helps later with:
+
+```text
+dedupe
+integrity checks
+portable exports
+content-addressed storage
+detecting whether two saved files are actually the same media
+```
+
+For now, Dew still leaves the file in the normal download folder. The hash is the first step toward a stronger archive format.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

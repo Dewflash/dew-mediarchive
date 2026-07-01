@@ -18,11 +18,26 @@ export type DownloadJob = DownloadRequest & {
   error?: string;
 };
 
+export type ArchiveRecord = {
+  id: string;
+  jobId: string;
+  sourceUrl: string;
+  pageUrl?: string;
+  pageTitle?: string;
+  kind?: DownloadKind;
+  outputPath: string;
+  byteSize: number;
+  sha256: string;
+  capturedAt: string;
+  createdAt: string;
+};
+
 export type ReceiverConfig = {
   host: string;
   port: number;
   downloadDir: string;
   jobsPath: string;
+  archivePath: string;
   ytDlpPath: string;
   bodyLimitBytes: number;
 };

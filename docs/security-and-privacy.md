@@ -29,6 +29,10 @@
 
 Logs should use structured status and failure reasons. Avoid raw URLs when they may contain tokens.
 
+## Archive Metadata
+
+Archive records intentionally store source URLs and page context because provenance is part of the product. Treat `archive.jsonl` as local private user data. Do not upload it, print it in public logs, or include it in bug reports without redaction.
+
 ## User Promise
 
 Dew is for archiving media the user is allowed to save. Unsupported or protected sources should be visible states, not hidden failures.

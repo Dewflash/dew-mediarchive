@@ -6,23 +6,33 @@ import {
 } from "node:http";
 import { URL } from "node:url";
 import type { Downloader, ReceiverConfig } from "./types.js";
+import { FileArchiveStore } from "./archiveStore.js";
 import { FileJobStore } from "./jobStore.js";
 import { validateDownloadRequest } from "./validation.js";
 
 export type ReceiverServerOptions = {
   config: ReceiverConfig;
   jobStore: FileJobStore;
+  archiveStore: FileArchiveStore;
   downloader: Downloader;
 };
 
 export function createReceiverServer({
   config,
   jobStore,
+  archiveStore,
   downloader
 }: ReceiverServerOptions): Server {
   return createServer(async (request, response) => {
     try {
-      await handleRequest(request, response, config, jobStore, downloader);
+      await handleRequest(
+        request,
+        response,
+        config,
+        jobStore,
+        archiveStore,
+        downloader
+      );
     } catch {
       sendJson(response, 500, { error: "Internal receiver error." });
     }
@@ -34,6 +44,7 @@ async function handleRequest(
   response: ServerResponse,
   config: ReceiverConfig,
   jobStore: FileJobStore,
+  archiveStore: FileArchiveStore,
   downloader: Downloader
 ): Promise<void> {
   if (!isAllowedOrigin(request.headers.origin)) {
@@ -65,6 +76,11 @@ async function handleRequest(
     return;
   }
 
+  if (request.method === "GET" && url.pathname === "/archive") {
+    sendJson(response, 200, { records: archiveStore.list() });
+    return;
+  }
+
   const downloadJobId = matchDownloadJobPath(url.pathname);
 
   if (request.method === "GET" && downloadJobId) {
@@ -80,7 +96,14 @@ async function handleRequest(
   }
 
   if (request.method === "POST" && url.pathname === "/downloads") {
-    await handleCreateDownload(request, response, config, jobStore, downloader);
+    await handleCreateDownload(
+      request,
+      response,
+      config,
+      jobStore,
+      archiveStore,
+      downloader
+    );
     return;
   }
 
@@ -92,6 +115,7 @@ async function handleCreateDownload(
   response: ServerResponse,
   config: ReceiverConfig,
   jobStore: FileJobStore,
+  archiveStore: FileArchiveStore,
   downloader: Downloader
 ): Promise<void> {
   const contentType = request.headers["content-type"] ?? "";
@@ -127,7 +151,7 @@ async function handleCreateDownload(
   }
 
   const job = await jobStore.create(validation.value);
-  void runDownloadJob(job.id, config, jobStore, downloader);
+  void runDownloadJob(job.id, config, jobStore, archiveStore, downloader);
   sendJson(response, 202, { job });
 }
 
@@ -135,6 +159,7 @@ async function runDownloadJob(
   jobId: string,
   config: ReceiverConfig,
   jobStore: FileJobStore,
+  archiveStore: FileArchiveStore,
   downloader: Downloader
 ): Promise<void> {
   const downloadingJob = await jobStore.update(jobId, {
@@ -147,6 +172,16 @@ async function runDownloadJob(
 
   try {
     const result = await downloader.download(downloadingJob, config);
+
+    if (result.outputPath) {
+      await archiveStore.createFromCompletedJob({
+        ...downloadingJob,
+        status: "completed",
+        outputPath: result.outputPath,
+        updatedAt: new Date().toISOString()
+      });
+    }
+
     await jobStore.update(jobId, {
       status: "completed",
       outputPath: result.outputPath,

@@ -10,6 +10,7 @@
 - At least one copied non-DRM media URL downloads successfully with `yt-dlp`.
 - Save button sends a detected candidate to the local receiver.
 - Local receiver accepts a non-DRM media URL and saves a file with `yt-dlp`.
+- Completed receiver saves create archive metadata with file hash and size.
 - Unsupported sources are shown or filtered intentionally.
 
 ## Static Checks
@@ -45,13 +46,14 @@ See `docs/mvp-manual-test.md` for the full first-user checklist.
 9. Save a media candidate while the local receiver is running.
 10. Confirm the receiver records `queued -> downloading -> completed`.
 11. Confirm the saved media file exists.
-12. For Copy fallback, run:
+12. Confirm `GET /archive` lists the completed save.
+13. For Copy fallback, run:
 
 ```bash
 yt-dlp "PASTED_URL"
 ```
 
-13. Record result in `changelog.md`.
+14. Record result in `changelog.md`.
 
 ## Current Runtime Proof
 
@@ -78,7 +80,7 @@ Verified:
 - extension typecheck passed
 - extension build passed
 - popup Save tests prove receiver POST, completed save state, receiver unavailable state, and receiver failure retry state
-- receiver tests passed: 1 file, 6 tests
+- receiver tests passed: 1 file, 7 tests
 - receiver typecheck passed
 - receiver build passed
 - receiver health endpoint returned `{ ok: true, name: "dew-mediarchive-receiver", version: "0.1.0" }`
@@ -87,6 +89,7 @@ Verified:
 - receiver output file probes as 5.055000 seconds and 1128375 bytes
 - manual extension Save smoke saved the MDN flower MP4 to `/private/tmp/dew-save-test/flower-[flower].mp4`
 - manual extension Save smoke job history recorded `queued -> downloading -> completed`
+- receiver tests prove completed saves append archive records with output path, byte size, and SHA-256
 
 Pending:
 

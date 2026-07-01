@@ -101,6 +101,7 @@ The receiver in `apps/receiver` is a local-only HTTP service. It listens on `127
 
 ```text
 GET  /health
+GET  /archive
 GET  /downloads
 GET  /downloads/:id
 POST /downloads
@@ -114,6 +115,7 @@ popup Save
   -> receiver validates JSON and URL shape
   -> job is appended to jobs.jsonl
   -> yt-dlp runs with argument-array spawning
+  -> completed output is hashed and appended to archive.jsonl
   -> job becomes completed or failed
   -> popup shows queued, downloading, saved, or retryable failure
 ```
@@ -134,7 +136,15 @@ The first receiver store is append-only JSONL:
 ~/Movies/Dew MediArchive/.dew/jobs.jsonl
 ```
 
-Each state transition writes a new complete job record. On startup, the receiver replays the file and keeps the latest record for each job id in memory. This is simple, inspectable, and good enough until archive storage, hashing, and indexing exist.
+Each job state transition writes a new complete job record. On startup, the receiver replays the file and keeps the latest record for each job id in memory.
+
+Completed saves also create archive records:
+
+```text
+~/Movies/Dew MediArchive/.dew/archive.jsonl
+```
+
+Each archive record stores source URL, page context, output path, byte size, SHA-256 hash, and capture timestamps. This is not the final object-store layout, but it gives the future library view a durable index.
 
 ## Future App Shape
 

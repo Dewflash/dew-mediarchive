@@ -1,11 +1,17 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createReceiverServer } from "../src/server.js";
+import { FileArchiveStore } from "../src/archiveStore.js";
 import { FileJobStore } from "../src/jobStore.js";
-import type { DownloadJob, Downloader, ReceiverConfig } from "../src/types.js";
+import type {
+  ArchiveRecord,
+  DownloadJob,
+  Downloader,
+  ReceiverConfig
+} from "../src/types.js";
 
 describe("receiver server", () => {
   let tempDir: string;
@@ -13,6 +19,7 @@ describe("receiver server", () => {
   let baseUrl: string;
   let config: ReceiverConfig;
   let jobStore: FileJobStore;
+  let archiveStore: FileArchiveStore;
   let downloadedJobs: DownloadJob[];
 
   beforeEach(async () => {
@@ -22,22 +29,28 @@ describe("receiver server", () => {
       port: 0,
       downloadDir: join(tempDir, "downloads"),
       jobsPath: join(tempDir, "jobs.jsonl"),
+      archivePath: join(tempDir, "archive.jsonl"),
       ytDlpPath: "yt-dlp",
       bodyLimitBytes: 64 * 1024
     };
     jobStore = new FileJobStore(config.jobsPath);
+    archiveStore = new FileArchiveStore(config.archivePath);
     downloadedJobs = [];
 
     const downloader: Downloader = {
       async download(job) {
+        const outputPath = join(config.downloadDir, "flower.mp4");
         downloadedJobs.push(job);
-        return { outputPath: join(config.downloadDir, "flower.mp4") };
+        await mkdir(config.downloadDir, { recursive: true });
+        await writeFile(outputPath, "flower video bytes", "utf8");
+        return { outputPath };
       }
     };
 
     server = createReceiverServer({
       config,
       jobStore,
+      archiveStore,
       downloader
     });
 
@@ -136,6 +149,45 @@ describe("receiver server", () => {
       outputPath: join(config.downloadDir, "flower.mp4")
     });
     expect(downloadedJobs).toHaveLength(1);
+  });
+
+  it("writes an archive record for completed downloads", async () => {
+    const response = await fetch(`${baseUrl}/downloads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "chrome-extension://example"
+      },
+      body: JSON.stringify({
+        url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        pageUrl: "https://interactive-examples.mdn.mozilla.net/",
+        pageTitle: "MDN Flower",
+        kind: "mp4"
+      })
+    });
+    const body = (await response.json()) as { job: DownloadJob };
+    const completedJob = await waitForJobStatus(body.job.id, "completed");
+    const archiveResponse = await fetch(`${baseUrl}/archive`, {
+      headers: {
+        Origin: "chrome-extension://example"
+      }
+    });
+    const archiveBody = (await archiveResponse.json()) as {
+      records: ArchiveRecord[];
+    };
+
+    expect(archiveResponse.status).toBe(200);
+    expect(archiveBody.records).toHaveLength(1);
+    expect(archiveBody.records[0]).toMatchObject({
+      jobId: completedJob.id,
+      sourceUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+      pageUrl: "https://interactive-examples.mdn.mozilla.net/",
+      pageTitle: "MDN Flower",
+      kind: "mp4",
+      outputPath: join(config.downloadDir, "flower.mp4"),
+      byteSize: 18
+    });
+    expect(archiveBody.records[0].sha256).toMatch(/^[a-f0-9]{64}$/);
   });
 
   it("rejects unsupported download URL schemes", async () => {

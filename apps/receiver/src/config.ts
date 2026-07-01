@@ -14,6 +14,8 @@ export function createDefaultConfig(env = process.env): ReceiverConfig {
     port: parsePort(env.DEW_RECEIVER_PORT),
     downloadDir,
     jobsPath: env.DEW_JOBS_PATH ?? join(downloadDir, ".dew", "jobs.jsonl"),
+    archivePath:
+      env.DEW_ARCHIVE_PATH ?? join(downloadDir, ".dew", "archive.jsonl"),
     ytDlpPath: env.DEW_YT_DLP_PATH ?? "yt-dlp",
     bodyLimitBytes: parseBodyLimit(env.DEW_BODY_LIMIT_BYTES)
   };

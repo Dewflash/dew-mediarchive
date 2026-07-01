@@ -31,6 +31,8 @@
 - Keep Copy beside Save. Save is the product path, but Copy remains the best fallback when the receiver is not running or `yt-dlp` needs manual inspection.
 - The extension should poll receiver jobs only while the popup is alive. Close/unmount should cancel active polling instead of leaving hidden work in the popup process.
 - Use `/private/tmp` only for smoke tests. Real default saves belong in `~/Movies/Dew MediArchive`.
+- Separate job history from archive records. Jobs explain what happened operationally; archive records describe saved media for future search, dedupe, export, and gallery views.
+- Hash completed files before marking the receiver job completed. A Save should not claim completion unless the first archive metadata record was written successfully.
 
 ## Mistakes To Avoid
 
@@ -55,3 +57,4 @@
 - Do not run `yt-dlp` through shell interpolation.
 - Do not treat the receiver as archive storage. It is only the first save-job backend.
 - Do not push a manually passing Save flow before automated popup tests, typecheck, build, docs, and changelog are updated.
+- Do not use jobs.jsonl as the library source of truth. It contains retries and state transitions, not one clean record per saved item.

@@ -118,3 +118,12 @@
 - Manually smoke-tested extension Save with the MDN flower MP4.
 - Confirmed the Save smoke test saved `/private/tmp/dew-save-test/flower-[flower].mp4`.
 - Confirmed the Save smoke job history recorded `queued -> downloading -> completed`.
+- Added receiver archive records for completed saves.
+- Added `DEW_ARCHIVE_PATH`, defaulting to `.dew/archive.jsonl` under the download directory.
+- Added `GET /archive` to list archive records.
+- Archive records now include source URL, page context, output path, byte size, SHA-256, and timestamps.
+- Adjusted receiver completion flow so archive metadata is written before a job is marked completed.
+- Added receiver test coverage for archive record creation.
+- Ran receiver `npm run test`: 1 file, 7 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.

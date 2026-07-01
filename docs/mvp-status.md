@@ -29,6 +29,9 @@ mvp-extension
 - Receiver validation for JSON bodies, HTTP/HTTPS media URLs, optional page metadata, and media kind.
 - Receiver `yt-dlp` downloader that saves files locally without shell command interpolation.
 - Append-only receiver job history in JSONL.
+- Append-only archive metadata in JSONL for completed saves.
+- Archive endpoint at `GET /archive`.
+- Archive records include source URL, page context, output path, byte size, and SHA-256 hash.
 - Manual verification guide in `docs/mvp-manual-test.md`.
 - Architecture, adapter, archive, security, verification, learning, and changelog docs.
 
@@ -61,7 +64,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 1 file, 6 tests.
+- Receiver `npm run test` passes: 1 file, 7 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -84,12 +87,14 @@ size=1128375
 queued -> downloading -> completed
 ```
 
+- Receiver tests prove completed downloads write archive records.
+
 ## What Is Not Done Yet
 
 - Human Copy proof from the real toolbar popup is not complete.
 - Desktop app wrapper is not built.
 - Safari support is not built.
-- Persistent archive storage, hashing, indexing, search, import/export, and gallery views are not built.
+- Final content-addressed object storage, search, import/export, and gallery views are not built.
 - YouTube and DRM-heavy platforms remain intentionally unsupported.
 
 ## Why The Remaining Copy Proof Is Still Open

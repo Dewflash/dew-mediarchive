@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-MVP Save loop.
+MVP archive records.
 
 ## Current Goal
 
-Prove the extension can Save detected media through the local receiver without sending media URLs to a cloud service.
+Turn completed local saves into durable archive metadata that future library/search/export surfaces can read.
 
 ## Handoff Status
 
@@ -63,13 +63,18 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Added popup tests for Save request shape, saved state, receiver unavailable state, and receiver failure retry state.
 - Verified the Save wiring with `npm run test`, `npm run typecheck`, and `npm run build`.
 - Manually smoke-tested extension Save with the MDN flower MP4 and confirmed `/private/tmp/dew-save-test/flower-[flower].mp4` plus `queued -> downloading -> completed` job history.
+- Added append-only archive records in `apps/receiver`.
+- Added `DEW_ARCHIVE_PATH` and default `.dew/archive.jsonl` storage beside job history.
+- Added `GET /archive`.
+- Added SHA-256 and byte-size metadata for completed downloads.
+- Verified archive records with receiver tests, typecheck, and build.
 
 ## Next Steps
 
 1. Improve Save UX with saved output path display.
 2. Make the receiver easier to launch outside a terminal.
-3. Add archive records for saved media metadata.
-4. Start a local library/gallery surface.
+3. Start a local library/gallery surface backed by `/archive`.
+4. Add export for archive metadata.
 5. Re-test a short MP4 and a page with multiple videos in normal Chrome.
 
 ## Open Questions

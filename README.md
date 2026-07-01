@@ -60,7 +60,7 @@ The local receiver is the save backend:
 popup Save -> POST /downloads -> receiver starts yt-dlp -> file saved locally
 ```
 
-By default, saved files go to `~/Movies/Dew MediArchive`, and job history is appended to `~/Movies/Dew MediArchive/.dew/jobs.jsonl`.
+By default, saved files go to `~/Movies/Dew MediArchive`, job history is appended to `~/Movies/Dew MediArchive/.dew/jobs.jsonl`, and completed saves are indexed in `~/Movies/Dew MediArchive/.dew/archive.jsonl`.
 
 ## Extension Commands
 
@@ -99,6 +99,7 @@ Useful environment overrides:
 ```bash
 DEW_DOWNLOAD_DIR=/path/to/downloads
 DEW_JOBS_PATH=/path/to/jobs.jsonl
+DEW_ARCHIVE_PATH=/path/to/archive.jsonl
 DEW_YT_DLP_PATH=/path/to/yt-dlp
 DEW_RECEIVER_PORT=47321
 ```
@@ -110,4 +111,5 @@ curl http://127.0.0.1:47321/health
 curl -X POST http://127.0.0.1:47321/downloads \
   -H 'Content-Type: application/json' \
   -d '{"url":"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4","kind":"mp4"}'
+curl http://127.0.0.1:47321/archive
 ```
