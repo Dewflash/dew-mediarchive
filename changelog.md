@@ -142,3 +142,4 @@
 - Ran receiver `npm run test`: 1 file, 11 tests passed.
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
+- User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.

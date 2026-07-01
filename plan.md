@@ -78,6 +78,7 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Escaped archive metadata before rendering HTML.
 - Added a restrictive CSP for the local library page.
 - Verified the library route with receiver tests, typecheck, and build.
+- Manually confirmed the local library page shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
 
 ## Next Steps
 

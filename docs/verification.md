@@ -95,6 +95,7 @@ Verified:
 - receiver tests prove completed saves append archive records with output path, byte size, and SHA-256
 - receiver tests prove `/library` renders empty and populated states
 - receiver tests prove `/library` escapes untrusted archive metadata
+- user manually confirmed `/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed
 
 Pending:
 

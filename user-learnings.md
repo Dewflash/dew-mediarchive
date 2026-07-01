@@ -505,6 +505,24 @@ what source did it come from?
 
 Avoiding client-side JavaScript keeps the first library safer and simpler. Since page titles and source URLs come from websites, Dew escapes them before rendering HTML so a saved page title cannot become executable code in the library.
 
+## Why The Library Looked Empty At First
+
+The first successful Save happened before Dew wrote archive records. That older job history proved:
+
+```text
+queued -> downloading -> completed
+```
+
+but it did not yet create the separate library record that `/library` reads.
+
+After the receiver was rebuilt/restarted with the archive code and a new Save existed, the library showed the saved item. That means the current flow is:
+
+```text
+Save completes -> archive record is written -> /library displays it
+```
+
+If `/library` ever says no saved media during testing, check that the receiver is the rebuilt version and make one fresh Save so `archive.jsonl` has a current record.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

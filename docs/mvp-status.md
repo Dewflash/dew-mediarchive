@@ -94,6 +94,7 @@ queued -> downloading -> completed
 - Receiver tests prove the local library renders empty and populated archive states.
 - Receiver tests prove the local library escapes untrusted archive metadata.
 - Popup tests prove completed saves display the receiver output path.
+- User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
 
 ## What Is Not Done Yet
 
