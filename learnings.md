@@ -45,6 +45,7 @@
 - `yt-dlp` needs `--progress` when spawned without a terminal; otherwise progress-template lines may not appear even though the download succeeds.
 - Progress is best-effort. Small direct files may complete before percent updates are useful, so queued/downloading/completed states still matter.
 - Keep media-specific titles separate from page titles and source URLs. `mediaTitle` helps users distinguish multiple videos on one page; `pageTitle` remains provenance for the browser page; `url` remains the real downloadable source.
+- Network-only stream candidates may not have element context. The popup should use page title as a readable fallback before using the raw source URL as the title.
 
 ## Mistakes To Avoid
 
@@ -76,3 +77,4 @@
 - Do not export job history as the user archive. Exports should come from archive records so retries and transient failures do not leak into the library.
 - Do not invent fake percentages when `yt-dlp` has not reported a total. Show an indeterminate/downloading state or byte/speed details instead.
 - Do not overwrite `pageTitle` with a guessed media label. That would make provenance worse and still would not solve multi-video identification cleanly.
+- Do not show the same manifest URL twice in a media card unless no title, page title, or element index exists.

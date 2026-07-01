@@ -307,6 +307,7 @@ function PopupContent({
           copyErrorMediaId={copyErrorMediaId}
           key={media.id}
           media={media}
+          mediaTitle={getMediaTitle(media, mediaItems)}
           onCopy={onCopy}
           onSave={onSave}
           saveState={saveStates[media.id]}
@@ -320,6 +321,7 @@ function MediaItem({
   copiedMediaId,
   copyErrorMediaId,
   media,
+  mediaTitle,
   onCopy,
   onSave,
   saveState
@@ -327,6 +329,7 @@ function MediaItem({
   copiedMediaId: string | undefined;
   copyErrorMediaId: string | undefined;
   media: DetectedMedia;
+  mediaTitle: string;
   onCopy: (media: DetectedMedia) => Promise<void>;
   onSave: (media: DetectedMedia) => Promise<void>;
   saveState: SaveState | undefined;
@@ -340,7 +343,7 @@ function MediaItem({
             {media.status}
           </span>
         </div>
-        <p className="media-item__title">{getMediaTitle(media)}</p>
+        <p className="media-item__title">{mediaTitle}</p>
         <p className="media-item__url">{formatUrl(media.url)}</p>
         {media.status === "unsupported" ? (
           <p className="media-item__message">{media.message}</p>
@@ -458,13 +461,31 @@ function getMediaLabel(media: DetectedMedia): string {
   return media.unsupportedReason.replaceAll("-", " ");
 }
 
-function getMediaTitle(media: DetectedMedia): string {
+function getMediaTitle(media: DetectedMedia, mediaItems: DetectedMedia[]): string {
   if (media.mediaTitle) {
     return media.mediaTitle;
   }
 
   if (media.mediaElementIndex !== undefined) {
     return `${media.kind === "audio" ? "Audio" : "Video"} ${media.mediaElementIndex}`;
+  }
+
+  const pageTitle = media.pageTitle?.trim();
+
+  if (pageTitle) {
+    const untitledPagePeers = mediaItems.filter(
+      (item) =>
+        !item.mediaTitle &&
+        item.mediaElementIndex === undefined &&
+        item.pageTitle?.trim() === pageTitle
+    );
+
+    if (untitledPagePeers.length > 1) {
+      const titleIndex = untitledPagePeers.findIndex((item) => item.id === media.id) + 1;
+      return `${pageTitle} · ${getMediaLabel(media)} ${Math.max(1, titleIndex)}`;
+    }
+
+    return pageTitle;
   }
 
   return formatUrl(media.url);

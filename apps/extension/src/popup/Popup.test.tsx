@@ -102,6 +102,47 @@ describe("Popup", () => {
     expect(screen.getByText("cdn.example.test/video.mp4")).toBeInTheDocument();
   });
 
+  it("uses page titles for title-less network candidates", async () => {
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate(
+          "media-1",
+          "https://cdn.example.test/streaming/one/master.m3u8",
+          {
+            kind: "hls",
+            label: "HLS stream",
+            mediaElementIndex: undefined,
+            mediaTitle: undefined,
+            pageTitle: "Progress Bar"
+          }
+        ),
+        createCandidate(
+          "media-2",
+          "https://cdn.example.test/streaming/two/master.m3u8",
+          {
+            kind: "hls",
+            label: "HLS stream",
+            mediaElementIndex: undefined,
+            mediaTitle: undefined,
+            pageTitle: "Progress Bar"
+          }
+        )
+      ])
+    });
+
+    render(<Popup />);
+
+    expect(await screen.findByText("2 items found")).toBeInTheDocument();
+    expect(screen.getByText("Progress Bar · HLS stream 1")).toBeInTheDocument();
+    expect(screen.getByText("Progress Bar · HLS stream 2")).toBeInTheDocument();
+    expect(
+      screen.getByText("cdn.example.test/streaming/one/master.m3u8")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("cdn.example.test/streaming/two/master.m3u8")
+    ).toBeInTheDocument();
+  });
+
   it("can render a requested tab snapshot for verification", async () => {
     window.history.replaceState(null, "", "/popup.html?tabId=42");
     storageGet.mockResolvedValue({
@@ -124,7 +165,11 @@ describe("Popup", () => {
     window.history.replaceState(null, "", "/popup.html?tabId=not-a-tab");
     storageGet.mockResolvedValue({
       "media-snapshot:7": createSnapshot([
-        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+        createCandidate("media-1", "https://cdn.example.test/video.mp4", {
+          mediaElementIndex: undefined,
+          mediaTitle: undefined,
+          pageTitle: "Progress Bar"
+        })
       ])
     });
 
@@ -140,7 +185,11 @@ describe("Popup", () => {
   it("copies a candidate URL and shows copied state", async () => {
     storageGet.mockResolvedValue({
       "media-snapshot:7": createSnapshot([
-        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+        createCandidate("media-1", "https://cdn.example.test/video.mp4", {
+          mediaElementIndex: undefined,
+          mediaTitle: undefined,
+          pageTitle: "Progress Bar"
+        })
       ])
     });
 
@@ -168,7 +217,11 @@ describe("Popup", () => {
       );
     storageGet.mockResolvedValue({
       "media-snapshot:7": createSnapshot([
-        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+        createCandidate("media-1", "https://cdn.example.test/video.mp4", {
+          mediaElementIndex: undefined,
+          mediaTitle: undefined,
+          pageTitle: "Progress Bar"
+        })
       ])
     });
 
@@ -187,8 +240,8 @@ describe("Popup", () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
       url: "https://cdn.example.test/video.mp4",
       pageUrl: "https://example.test/watch",
-      pageTitle: "Smoke Page",
-      mediaTitle: "Video 1",
+      pageTitle: "Progress Bar",
+      mediaTitle: "Progress Bar",
       kind: "mp4"
     });
     expect(await screen.findByText("Saved locally. Added to library.")).toBeInTheDocument();

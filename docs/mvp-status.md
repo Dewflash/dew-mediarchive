@@ -48,7 +48,7 @@ mvp-extension
 
 ## What Is Proven
 
-- Extension `npm run test` passes: 5 files, 36 tests.
+- Extension `npm run test` passes: 5 files, 37 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -110,6 +110,7 @@ queued -> downloading -> completed
 - Popup tests prove completed saves display the receiver output path.
 - Popup tests prove download progress renders as a progress bar with details.
 - Popup tests prove detected cards show media-specific titles.
+- Popup tests prove title-less network stream candidates use page-title fallback labels instead of duplicating the source URL.
 - Receiver tests prove media-specific titles are preserved in archive records, library rendering, search, JSON export, and CSV export.
 - Popup tests prove completed saves link to the local library.
 - Popup tests prove duplicate saves show an already-saved state.

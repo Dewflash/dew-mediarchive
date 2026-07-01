@@ -196,3 +196,10 @@
 - Ran receiver `npm run test`: 3 files, 22 tests passed.
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
+- User-tested on a Peertube page and confirmed page-derived titles appeared on unsupported page-media entries, but title-less network HLS candidates still showed duplicate URL text.
+- Updated popup title fallback so title-less network candidates use the browser page title before falling back to the source URL.
+- Added ordinal labels for multiple title-less candidates from the same page/title, such as `Progress Bar · HLS stream 1`.
+- Updated Save payload fallback so title-less candidates can still preserve the readable page-title label in the archive.
+- Added popup regression coverage for title-less HLS candidates and Save fallback titles.
+- Ran extension `npm run test`: 5 files, 37 tests passed.
+- Ran extension `npm run typecheck`: passed.

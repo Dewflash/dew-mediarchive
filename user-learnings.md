@@ -675,6 +675,8 @@ Audio 1
 
 So on a page with five videos, the popup should no longer show five anonymous links. It should show a readable label above each URL, then keep that label when you Save so the library and exports are easier to understand later.
 
+One real-page nuance: HLS/DASH streams sometimes come from browser network requests, not directly from the `video` element. In that case Dew may not know the exact element caption. The popup now uses the page title before falling back to the raw stream URL, and if there are several title-less stream candidates from the same page it adds an ordinal label.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

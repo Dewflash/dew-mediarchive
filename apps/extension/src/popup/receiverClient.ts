@@ -81,7 +81,7 @@ async function createDownloadJob(
       url: media.url,
       pageUrl: media.pageUrl,
       pageTitle: media.pageTitle,
-      mediaTitle: media.mediaTitle,
+      mediaTitle: getReceiverMediaTitle(media),
       kind: media.kind
     }),
     headers: {
@@ -92,6 +92,18 @@ async function createDownloadJob(
   });
 
   return parseJobResponse(response);
+}
+
+function getReceiverMediaTitle(media: MediaCandidate): string | undefined {
+  if (media.mediaTitle) {
+    return media.mediaTitle;
+  }
+
+  if (media.mediaElementIndex !== undefined) {
+    return `${media.kind === "audio" ? "Audio" : "Video"} ${media.mediaElementIndex}`;
+  }
+
+  return media.pageTitle?.trim() || undefined;
 }
 
 async function pollDownloadJob(
