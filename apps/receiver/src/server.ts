@@ -4,8 +4,14 @@ import {
   type Server,
   type ServerResponse
 } from "node:http";
+import { stat } from "node:fs/promises";
 import { URL } from "node:url";
-import type { DownloadProgress, Downloader, ReceiverConfig } from "./types.js";
+import type {
+  ArchiveRecord,
+  DownloadProgress,
+  Downloader,
+  ReceiverConfig
+} from "./types.js";
 import {
   renderArchiveCsvExport,
   renderArchiveJsonExport
@@ -15,6 +21,7 @@ import { FileJobStore } from "./jobStore.js";
 import {
   filterAndSortArchiveRecords,
   getLibraryOptionsFromSearchParams,
+  type LibraryArchiveRecord,
   renderLibraryPage
 } from "./libraryView.js";
 import { renderPrivacyPage } from "./privacyView.js";
@@ -100,11 +107,13 @@ async function handleRequest(
   }
 
   if (request.method === "GET" && url.pathname === "/library") {
+    const libraryRecords = await annotateLibraryRecords(archiveStore.list());
+
     sendHtml(
       response,
       200,
       renderLibraryPage(
-        archiveStore.list(),
+        libraryRecords,
         getLibraryOptionsFromSearchParams(url.searchParams)
       )
     );
@@ -250,6 +259,26 @@ async function handleCreateDownload(
   const job = await jobStore.create(validation.value);
   void runDownloadJob(job.id, config, jobStore, archiveStore, downloader);
   sendJson(response, 202, { job });
+}
+
+async function annotateLibraryRecords(
+  records: ArchiveRecord[]
+): Promise<LibraryArchiveRecord[]> {
+  return Promise.all(
+    records.map(async (record) => ({
+      ...record,
+      fileStatus: (await fileExists(record.outputPath)) ? "available" : "missing"
+    }))
+  );
+}
+
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    const fileStats = await stat(filePath);
+    return fileStats.isFile();
+  } catch {
+    return false;
+  }
 }
 
 async function runDownloadJob(

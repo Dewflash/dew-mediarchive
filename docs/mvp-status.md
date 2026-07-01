@@ -27,6 +27,7 @@ mvp-extension
 - Popup shows the saved output path when the receiver returns one.
 - Popup links to the local library after completed Save.
 - Popup shows an already-saved state when the receiver reuses an existing archive record.
+- Popup can clear detected media and session-backed Save progress for the current tab.
 - Copy remains available as a fallback beside Save.
 - Popup Save polling is cancelled when the popup closes.
 - Open popup keeps the last non-empty media list visible even if the temporary tab snapshot clears.
@@ -44,6 +45,7 @@ mvp-extension
 - Local library page at `GET /library`.
 - Local privacy page at `GET /privacy`.
 - Local library search, media-type filtering, sorting, source links, and export links.
+- Local library marks archive records whose saved media file is missing from disk.
 - Local library can remove archive history records without deleting saved media files.
 - Root receiver route redirects to `/library`.
 - Double-clickable `Dew.command` launcher that starts the receiver and opens the local library.
@@ -55,7 +57,7 @@ mvp-extension
 
 ## What Is Proven
 
-- Extension `npm run test` passes: 5 files, 39 tests.
+- Extension `npm run test` passes: 5 files, 40 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -82,7 +84,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 3 files, 25 tests.
+- Receiver `npm run test` passes: 3 files, 26 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -109,6 +111,7 @@ queued -> downloading -> completed
 - Receiver tests prove the local library renders empty and populated archive states.
 - Receiver tests prove the local library escapes untrusted archive metadata.
 - Receiver tests prove the local library can search, filter, and sort archive records.
+- Receiver tests prove the local library marks records whose saved media file is missing.
 - Receiver tests prove library Remove deletes archive history records without deleting saved media files.
 - Receiver tests prove the local privacy page renders.
 - Receiver tests prove JSON and CSV archive export.
@@ -121,6 +124,7 @@ queued -> downloading -> completed
 - Popup tests prove detected cards show media-specific titles.
 - Popup tests prove title-less network stream candidates use page-title fallback labels instead of duplicating the source URL.
 - Popup tests prove saved receiver jobs restore after popup reopen and resume progress polling.
+- Popup tests prove Clear temp removes detected media and session-backed Save progress for the current tab.
 - Popup tests prove downloadable candidates render above unsupported observations.
 - Receiver tests prove media-specific titles are preserved in archive records, library rendering, search, JSON export, and CSV export.
 - Popup tests prove completed saves link to the local library.

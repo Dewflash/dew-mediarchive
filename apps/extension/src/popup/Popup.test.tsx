@@ -9,8 +9,10 @@ import type { MediaCandidate, MediaDetectionSnapshot } from "../shared";
 
 const storageGet = vi.fn();
 const storageSet = vi.fn();
+const storageRemove = vi.fn();
 const storageAddListener = vi.fn();
 const storageRemoveListener = vi.fn();
+const setBadgeText = vi.fn();
 const tabsQuery = vi.fn();
 const writeText = vi.fn();
 const fetchMock = vi.fn();
@@ -28,8 +30,10 @@ describe("Popup", () => {
     storageChangeHandler = undefined;
     storageGet.mockReset();
     storageSet.mockReset();
+    storageRemove.mockReset();
     storageAddListener.mockReset();
     storageRemoveListener.mockReset();
+    setBadgeText.mockReset();
     tabsQuery.mockReset();
     writeText.mockReset();
     fetchMock.mockReset();
@@ -47,10 +51,14 @@ describe("Popup", () => {
     });
 
     vi.stubGlobal("chrome", {
+      action: {
+        setBadgeText
+      },
       storage: {
         session: {
           get: storageGet,
-          set: storageSet
+          set: storageSet,
+          remove: storageRemove
         },
         onChanged: {
           addListener: storageAddListener,
@@ -103,6 +111,54 @@ describe("Popup", () => {
     expect(screen.getByText("MP4 video")).toBeInTheDocument();
     expect(screen.getByText("Launch trailer")).toBeInTheDocument();
     expect(screen.getByText("cdn.example.test/video.mp4")).toBeInTheDocument();
+  });
+
+  it("clears detected media and saved progress for the current tab", async () => {
+    storageGet.mockImplementation(async (key: string) => {
+      if (key === "media-snapshot:7") {
+        return {
+          [key]: createSnapshot([
+            createCandidate("media-1", "https://cdn.example.test/video.mp4")
+          ])
+        };
+      }
+
+      if (key === "save-jobs:7") {
+        return {
+          [key]: {
+            "media-1": {
+              jobId: "job-1",
+              mediaId: "media-1",
+              saveState: {
+                message: "Saved locally. Added to library.",
+                status: "completed"
+              },
+              updatedAt: new Date().toISOString()
+            }
+          }
+        };
+      }
+
+      return {};
+    });
+
+    render(<Popup />);
+
+    expect(await screen.findByText("1 item found")).toBeInTheDocument();
+    expect(screen.getByText("Saved locally. Added to library.")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Clear temp" }));
+
+    expect(storageRemove).toHaveBeenCalledWith("media-snapshot:7");
+    expect(storageRemove).toHaveBeenCalledWith("save-jobs:7");
+    expect(setBadgeText).toHaveBeenCalledWith({
+      tabId: 7,
+      text: ""
+    });
+    expect(await screen.findByText("No media detected yet")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Saved locally. Added to library.")
+    ).not.toBeInTheDocument();
   });
 
   it("shows downloadable candidates before unsupported observations", async () => {

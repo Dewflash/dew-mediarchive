@@ -186,7 +186,9 @@ GET /library
 
 It renders `archive.jsonl` records as HTML and redirects `/` to `/library`. The page is server-rendered, has no client-side scripts, escapes archive metadata, and uses a restrictive content security policy.
 
-The personal-tool MVP library supports search, kind filtering, sorting, source links, export links, and removing history records. JSON and CSV exports are generated from archive records, and CSV text is escaped so spreadsheet formulas cannot be injected through page titles or URLs.
+The personal-tool MVP library supports search, kind filtering, sorting, source links, export links, missing-file status, and removing history records. JSON and CSV exports are generated from archive records, and CSV text is escaped so spreadsheet formulas cannot be injected through page titles or URLs.
+
+When rendering `/library`, the receiver checks each archive record's `outputPath`. Existing files show `File on disk`; missing files show `Missing file`. This is a view-time status check and does not mutate archive history.
 
 Library Remove posts to `POST /archive/:id/remove`. That action rewrites the archive JSONL history without the selected record, then redirects back to `/library`. It intentionally leaves the media file on disk; file deletion should remain a separate stronger action.
 

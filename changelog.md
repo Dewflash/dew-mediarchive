@@ -234,3 +234,11 @@
 - Ran receiver `npm run test`: 3 files, 25 tests passed.
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
+- Added library missing-file status by checking archive record `outputPath` values when rendering `/library`.
+- Added popup Clear temp action for clearing current-tab detected media and session-backed Save progress.
+- Ran receiver `npm run test`: 3 files, 26 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.
+- Ran extension `npm run test`: 5 files, 40 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.

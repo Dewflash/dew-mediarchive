@@ -2,6 +2,10 @@ import type { ArchiveRecord, DownloadKind } from "./types.js";
 
 export type LibrarySort = "newest" | "oldest" | "source" | "size";
 
+export type LibraryArchiveRecord = ArchiveRecord & {
+  fileStatus?: "available" | "missing";
+};
+
 export type LibraryViewOptions = {
   search?: string;
   kind?: DownloadKind | "all";
@@ -9,7 +13,7 @@ export type LibraryViewOptions = {
 };
 
 export function renderLibraryPage(
-  records: ArchiveRecord[],
+  records: LibraryArchiveRecord[],
   options: LibraryViewOptions = {}
 ): string {
   const normalizedOptions = normalizeOptions(options);
@@ -229,6 +233,22 @@ export function renderLibraryPage(
       padding: 2px 7px;
     }
 
+    .file-status {
+      display: inline-block;
+      margin-top: 6px;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+    }
+
+    .file-status--missing {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
     .empty {
       border: 1px solid #dbe4ef;
       background: #ffffff;
@@ -314,6 +334,16 @@ export function renderLibraryPage(
         border-color: #7f1d1d;
         color: #fecaca;
       }
+
+      .file-status {
+        background: #12351f;
+        color: #86efac;
+      }
+
+      .file-status--missing {
+        background: #3f1d1d;
+        color: #fecaca;
+      }
     }
   </style>
 </head>
@@ -353,9 +383,9 @@ export function renderLibraryPage(
 }
 
 export function filterAndSortArchiveRecords(
-  records: ArchiveRecord[],
+  records: LibraryArchiveRecord[],
   options: LibraryViewOptions = {}
-): ArchiveRecord[] {
+): LibraryArchiveRecord[] {
   const normalizedOptions = normalizeOptions(options);
   const search = normalizedOptions.search?.toLocaleLowerCase();
 
@@ -411,7 +441,7 @@ export function getLibraryOptionsFromSearchParams(
   });
 }
 
-function renderArchiveRow(record: ArchiveRecord): string {
+function renderArchiveRow(record: LibraryArchiveRecord): string {
   const title =
     record.mediaTitle?.trim() ||
     record.pageTitle?.trim() ||
@@ -428,6 +458,7 @@ function renderArchiveRow(record: ArchiveRecord): string {
   <td>
     <p>${escapeHtml(formatTimestamp(record.createdAt))}</p>
     <p class="path">${escapeHtml(record.outputPath)}</p>
+    ${renderFileStatus(record)}
   </td>
   <td>${escapeHtml(formatBytes(record.byteSize))}</td>
   <td><span class="hash" title="${escapeHtml(record.sha256)}">${escapeHtml(record.sha256.slice(0, 12))}</span></td>
@@ -439,6 +470,18 @@ function renderArchiveRow(record: ArchiveRecord): string {
     </form>
   </td>
 </tr>`;
+}
+
+function renderFileStatus(record: LibraryArchiveRecord): string {
+  if (record.fileStatus === "missing") {
+    return `<span class="file-status file-status--missing">Missing file</span>`;
+  }
+
+  if (record.fileStatus === "available") {
+    return `<span class="file-status">File on disk</span>`;
+  }
+
+  return "";
 }
 
 function renderKindOptions(selectedKind: LibraryViewOptions["kind"]): string {

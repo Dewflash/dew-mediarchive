@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getMediaSnapshotStorageKey,
   readMediaDetectionSnapshot,
+  removeMediaDetectionSnapshot,
   type DetectedMedia,
   type MediaCandidate,
   type MediaDetectionSnapshot
@@ -15,6 +16,7 @@ import {
   type ReceiverDownloadJobStatus
 } from "./receiverClient";
 import {
+  removeSaveJobs,
   readSaveJobs,
   writeSaveJob,
   type PersistedSaveJob
@@ -42,6 +44,7 @@ export function Popup() {
   const isMountedRef = useRef(true);
   const saveControllersRef = useRef(new Map<string, AbortController>());
   const resumedJobIdsRef = useRef(new Set<string>());
+  const isClearingSnapshotRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -120,12 +123,20 @@ export function Popup() {
       const tabId = activeTabId;
 
       setPopupState((currentState) => {
+        const wasClearingSnapshot =
+          changedSnapshot === undefined && isClearingSnapshotRef.current;
+
         if (
           changedSnapshot === undefined &&
           currentState.status === "ready" &&
-          currentState.snapshot?.candidates.length
+          currentState.snapshot?.candidates.length &&
+          !wasClearingSnapshot
         ) {
           return currentState;
+        }
+
+        if (wasClearingSnapshot) {
+          isClearingSnapshotRef.current = false;
         }
 
         return {
@@ -153,6 +164,10 @@ export function Popup() {
 
     return sortMediaItems(popupState.snapshot?.candidates ?? []);
   }, [popupState]);
+
+  const hasTemporaryState =
+    popupState.status === "ready" &&
+    (mediaItems.length > 0 || Object.keys(saveStates).length > 0);
 
   async function copyMediaUrl(media: DetectedMedia) {
     if (media.status !== "candidate") {
@@ -219,6 +234,38 @@ export function Popup() {
       if (saveControllersRef.current.get(media.id) === saveController) {
         saveControllersRef.current.delete(media.id);
       }
+    }
+  }
+
+  async function clearTemporaryTabState() {
+    if (popupState.status !== "ready") {
+      return;
+    }
+
+    const tabId = popupState.tabId;
+    isClearingSnapshotRef.current = true;
+    abortActiveSaves(saveControllersRef.current);
+    resumedJobIdsRef.current.clear();
+    setCopiedMediaId(undefined);
+    setCopyErrorMediaId(undefined);
+    setSaveStates({});
+    setPopupState({
+      status: "ready",
+      tabId,
+      snapshot: undefined
+    });
+
+    try {
+      await Promise.all([
+        removeMediaDetectionSnapshot(tabId),
+        removeSaveJobs(tabId),
+        chrome.action.setBadgeText({
+          tabId,
+          text: ""
+        })
+      ]);
+    } finally {
+      isClearingSnapshotRef.current = false;
     }
   }
 
@@ -335,6 +382,17 @@ export function Popup() {
           <p className="popup__eyebrow">Dew MediArchive</p>
           <h1 className="popup__title">{getTitle(popupState, mediaItems.length)}</h1>
         </div>
+        {hasTemporaryState ? (
+          <button
+            className="popup__clear-button"
+            onClick={() => {
+              void clearTemporaryTabState();
+            }}
+            type="button"
+          >
+            Clear temp
+          </button>
+        ) : null}
       </header>
 
       <PopupContent

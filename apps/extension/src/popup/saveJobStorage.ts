@@ -49,6 +49,10 @@ export async function writeSaveJob(
   });
 }
 
+export async function removeSaveJobs(tabId: number): Promise<void> {
+  await chrome.storage.session.remove(getSaveJobsStorageKey(tabId));
+}
+
 function isPersistedSaveJobMap(
   value: unknown
 ): value is Record<string, PersistedSaveJob> {

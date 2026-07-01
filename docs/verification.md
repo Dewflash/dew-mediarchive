@@ -15,8 +15,10 @@
 - Receiver job records expose `yt-dlp` progress when progress is available.
 - Popup renders Save progress when the receiver reports it.
 - Popup restores Save progress after closing and reopening while a receiver job is still running.
+- Popup can clear detected media and session-backed Save progress for the current tab.
 - Completed receiver saves create archive metadata with file hash and size.
 - Local library renders saved archive records.
+- Local library marks archive records whose saved media file is missing from disk.
 - Local privacy page explains local storage and network visibility.
 - Local library supports search, filtering, sorting, and export links.
 - Local library can remove archive history records without deleting saved media files.
@@ -115,6 +117,7 @@ Verified:
 - receiver tests prove `/library` escapes untrusted archive metadata
 - user manually confirmed `/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed
 - receiver tests prove `/library` search, kind filtering, and sort query handling
+- receiver tests prove `/library` marks records whose saved media file is missing
 - receiver tests prove library Remove deletes archive history records without deleting saved media files
 - receiver tests prove JSON and CSV archive exports
 - receiver tests prove CSV formula escaping
@@ -125,6 +128,7 @@ Verified:
 - popup tests prove candidate cards can render media-specific titles instead of only source URLs
 - popup tests prove title-less network stream candidates use page-title fallback labels before falling back to source URLs
 - popup tests prove session-backed Save jobs restore and resume progress polling after popup reopen
+- popup tests prove Clear temp removes detected media and session-backed Save progress for the current tab
 - popup tests prove downloadable candidates render before unsupported observations
 - receiver tests prove completed archive records preserve media-specific titles and expose them in library/export surfaces
 - receiver tests prove `/privacy` renders local privacy information

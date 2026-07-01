@@ -63,6 +63,8 @@ POST /archive/:id/remove
 
 This removes the item from Dew's history and library views, but it does not delete the saved media file at `outputPath`.
 
+If the file at `outputPath` is manually deleted outside Dew, the record can still remain in `archive.jsonl`. The local library checks that path at render time and marks the row as `Missing file`.
+
 The personal-tool MVP exposes portable metadata exports while the receiver is running:
 
 ```text

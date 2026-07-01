@@ -293,12 +293,35 @@ describe("receiver server", () => {
     expect(html).toContain("flower.mp4");
     expect(html).toContain("18 B");
     expect(html).toContain("mp4");
+    expect(html).toContain("File on disk");
     expect(html).toContain("Export JSON");
     expect(html).toContain("Export CSV");
     expect(html).toContain("Remove");
     expect(html).toContain("History only. File stays on disk.");
     expect(html).toContain("/archive/");
     expect(html).toContain("/remove");
+  });
+
+  it("marks library records when the saved file is missing", async () => {
+    await createCompletedDownload({
+      mediaTitle: "Flower clip",
+      pageTitle: "MDN Flower"
+    });
+    const archiveResponse = await fetch(`${baseUrl}/archive`);
+    const archiveBody = (await archiveResponse.json()) as {
+      records: ArchiveRecord[];
+    };
+    const record = archiveBody.records[0];
+
+    await rm(record.outputPath, { force: true });
+
+    const libraryResponse = await fetch(`${baseUrl}/library`);
+    const html = await libraryResponse.text();
+
+    expect(libraryResponse.status).toBe(200);
+    expect(html).toContain("Flower clip");
+    expect(html).toContain("Missing file");
+    expect(html).not.toContain("File on disk");
   });
 
   it("removes archive records from the local library without deleting files", async () => {

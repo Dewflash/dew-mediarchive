@@ -52,6 +52,8 @@
 - Plain macOS `open URL` can focus an existing browser window without making the intended navigation obvious. For the Chromium-extension MVP, prefer Chrome explicitly and print the local URL as the user's fallback.
 - Downloadable candidates should render before unsupported observations. Unsupported items are useful transparency, but they should not lead the user's decision flow.
 - Removing from the library should mean removing Dew's archive/history record only. Deleting the actual saved media file should be a separate, more explicit action.
+- Library file presence should be checked at render time. A missing file is a visible row state, not a reason to silently delete archive history.
+- Popup temporary state is browser-session state. Clearing it should remove only the current tab's detections and Save progress, not receiver jobs, archive records, or saved files.
 
 ## Mistakes To Avoid
 
