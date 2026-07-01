@@ -227,3 +227,5 @@
 - Reran `DEW_RECEIVER_PORT=54988 npm run dew:check` outside the sandbox: passed.
 - Hardened `Dew.command` for double-click usage by adding Homebrew paths, preflighting `node` and `npm`, and pausing on startup failure so errors remain readable.
 - Ran the actual `Dew.command` launcher on throwaway port `54989`; the receiver started and `GET /health` returned `{"ok":true,"name":"dew-mediarchive-receiver","version":"0.1.0"}`.
+- Updated the launcher opener to prefer Google Chrome on macOS, fall back to the default browser, and print the library URL when automatic opening fails.
+- Ran the actual `Dew.command` launcher on throwaway port `54991`; it reached `Opening library: http://127.0.0.1:54991/library` without an opener warning, and `GET /health` returned the Dew receiver identity.

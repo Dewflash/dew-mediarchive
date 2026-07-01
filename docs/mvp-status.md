@@ -47,6 +47,7 @@ mvp-extension
 - Root receiver route redirects to `/library`.
 - Double-clickable `Dew.command` launcher that starts the receiver and opens the local library.
 - `Dew.command` adds common Homebrew paths, preflights `node` and `npm`, and keeps readable startup errors open in Terminal.
+- Launcher opener prefers Google Chrome on macOS, falls back to the default browser, and prints the local library URL.
 - Root `npm run dew` launcher and `npm run dew:check` verification command.
 - Manual verification guide in `docs/mvp-manual-test.md`.
 - Architecture, adapter, archive, security, verification, learning, and changelog docs.
@@ -127,6 +128,7 @@ queued -> downloading -> completed
 - `Dew.command` passed shell syntax validation and has executable permissions.
 - Hardened `Dew.command` passed shell syntax validation after adding Homebrew PATH and readable failure handling.
 - Actual `Dew.command` launch on throwaway port `54989` started the receiver, and `GET /health` returned the Dew receiver identity.
+- Actual `Dew.command` launch on throwaway port `54991` reached the Chrome-first opener path without an opener warning, and `GET /health` returned the Dew receiver identity.
 - `npm run dew` launched the receiver on a throwaway port, and `/health` plus `/library` responded.
 - A real `yt-dlp` smoke against the larger Blender Big Buck Bunny MP4 emitted `dew-progress` lines from 0% to 100% with `--progress`.
 - A full receiver API smoke on a throwaway port saved the larger Blender Big Buck Bunny MP4 and recorded progress snapshots from 0% through 100% in `jobs.jsonl`.

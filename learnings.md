@@ -49,6 +49,7 @@
 - Popup state is not durable by itself. Any user-visible long-running receiver job needs a session-backed job id so the popup can restore progress after being closed.
 - For the personal MVP, a double-click launcher is enough to remove the normal Terminal workflow without taking on full app packaging yet.
 - Double-clicked macOS command files can have a thinner PATH than a normal developer terminal. Keep the personal launcher explicit about Homebrew paths and readable failure output.
+- Plain macOS `open URL` can focus an existing browser window without making the intended navigation obvious. For the Chromium-extension MVP, prefer Chrome explicitly and print the local URL as the user's fallback.
 - Downloadable candidates should render before unsupported observations. Unsupported items are useful transparency, but they should not lead the user's decision flow.
 
 ## Mistakes To Avoid

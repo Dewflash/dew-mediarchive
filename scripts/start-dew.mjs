@@ -100,12 +100,60 @@ async function waitForDewReceiver(host, port) {
 }
 
 function openLibrary(url) {
-  const openProcess = spawn("open", [url], {
-    detached: true,
-    stdio: "ignore"
-  });
+  console.log(`Opening library: ${url}`);
 
-  openProcess.unref();
+  const openResult = openUrl(url);
+
+  if (!openResult.ok) {
+    console.warn("Dew could not open the browser automatically.");
+    if (openResult.error) {
+      console.warn(openResult.error);
+    }
+    console.warn(`Open this URL manually: ${url}`);
+  }
+}
+
+function openUrl(url) {
+  if (process.platform === "darwin") {
+    const preferredBrowser = process.env.DEW_BROWSER_APP?.trim();
+    const attempts = preferredBrowser
+      ? [["open", ["-a", preferredBrowser, url]]]
+      : [
+          ["open", ["-a", "Google Chrome", url]],
+          ["open", [url]]
+        ];
+
+    return runFirstSuccessfulOpenCommand(attempts);
+  }
+
+  if (process.platform === "win32") {
+    return runFirstSuccessfulOpenCommand([
+      ["cmd", ["/c", "start", "", url]]
+    ]);
+  }
+
+  return runFirstSuccessfulOpenCommand([
+    ["xdg-open", [url]]
+  ]);
+}
+
+function runFirstSuccessfulOpenCommand(attempts) {
+  let lastError = "";
+
+  for (const [command, args] of attempts) {
+    const result = spawnSync(command, args, {
+      encoding: "utf8",
+      stdio: ["ignore", "ignore", "pipe"]
+    });
+
+    if (result.status === 0) {
+      return { ok: true };
+    }
+
+    lastError = result.stderr?.trim() ?? "";
+  }
+
+  return { ok: false, error: lastError };
 }
 
 receiverProcess.on("exit", (code, signal) => {
