@@ -5,6 +5,8 @@ export type PageMediaDetectedMessage = {
   url: string;
   pageUrl: string;
   pageTitle?: string;
+  mediaElementIndex?: number;
+  mediaTitle?: string;
 };
 
 export type ExtensionMessage = PageMediaDetectedMessage;
@@ -22,6 +24,9 @@ export function isPageMediaDetectedMessage(
     candidate.type === PAGE_MEDIA_DETECTED_MESSAGE &&
     typeof candidate.url === "string" &&
     typeof candidate.pageUrl === "string" &&
-    (candidate.pageTitle === undefined || typeof candidate.pageTitle === "string")
+    (candidate.pageTitle === undefined || typeof candidate.pageTitle === "string") &&
+    (candidate.mediaElementIndex === undefined ||
+      typeof candidate.mediaElementIndex === "number") &&
+    (candidate.mediaTitle === undefined || typeof candidate.mediaTitle === "string")
   );
 }

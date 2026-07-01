@@ -9,6 +9,7 @@ const CSV_COLUMNS: Array<{
   { key: "sourceUrl", label: "source_url" },
   { key: "pageUrl", label: "page_url" },
   { key: "pageTitle", label: "page_title" },
+  { key: "mediaTitle", label: "media_title" },
   { key: "kind", label: "kind" },
   { key: "outputPath", label: "output_path" },
   { key: "byteSize", label: "byte_size" },

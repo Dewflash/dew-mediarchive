@@ -340,6 +340,7 @@ function MediaItem({
             {media.status}
           </span>
         </div>
+        <p className="media-item__title">{getMediaTitle(media)}</p>
         <p className="media-item__url">{formatUrl(media.url)}</p>
         {media.status === "unsupported" ? (
           <p className="media-item__message">{media.message}</p>
@@ -455,6 +456,18 @@ function getMediaLabel(media: DetectedMedia): string {
   }
 
   return media.unsupportedReason.replaceAll("-", " ");
+}
+
+function getMediaTitle(media: DetectedMedia): string {
+  if (media.mediaTitle) {
+    return media.mediaTitle;
+  }
+
+  if (media.mediaElementIndex !== undefined) {
+    return `${media.kind === "audio" ? "Audio" : "Video"} ${media.mediaElementIndex}`;
+  }
+
+  return formatUrl(media.url);
 }
 
 function getSaveStateFromJob(job: ReceiverDownloadJob): SaveState {

@@ -8,7 +8,9 @@ describe("isPageMediaDetectedMessage", () => {
         type: "dew:page-media-detected",
         url: "https://example.test/video.mp4",
         pageUrl: "https://example.test/watch",
-        pageTitle: "Example"
+        pageTitle: "Example",
+        mediaElementIndex: 2,
+        mediaTitle: "Product demo"
       })
     ).toBe(true);
   });

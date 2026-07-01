@@ -89,7 +89,9 @@ describe("createDetectedMediaFromRequest", () => {
         type: "dew:page-media-detected",
         url: "http://127.0.0.1:8765/sample.mp4",
         pageUrl: "http://127.0.0.1:8765/index.html",
-        pageTitle: "Dew Smoke Test"
+        pageTitle: "Dew Smoke Test",
+        mediaElementIndex: 2,
+        mediaTitle: "Flower clip"
       },
       42
     );
@@ -101,6 +103,8 @@ describe("createDetectedMediaFromRequest", () => {
       url: "http://127.0.0.1:8765/sample.mp4",
       pageUrl: "http://127.0.0.1:8765/index.html",
       pageTitle: "Dew Smoke Test",
+      mediaElementIndex: 2,
+      mediaTitle: "Flower clip",
       provenance: {
         source: "page-video-element"
       }

@@ -636,6 +636,45 @@ The popup polls the job and renders a progress bar when that data exists.
 
 One important caveat: not every download will have useful progress. Tiny direct MP4 files can finish so fast that they jump straight from downloading to saved. Some streams may not know total size, so Dew may show activity/details without a true percentage. That is better than inventing a fake number.
 
+## Why Five Videos Looked Anonymous
+
+When a page has several videos, the real downloadable URLs can look like random CDN paths:
+
+```text
+.../asset-9382.mp4
+.../playlist.m3u8?token=...
+```
+
+Those URLs are useful for downloading, but terrible for choosing the right video in a popup.
+
+Dew now keeps three ideas separate:
+
+```text
+mediaTitle = the best label for this specific video or audio element
+pageTitle = the title of the browser page it came from
+url = the actual source Dew copies or saves
+```
+
+The extension tries page-visible clues first:
+
+```text
+aria-label
+title
+data-title
+figcaption
+nearby heading
+```
+
+If the page does not expose a useful name, Dew falls back to:
+
+```text
+Video 1
+Video 2
+Audio 1
+```
+
+So on a page with five videos, the popup should no longer show five anonymous links. It should show a readable label above each URL, then keep that label when you Save so the library and exports are easier to understand later.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

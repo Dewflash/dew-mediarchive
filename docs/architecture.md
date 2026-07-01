@@ -70,6 +70,14 @@ content script scans media elements
 
 This fallback exists because Manifest V3 service workers are short-lived. Runtime testing showed that the local page could request `sample.mp4` while the network-only path failed to leave a stored candidate. The content script produced the first clean real-browser `sample.mp4` candidate.
 
+The content script also attaches best-effort page-visible context to each media element:
+
+```text
+mediaTitle, mediaElementIndex
+```
+
+`mediaTitle` comes from safe element context such as `aria-label`, `title`, `data-title`, `figcaption`, or a nearby heading. If no useful title exists, Dew falls back to `Video 1`, `Video 2`, or `Audio 1`. This keeps multi-video pages understandable without changing the real source URL that gets copied or saved.
+
 ## Popup Flow
 
 The popup reads the current tab's media snapshot from the shared storage helper.
@@ -129,7 +137,7 @@ If the same source URL already has an archive record, the receiver creates a com
 The receiver deliberately does not depend on the extension internals. It accepts a normalized download request:
 
 ```text
-url, optional pageUrl, optional pageTitle, optional kind
+url, optional pageUrl, optional pageTitle, optional mediaTitle, optional kind
 ```
 
 That keeps the browser detection surface and the local save surface separated.

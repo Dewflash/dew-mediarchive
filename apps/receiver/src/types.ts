@@ -4,6 +4,7 @@ export type DownloadRequest = {
   url: string;
   pageUrl?: string;
   pageTitle?: string;
+  mediaTitle?: string;
   kind?: DownloadKind;
 };
 
@@ -37,6 +38,7 @@ export type ArchiveRecord = {
   sourceUrl: string;
   pageUrl?: string;
   pageTitle?: string;
+  mediaTitle?: string;
   kind?: DownloadKind;
   outputPath: string;
   byteSize: number;

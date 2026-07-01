@@ -14,6 +14,7 @@ mvp-extension
 - React popup UI.
 - Background request detector for HTTP/HTTPS media URLs.
 - Content-script fallback that scans page `video`, `audio`, and nested `source` elements.
+- Best-effort media labels from page-visible element context, with stable `Video N` / `Audio N` fallback labels for multi-media pages.
 - Shared media detection model with provenance, status, media kind, and unsupported reasons.
 - Per-tab session snapshot storage in `chrome.storage.session`.
 - Badge count updates for supported candidates.
@@ -37,7 +38,7 @@ mvp-extension
 - Append-only archive metadata in JSONL for completed saves.
 - Archive endpoint at `GET /archive`.
 - Export endpoints at `GET /export/archive.json` and `GET /export/archive.csv`.
-- Archive records include source URL, page context, output path, byte size, and SHA-256 hash.
+- Archive records include source URL, page context, media title, output path, byte size, and SHA-256 hash.
 - Local library page at `GET /library`.
 - Local library search, media-type filtering, sorting, source links, and export links.
 - Root receiver route redirects to `/library`.
@@ -47,7 +48,7 @@ mvp-extension
 
 ## What Is Proven
 
-- Extension `npm run test` passes: 5 files, 34 tests.
+- Extension `npm run test` passes: 5 files, 36 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -74,7 +75,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 1 file, 11 tests.
+- Receiver `npm run test` passes: 3 files, 22 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -108,6 +109,8 @@ queued -> downloading -> completed
 - Receiver tests prove running jobs expose progress through the job record.
 - Popup tests prove completed saves display the receiver output path.
 - Popup tests prove download progress renders as a progress bar with details.
+- Popup tests prove detected cards show media-specific titles.
+- Receiver tests prove media-specific titles are preserved in archive records, library rendering, search, JSON export, and CSV export.
 - Popup tests prove completed saves link to the local library.
 - Popup tests prove duplicate saves show an already-saved state.
 - User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.

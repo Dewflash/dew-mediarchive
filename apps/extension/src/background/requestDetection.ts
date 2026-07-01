@@ -73,6 +73,8 @@ export function createDetectedMediaFromPageMessage(
     url: classification.normalizedUrl,
     pageUrl: message.pageUrl,
     pageTitle: message.pageTitle,
+    mediaElementIndex: message.mediaElementIndex,
+    mediaTitle: message.mediaTitle,
     kind:
       classification.status === "candidate"
         ? classification.kind

@@ -5,7 +5,7 @@ import "@testing-library/jest-dom/vitest";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Popup } from "./Popup";
-import type { MediaDetectionSnapshot } from "../shared";
+import type { MediaCandidate, MediaDetectionSnapshot } from "../shared";
 
 const storageGet = vi.fn();
 const storageAddListener = vi.fn();
@@ -88,7 +88,9 @@ describe("Popup", () => {
   it("renders candidates from the active tab snapshot", async () => {
     storageGet.mockResolvedValue({
       "media-snapshot:7": createSnapshot([
-        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+        createCandidate("media-1", "https://cdn.example.test/video.mp4", {
+          mediaTitle: "Launch trailer"
+        })
       ])
     });
 
@@ -96,6 +98,7 @@ describe("Popup", () => {
 
     expect(await screen.findByText("1 item found")).toBeInTheDocument();
     expect(screen.getByText("MP4 video")).toBeInTheDocument();
+    expect(screen.getByText("Launch trailer")).toBeInTheDocument();
     expect(screen.getByText("cdn.example.test/video.mp4")).toBeInTheDocument();
   });
 
@@ -185,6 +188,7 @@ describe("Popup", () => {
       url: "https://cdn.example.test/video.mp4",
       pageUrl: "https://example.test/watch",
       pageTitle: "Smoke Page",
+      mediaTitle: "Video 1",
       kind: "mp4"
     });
     expect(await screen.findByText("Saved locally. Added to library.")).toBeInTheDocument();
@@ -444,13 +448,16 @@ function createSnapshot(
 
 function createCandidate(
   id: string,
-  url: string
+  url: string,
+  overrides: Partial<MediaCandidate> = {}
 ): MediaDetectionSnapshot["candidates"][number] {
   return {
     id,
     url,
     pageUrl: "https://example.test/watch",
     pageTitle: "Smoke Page",
+    mediaElementIndex: 1,
+    mediaTitle: "Video 1",
     status: "candidate",
     kind: "mp4",
     label: "MP4 video",
@@ -458,7 +465,8 @@ function createCandidate(
     provenance: {
       source: "network-request",
       detectorVersion: "test"
-    }
+    },
+    ...overrides
   };
 }
 

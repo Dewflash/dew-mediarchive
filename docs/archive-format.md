@@ -41,6 +41,7 @@ Each completed receiver download appends one record:
   "sourceUrl": "https://example.test/video.mp4",
   "pageUrl": "https://example.test/watch",
   "pageTitle": "Example",
+  "mediaTitle": "Launch Trailer",
   "kind": "mp4",
   "outputPath": "/Users/example/Movies/Dew MediArchive/video.mp4",
   "byteSize": 12345,
@@ -49,6 +50,8 @@ Each completed receiver download appends one record:
   "createdAt": "2026-07-01T10:00:00.100Z"
 }
 ```
+
+`mediaTitle` is the best-effort title for the specific media element, while `pageTitle` is the browser page title. Keeping both fields avoids five videos from one page collapsing into the same label.
 
 The downloaded media file still stays in the user-facing download folder. The JSONL record is the first portable index for future search, dedupe, export, and gallery views.
 

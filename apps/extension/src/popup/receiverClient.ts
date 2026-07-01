@@ -81,6 +81,7 @@ async function createDownloadJob(
       url: media.url,
       pageUrl: media.pageUrl,
       pageTitle: media.pageTitle,
+      mediaTitle: media.mediaTitle,
       kind: media.kind
     }),
     headers: {

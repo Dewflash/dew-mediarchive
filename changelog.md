@@ -185,3 +185,14 @@
 - Posted the larger Blender Big Buck Bunny MP4 to `POST /downloads`.
 - Confirmed `/private/tmp/dew-progress-api-proof/.dew/jobs.jsonl` recorded progress snapshots from 0% through 100%.
 - Confirmed `GET /downloads/:id` ended completed with `progress.percent: 100` and the saved output path.
+- Added best-effort media-specific titles for page media detections using element labels, captions, nearby headings, and stable `Video N` / `Audio N` fallbacks.
+- Updated the popup to show the media title above the source URL so multi-video pages are easier to distinguish.
+- Sent `mediaTitle` through the Save request and receiver validation path.
+- Stored `mediaTitle` in archive records and included it in library search, library rows, JSON export, and CSV export.
+- Added extension and receiver tests for media-title rendering and archive/export preservation.
+- Ran extension `npm run test`: 5 files, 36 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.
+- Ran receiver `npm run test`: 3 files, 22 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.

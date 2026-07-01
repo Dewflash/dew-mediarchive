@@ -127,12 +127,19 @@ body {
 }
 
 .media-item__url,
+.media-item__title,
 .media-item__message {
   margin: 6px 0 0;
   overflow-wrap: anywhere;
   color: #64748b;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.media-item__title {
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 750;
 }
 
 .media-item__message {
@@ -308,6 +315,10 @@ body {
 
   .media-item__url {
     color: #cbd5e1;
+  }
+
+  .media-item__title {
+    color: #f8fafc;
   }
 
   .media-item__message {

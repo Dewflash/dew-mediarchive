@@ -46,6 +46,7 @@ export class FileArchiveStore {
       sourceUrl: job.url,
       pageUrl: job.pageUrl,
       pageTitle: job.pageTitle,
+      mediaTitle: job.mediaTitle,
       kind: job.kind,
       outputPath: job.outputPath,
       byteSize: fileStats.size,

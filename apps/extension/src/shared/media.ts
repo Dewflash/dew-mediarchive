@@ -36,6 +36,8 @@ export type DetectedMediaBase = {
   url: string;
   pageUrl: string;
   pageTitle?: string;
+  mediaElementIndex?: number;
+  mediaTitle?: string;
   kind: MediaKind;
   detectedAt: string;
   provenance: MediaProvenance;
@@ -63,4 +65,3 @@ export type MediaDetectionSnapshot = {
   candidates: DetectedMedia[];
   updatedAt: string;
 };
-

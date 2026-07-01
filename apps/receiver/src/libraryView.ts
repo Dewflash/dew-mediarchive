@@ -336,6 +336,7 @@ export function filterAndSortArchiveRecords(
 
     return [
       record.pageTitle,
+      record.mediaTitle,
       record.sourceUrl,
       record.pageUrl,
       record.outputPath,
@@ -377,11 +378,16 @@ export function getLibraryOptionsFromSearchParams(
 }
 
 function renderArchiveRow(record: ArchiveRecord): string {
-  const title = record.pageTitle?.trim() || getFilename(record.outputPath);
+  const title =
+    record.mediaTitle?.trim() ||
+    record.pageTitle?.trim() ||
+    getFilename(record.outputPath);
+  const pageContext = record.mediaTitle && record.pageTitle ? record.pageTitle : undefined;
 
   return `<tr>
   <td>
     <p class="title">${escapeHtml(title)}</p>
+    ${pageContext ? `<p class="meta">${escapeHtml(pageContext)}</p>` : ""}
     <p class="meta">${escapeHtml(record.sourceUrl)}</p>
     ${record.kind ? `<span class="kind">${escapeHtml(record.kind)}</span>` : ""}
   </td>

@@ -6,6 +6,7 @@
 - Extension loads as an unpacked Chromium extension.
 - Badge updates when supported media candidates are detected.
 - Popup lists detected media for the current tab.
+- Popup gives each page-media candidate a readable title or stable fallback label on multi-video pages.
 - Copy button writes the media URL to the clipboard.
 - At least one copied non-DRM media URL downloads successfully with `yt-dlp`.
 - Save button sends a detected candidate to the local receiver.
@@ -116,6 +117,8 @@ Verified:
 - popup tests prove completed saves link to the local library
 - popup tests prove duplicate saves show an already-saved state
 - popup tests prove Save progress renders as a progress bar with byte/speed/ETA details
+- popup tests prove candidate cards can render media-specific titles instead of only source URLs
+- receiver tests prove completed archive records preserve media-specific titles and expose them in library/export surfaces
 - receiver tests prove `yt-dlp` progress-template parsing and job progress exposure
 - `npm run dew:check` passed on a throwaway port outside the sandbox
 - `npm run dew` launched the receiver on a throwaway port, and `/health`, `/library`, plus `/export/archive.json` responded

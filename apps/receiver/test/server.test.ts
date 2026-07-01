@@ -165,6 +165,7 @@ describe("receiver server", () => {
         url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
         pageUrl: "https://interactive-examples.mdn.mozilla.net/",
         pageTitle: "MDN Flower",
+        mediaTitle: "Flower clip",
         kind: "mp4"
       })
     });
@@ -196,6 +197,7 @@ describe("receiver server", () => {
         url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
         pageUrl: "https://interactive-examples.mdn.mozilla.net/",
         pageTitle: "MDN Flower",
+        mediaTitle: "Flower clip",
         kind: "mp4"
       })
     });
@@ -225,6 +227,7 @@ describe("receiver server", () => {
         url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
         pageUrl: "https://interactive-examples.mdn.mozilla.net/",
         pageTitle: "MDN Flower",
+        mediaTitle: "Flower clip",
         kind: "mp4"
       })
     });
@@ -246,6 +249,7 @@ describe("receiver server", () => {
       sourceUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
       pageUrl: "https://interactive-examples.mdn.mozilla.net/",
       pageTitle: "MDN Flower",
+      mediaTitle: "Flower clip",
       kind: "mp4",
       outputPath: join(config.downloadDir, "flower.mp4"),
       byteSize: 18
@@ -255,6 +259,7 @@ describe("receiver server", () => {
 
   it("renders archive records in the local library", async () => {
     await createCompletedDownload({
+      mediaTitle: "Flower clip",
       pageTitle: "MDN Flower"
     });
 
@@ -267,6 +272,7 @@ describe("receiver server", () => {
 
     expect(response.status).toBe(200);
     expect(html).toContain("1 saved item");
+    expect(html).toContain("Flower clip");
     expect(html).toContain("MDN Flower");
     expect(html).toContain("flower.mp4");
     expect(html).toContain("18 B");
@@ -311,6 +317,7 @@ describe("receiver server", () => {
     );
     expect(body.records).toHaveLength(1);
     expect(body.records[0].pageTitle).toBe("MDN Flower");
+    expect(body.records[0].mediaTitle).toBe("MDN Flower clip");
   });
 
   it("exports archive records as CSV with spreadsheet formula escaping", async () => {
@@ -323,7 +330,7 @@ describe("receiver server", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toContain("text/csv");
-    expect(csv).toContain("source_url,page_url,page_title");
+    expect(csv).toContain("source_url,page_url,page_title,media_title");
     expect(csv).toContain("\"'=cmd\"");
   });
 
@@ -447,10 +454,12 @@ describe("receiver server", () => {
 
   async function createCompletedDownload({
     kind = "mp4",
+    mediaTitle,
     pageTitle,
     url = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
   }: {
     kind?: "mp4" | "webm";
+    mediaTitle?: string;
     pageTitle: string;
     url?: string;
   }): Promise<DownloadJob> {
@@ -464,6 +473,7 @@ describe("receiver server", () => {
         url,
         pageUrl: "https://interactive-examples.mdn.mozilla.net/",
         pageTitle,
+        mediaTitle: mediaTitle ?? `${pageTitle} clip`,
         kind
       })
     });

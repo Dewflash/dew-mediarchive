@@ -56,6 +56,14 @@ export function validateDownloadRequest(value: unknown): ValidationResult {
     request.pageTitle = candidate.pageTitle.slice(0, 500);
   }
 
+  if (candidate.mediaTitle !== undefined) {
+    if (typeof candidate.mediaTitle !== "string") {
+      return { ok: false, message: "mediaTitle must be a string." };
+    }
+
+    request.mediaTitle = candidate.mediaTitle.slice(0, 500);
+  }
+
   if (candidate.kind !== undefined) {
     if (typeof candidate.kind !== "string" || !DOWNLOAD_KINDS.has(candidate.kind as DownloadKind)) {
       return { ok: false, message: "kind is not supported." };
