@@ -139,6 +139,23 @@ body {
   color: #b91c1c;
 }
 
+.media-item__save {
+  min-width: 0;
+}
+
+.media-item__path {
+  margin: 3px 0 0;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 4px 6px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .media-item__message--success {
   color: #047857;
 }
@@ -233,6 +250,11 @@ body {
 
   .media-item__message {
     color: #fca5a5;
+  }
+
+  .media-item__path {
+    background: #0f172a;
+    color: #cbd5e1;
   }
 
   .media-item__message--success {

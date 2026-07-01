@@ -20,6 +20,7 @@ mvp-extension
 - Popup states for loading, empty, error, candidates, unsupported media, Copy success, and Copy failure.
 - Popup Save action for candidate media.
 - Popup Save states for receiver unavailable, queued, downloading, completed, and failed jobs.
+- Popup shows the saved output path when the receiver returns one.
 - Copy remains available as a fallback beside Save.
 - Popup Save polling is cancelled when the popup closes.
 - Open popup keeps the last non-empty media list visible even if the temporary tab snapshot clears.
@@ -88,6 +89,7 @@ queued -> downloading -> completed
 ```
 
 - Receiver tests prove completed downloads write archive records.
+- Popup tests prove completed saves display the receiver output path.
 
 ## What Is Not Done Yet
 

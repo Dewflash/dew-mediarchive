@@ -451,6 +451,26 @@ detecting whether two saved files are actually the same media
 
 For now, Dew still leaves the file in the normal download folder. The hash is the first step toward a stronger archive format.
 
+## Why The Popup Shows The Saved Path
+
+After Save worked, the next obvious user question was:
+
+```text
+okay, but where did it go?
+```
+
+The receiver already knows the final output path from `yt-dlp`, so the popup now shows that path after a completed Save.
+
+The popup shortens long paths:
+
+```text
+.../Movies/Dew MediArchive/video.mp4
+```
+
+instead of forcing the full filesystem path into a tiny extension window. The full path is still kept in the element title for inspection.
+
+We are not adding an Open Folder button yet because that is really native-app behavior. For now, showing the path gives confirmation without pretending the extension is already a desktop app.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.
@@ -537,7 +557,7 @@ https://*/*
 
 That prevents browser or extension-internal URLs from polluting the media list while still allowing normal website media URLs through.
 
-## What The Latest Runtime Proof Actually Proves
+## What The Browser Runtime Proof Actually Proved
 
 The latest clean Chrome test proves:
 
@@ -549,9 +569,11 @@ extension session storage contained one MP4 candidate
 candidate came from the page media-element fallback
 ```
 
-It still does not prove the real toolbar popup visually showed the candidate, because opening `chrome-extension://.../popup.html` as a standalone tab makes Chrome treat that extension page as the active tab.
+At that earlier stage, it still did not prove the real toolbar popup visually showed the candidate, because opening `chrome-extension://.../popup.html` as a standalone tab makes Chrome treat that extension page as the active tab.
 
-So the honest remaining proof is still:
+That is why we added the explicit `tabId` verification path first, then later verified the real toolbar popup Save path manually.
+
+The remaining human Copy fallback proof is:
 
 ```text
 open Dew from the toolbar on the smoke page

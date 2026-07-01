@@ -127,3 +127,9 @@
 - Ran receiver `npm run test`: 1 file, 7 tests passed.
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
+- Updated the popup to show the receiver output path after a completed Save.
+- Added compact output-path formatting so long filesystem paths fit in the popup.
+- Added popup test coverage for completed Save output path display.
+- Ran extension `npm run test`: 5 files, 34 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.

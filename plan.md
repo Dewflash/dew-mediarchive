@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-MVP archive records.
+MVP Save UX polish.
 
 ## Current Goal
 
-Turn completed local saves into durable archive metadata that future library/search/export surfaces can read.
+Make completed saves explain where the file landed while keeping the extension popup compact.
 
 ## Handoff Status
 
@@ -68,14 +68,17 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Added `GET /archive`.
 - Added SHA-256 and byte-size metadata for completed downloads.
 - Verified archive records with receiver tests, typecheck, and build.
+- Updated the popup to show the receiver's completed output path after Save.
+- Shortened long output paths in the popup while preserving the full path in the element title.
+- Added popup test coverage for output path display.
+- Verified the Save output-path UI with `npm run test`, `npm run typecheck`, and `npm run build`.
 
 ## Next Steps
 
-1. Improve Save UX with saved output path display.
-2. Make the receiver easier to launch outside a terminal.
-3. Start a local library/gallery surface backed by `/archive`.
-4. Add export for archive metadata.
-5. Re-test a short MP4 and a page with multiple videos in normal Chrome.
+1. Make the receiver easier to launch outside a terminal.
+2. Start a local library/gallery surface backed by `/archive`.
+3. Add export for archive metadata.
+4. Re-test a short MP4 and a page with multiple videos in normal Chrome.
 
 ## Open Questions
 

@@ -33,6 +33,7 @@
 - Use `/private/tmp` only for smoke tests. Real default saves belong in `~/Movies/Dew MediArchive`.
 - Separate job history from archive records. Jobs explain what happened operationally; archive records describe saved media for future search, dedupe, export, and gallery views.
 - Hash completed files before marking the receiver job completed. A Save should not claim completion unless the first archive metadata record was written successfully.
+- Show the saved output path in the popup, but keep it compact. Full filesystem paths are useful confirmation, but they can easily overwhelm a small extension popup.
 
 ## Mistakes To Avoid
 
@@ -58,3 +59,4 @@
 - Do not treat the receiver as archive storage. It is only the first save-job backend.
 - Do not push a manually passing Save flow before automated popup tests, typecheck, build, docs, and changelog are updated.
 - Do not use jobs.jsonl as the library source of truth. It contains retries and state transitions, not one clean record per saved item.
+- Do not add an Open Folder button inside the extension yet. That belongs with a native app wrapper or explicit browser download/open permissions, not the current lightweight popup.

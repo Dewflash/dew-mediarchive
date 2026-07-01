@@ -188,6 +188,9 @@ describe("Popup", () => {
       kind: "mp4"
     });
     expect(await screen.findByText("Saved locally.")).toBeInTheDocument();
+    expect(
+      screen.getByText(".../Movies/Dew MediArchive/video.mp4")
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Saved" })).toBeInTheDocument();
   });
 

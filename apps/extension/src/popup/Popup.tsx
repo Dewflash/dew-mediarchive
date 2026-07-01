@@ -21,6 +21,7 @@ type SaveStatus = ReceiverDownloadJobStatus | "saving" | "unavailable";
 type SaveState = {
   status: SaveStatus;
   message: string;
+  outputPath?: string;
 };
 
 export function Popup() {
@@ -175,7 +176,7 @@ export function Popup() {
           setSaveStateIfActive(
             media.id,
             saveController,
-            getSaveStateFromJob(job.status, job.error)
+            getSaveStateFromJob(job.status, job.error, job.outputPath)
           );
         },
         signal: saveController.signal
@@ -184,7 +185,11 @@ export function Popup() {
       setSaveStateIfActive(
         media.id,
         saveController,
-        getSaveStateFromJob(finalJob.status, finalJob.error)
+        getSaveStateFromJob(
+          finalJob.status,
+          finalJob.error,
+          finalJob.outputPath
+        )
       );
     } catch (error) {
       if (saveController.signal.aborted || !isMountedRef.current) {
@@ -343,11 +348,18 @@ function MediaItem({
           <p className="media-item__message">Copy failed. Try again.</p>
         ) : null}
         {saveState ? (
-          <p
-            className={`media-item__message media-item__message--${getSaveMessageTone(saveState.status)}`}
-          >
-            {saveState.message}
-          </p>
+          <div className="media-item__save">
+            <p
+              className={`media-item__message media-item__message--${getSaveMessageTone(saveState.status)}`}
+            >
+              {saveState.message}
+            </p>
+            {saveState.outputPath ? (
+              <p className="media-item__path" title={saveState.outputPath}>
+                {formatOutputPath(saveState.outputPath)}
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
@@ -402,12 +414,14 @@ function getMediaLabel(media: DetectedMedia): string {
 
 function getSaveStateFromJob(
   status: ReceiverDownloadJobStatus,
-  error: string | undefined
+  error: string | undefined,
+  outputPath: string | undefined
 ): SaveState {
   if (status === "completed") {
     return {
       status,
-      message: "Saved locally."
+      message: "Saved locally.",
+      outputPath
     };
   }
 
@@ -490,6 +504,17 @@ function formatUrl(url: string): string {
   } catch {
     return url;
   }
+}
+
+function formatOutputPath(outputPath: string): string {
+  const normalizedPath = outputPath.replaceAll("\\", "/");
+  const pathParts = normalizedPath.split("/").filter(Boolean);
+
+  if (pathParts.length <= 3) {
+    return outputPath;
+  }
+
+  return `.../${pathParts.slice(-3).join("/")}`;
 }
 
 function getRequestedTabId(search: string): number | undefined {
