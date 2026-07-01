@@ -265,6 +265,12 @@
 - Ran receiver `npm run test`: 3 files, 31 tests passed.
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
+- Fixed failed-job clearing so rewritten `jobs.jsonl` keeps a trailing newline before future appends.
+- Added startup recovery for older glued job history lines caused by missing JSONL separators.
+- Added regression coverage for remove-then-append job history and glued-line recovery.
+- Ran receiver `npm run test`: 3 files, 33 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.
 - Added a bottom-of-popup receiver activity section for global queued, downloading, and failed receiver jobs.
 - The receiver activity section reads `/downloads`, excludes completed jobs, and links to the local library.
 - Added popup regression coverage proving receiver activity renders below detected candidates and unsupported observations.

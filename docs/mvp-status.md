@@ -90,7 +90,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 3 files, 31 tests.
+- Receiver `npm run test` passes: 3 files, 33 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -119,6 +119,8 @@ queued -> downloading -> completed
 - Receiver tests prove completed jobs do not duplicate in the active download section.
 - Receiver tests prove failed jobs remain visible without causing library auto-refresh.
 - Receiver tests prove failed job clearing removes the job record and cannot clear non-failed jobs.
+- Receiver tests prove job history remains valid after clearing a failed job and appending another job.
+- Receiver tests prove startup recovers older glued job history lines and normalizes them back to valid JSONL.
 - Receiver tests prove the local library escapes untrusted archive metadata.
 - Receiver tests prove the local library can search, filter, and sort archive records.
 - Receiver tests prove the local library marks records whose saved media file is missing.

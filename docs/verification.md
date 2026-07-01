@@ -109,7 +109,7 @@ Verified:
 - extension typecheck passed
 - extension build passed
 - popup Save tests prove receiver POST, completed save state, receiver unavailable state, and receiver failure retry state
-- receiver tests passed: 3 files, 31 tests
+- receiver tests passed: 3 files, 33 tests
 - receiver typecheck passed
 - receiver build passed
 - receiver health endpoint returned `{ ok: true, name: "dew-mediarchive-receiver", version: "0.1.0" }`
@@ -124,6 +124,8 @@ Verified:
 - receiver tests prove completed jobs do not duplicate in the active download section
 - receiver tests prove failed jobs remain visible without causing library auto-refresh
 - receiver tests prove failed job clearing removes the job record and cannot clear non-failed jobs
+- receiver tests prove job history remains valid after clearing a failed job and appending another job
+- receiver tests prove startup recovers older glued job history lines and normalizes them back to valid JSONL
 - receiver tests prove `/library` escapes untrusted archive metadata
 - user manually confirmed `/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed
 - receiver tests prove `/library` search, kind filtering, and sort query handling

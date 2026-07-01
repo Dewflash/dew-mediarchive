@@ -59,6 +59,7 @@
 - Cross-page download visibility belongs to the receiver/library, not the current tab popup. The receiver job store is the global truth for queued/downloading/failed saves.
 - Failed download cleanup should remove only the receiver job record. It should not touch archive records or saved files.
 - The popup can mirror receiver-global activity, but it should stay below page detections and unsupported observations so the current-page capture flow remains primary.
+- JSONL rewrites must preserve the same newline contract as append-only writes. If a rewrite omits the trailing newline, the next append can glue two JSON objects and break startup.
 
 ## Mistakes To Avoid
 
@@ -97,3 +98,4 @@
 - Do not make failed receiver jobs auto-refresh the library forever. Refresh only while queued/downloading work can actually change quickly.
 - Do not allow queued/downloading jobs to be cleared from the library; only terminal failed job records are safe to clear there.
 - Do not turn receiver-global popup activity into a second source of truth. Read it from `/downloads`; keep mutation in the receiver/library flow.
+- Do not rewrite JSONL stores with ad hoc `join("\n")` output unless the empty/non-empty trailing-newline cases are covered by tests.

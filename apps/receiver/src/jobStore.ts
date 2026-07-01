@@ -1,4 +1,4 @@
-import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { DownloadJob, DownloadRequest } from "./types.js";
 
@@ -21,13 +21,27 @@ export class FileJobStore {
       throw error;
     }
 
+    let shouldRewrite = false;
+
     for (const line of content.split("\n")) {
       if (!line.trim()) {
         continue;
       }
 
-      const job = JSON.parse(line) as DownloadJob;
-      this.jobs.set(job.id, job);
+      const serializedJobs = splitSerializedJsonObjects(line);
+
+      if (serializedJobs.length !== 1) {
+        shouldRewrite = true;
+      }
+
+      for (const serializedJob of serializedJobs) {
+        const job = JSON.parse(serializedJob) as DownloadJob;
+        this.jobs.set(job.id, job);
+      }
+    }
+
+    if (shouldRewrite) {
+      await this.rewriteJobs(this.jobs);
     }
   }
 
@@ -86,23 +100,20 @@ export class FileJobStore {
   }
 
   async remove(jobId: string): Promise<boolean> {
-    const hadJob = this.jobs.delete(jobId);
+    const removeOperation = this.writeQueue.then(async () => {
+      if (!this.jobs.has(jobId)) {
+        return false;
+      }
 
-    if (!hadJob) {
-      return false;
-    }
-
-    this.writeQueue = this.writeQueue.then(async () => {
-      await mkdir(dirname(this.jobsPath), { recursive: true });
-      await writeFile(
-        this.jobsPath,
-        this.list().map((job) => JSON.stringify(job)).join("\n"),
-        "utf8"
-      );
+      const nextJobs = new Map(this.jobs);
+      nextJobs.delete(jobId);
+      await this.rewriteJobs(nextJobs);
+      this.jobs.delete(jobId);
+      return true;
     });
 
-    await this.writeQueue;
-    return true;
+    this.writeQueue = removeOperation;
+    return removeOperation;
   }
 
   private async save(job: DownloadJob): Promise<void> {
@@ -114,6 +125,19 @@ export class FileJobStore {
 
     await this.writeQueue;
   }
+
+  private async rewriteJobs(jobs: Map<string, DownloadJob>): Promise<void> {
+    await mkdir(dirname(this.jobsPath), { recursive: true });
+    const body = [...jobs.values()]
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+      .map((job) => JSON.stringify(job))
+      .join("\n");
+    const nextBody = body ? `${body}\n` : "";
+    const tempPath = `${this.jobsPath}.tmp-${process.pid}-${Date.now()}`;
+
+    await writeFile(tempPath, nextBody, "utf8");
+    await rename(tempPath, this.jobsPath);
+  }
 }
 
 function isMissingFileError(error: unknown): boolean {
@@ -123,4 +147,81 @@ function isMissingFileError(error: unknown): boolean {
     "code" in error &&
     (error as { code?: string }).code === "ENOENT"
   );
+}
+
+function splitSerializedJsonObjects(line: string): string[] {
+  const trimmedLine = line.trim();
+  const objectRanges: Array<{ end: number; start: number }> = [];
+  let depth = 0;
+  let objectStart = -1;
+  let isInString = false;
+  let isEscaped = false;
+
+  for (let index = 0; index < trimmedLine.length; index += 1) {
+    const char = trimmedLine[index];
+
+    if (isInString) {
+      if (isEscaped) {
+        isEscaped = false;
+        continue;
+      }
+
+      if (char === "\\") {
+        isEscaped = true;
+        continue;
+      }
+
+      if (char === '"') {
+        isInString = false;
+      }
+
+      continue;
+    }
+
+    if (char === '"') {
+      isInString = true;
+      continue;
+    }
+
+    if (char === "{") {
+      if (depth === 0) {
+        objectStart = index;
+      }
+
+      depth += 1;
+      continue;
+    }
+
+    if (char === "}") {
+      depth -= 1;
+
+      if (depth === 0 && objectStart >= 0) {
+        objectRanges.push({
+          end: index + 1,
+          start: objectStart
+        });
+        objectStart = -1;
+      }
+    }
+  }
+
+  if (depth !== 0 || isInString || objectRanges.length === 0) {
+    return [trimmedLine];
+  }
+
+  let cursor = 0;
+
+  for (const range of objectRanges) {
+    if (trimmedLine.slice(cursor, range.start).trim()) {
+      return [trimmedLine];
+    }
+
+    cursor = range.end;
+  }
+
+  if (trimmedLine.slice(cursor).trim()) {
+    return [trimmedLine];
+  }
+
+  return objectRanges.map((range) => trimmedLine.slice(range.start, range.end));
 }

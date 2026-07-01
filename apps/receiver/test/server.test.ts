@@ -347,6 +347,66 @@ describe("receiver server", () => {
     await expect(readFile(config.jobsPath, "utf8")).resolves.toBe("");
   });
 
+  it("keeps job history valid after clearing a failed job and appending another", async () => {
+    const failedJob = await jobStore.create({
+      url: "https://cdn.example.test/broken.mp4",
+      pageTitle: "Broken page",
+      kind: "mp4"
+    });
+
+    await jobStore.update(failedJob.id, {
+      error: "Download failed.",
+      status: "failed"
+    });
+    await jobStore.remove(failedJob.id);
+    const nextJob = await jobStore.create({
+      url: "https://cdn.example.test/next.mp4",
+      pageTitle: "Next page",
+      kind: "mp4"
+    });
+    const reloadedJobStore = new FileJobStore(config.jobsPath);
+
+    await reloadedJobStore.load();
+
+    expect(reloadedJobStore.list()).toHaveLength(1);
+    expect(reloadedJobStore.get(nextJob.id)).toMatchObject({
+      id: nextJob.id,
+      pageTitle: "Next page"
+    });
+  });
+
+  it("recovers glued job history lines from older failed-job clearing", async () => {
+    const firstJob = await jobStore.create({
+      url: "https://cdn.example.test/first.mp4",
+      pageTitle: "First page",
+      kind: "mp4"
+    });
+    const secondJob = await jobStore.create({
+      url: "https://cdn.example.test/second.mp4",
+      pageTitle: "Second page",
+      kind: "mp4"
+    });
+
+    await writeFile(
+      config.jobsPath,
+      `${JSON.stringify(firstJob)}${JSON.stringify(secondJob)}\n`,
+      "utf8"
+    );
+
+    const reloadedJobStore = new FileJobStore(config.jobsPath);
+
+    await reloadedJobStore.load();
+
+    const normalizedHistory = await readFile(config.jobsPath, "utf8");
+    const normalizedLines = normalizedHistory.split("\n").filter(Boolean);
+
+    expect(reloadedJobStore.list()).toHaveLength(2);
+    expect(reloadedJobStore.get(firstJob.id)).toBeDefined();
+    expect(reloadedJobStore.get(secondJob.id)).toBeDefined();
+    expect(normalizedLines).toHaveLength(2);
+    expect(() => normalizedLines.map((line) => JSON.parse(line))).not.toThrow();
+  });
+
   it("does not clear non-failed download jobs", async () => {
     const job = await jobStore.create({
       url: "https://cdn.example.test/pending.mp4",
