@@ -187,9 +187,38 @@ describe("Popup", () => {
       pageTitle: "Smoke Page",
       kind: "mp4"
     });
-    expect(await screen.findByText("Saved locally.")).toBeInTheDocument();
+    expect(await screen.findByText("Saved locally. Added to library.")).toBeInTheDocument();
     expect(
       screen.getByText(".../Movies/Dew MediArchive/video.mp4")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View library" })).toHaveAttribute(
+      "href",
+      "http://127.0.0.1:47321/library"
+    );
+    expect(screen.getByRole("button", { name: "Saved" })).toBeInTheDocument();
+  });
+
+  it("shows when Save reuses an already archived file", async () => {
+    fetchMock.mockResolvedValueOnce(
+      createJsonResponse({
+        job: createReceiverJob("completed", {
+          outputPath: "/Users/example/Movies/Dew MediArchive/video.mp4",
+          reusedArchiveRecord: true
+        })
+      })
+    );
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+      ])
+    });
+
+    render(<Popup />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Save" }));
+
+    expect(
+      await screen.findByText("Already saved. Using existing local file.")
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Saved" })).toBeInTheDocument();
   });
@@ -207,7 +236,9 @@ describe("Popup", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Save" }));
 
     expect(
-      await screen.findByText("Local receiver is not running.")
+      await screen.findByText(
+        "Local receiver is not running. Start it with npm run dew, then retry."
+      )
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
   });

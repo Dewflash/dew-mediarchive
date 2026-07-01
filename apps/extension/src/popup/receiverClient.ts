@@ -17,6 +17,7 @@ export type ReceiverDownloadJob = {
   kind?: MediaCandidate["kind"];
   outputPath?: string;
   error?: string;
+  reusedArchiveRecord?: boolean;
 };
 
 type ReceiverJobResponse = {
@@ -122,7 +123,9 @@ async function fetchReceiver(
     return await fetcher(input, init);
   } catch {
     throwIfAborted(init?.signal);
-    throw new Error("Local receiver is not running.");
+    throw new Error(
+      "Local receiver is not running. Start it with npm run dew, then retry."
+    );
   }
 }
 

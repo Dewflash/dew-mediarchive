@@ -68,6 +68,35 @@ Open the local library while the receiver is running:
 http://127.0.0.1:47321/library
 ```
 
+The library supports search, media-type filtering, sorting, and archive exports:
+
+```text
+http://127.0.0.1:47321/export/archive.json
+http://127.0.0.1:47321/export/archive.csv
+```
+
+## Easy Launch
+
+From the repository root:
+
+```bash
+npm run dew
+```
+
+This builds the receiver, checks that `yt-dlp` is available, verifies the port, prints the local storage paths, and starts the receiver.
+
+To check the launcher without starting the receiver:
+
+```bash
+npm run dew:check
+```
+
+If the default port is busy, choose another one:
+
+```bash
+DEW_RECEIVER_PORT=47322 npm run dew
+```
+
 ## Extension Commands
 
 From `apps/extension`:

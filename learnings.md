@@ -36,6 +36,11 @@
 - Show the saved output path in the popup, but keep it compact. Full filesystem paths are useful confirmation, but they can easily overwhelm a small extension popup.
 - Start the library as a server-rendered receiver page. It is enough to prove archive visibility without adding a frontend build system or desktop wrapper yet.
 - Treat archive metadata as untrusted when rendering HTML. Source URLs and page titles came from websites and must be escaped.
+- A root `npm run dew` launcher is the right personal-tool bridge before a packaged desktop app. It can build/check/start the receiver without taking on signing, installers, or native permissions yet.
+- Library search, filtering, sorting, and exports should read archive records, not job history.
+- CSV export is a security surface. Escape spreadsheet formula prefixes in untrusted text before writing CSV cells.
+- Duplicate handling in the personal-tool MVP can safely reuse an existing archive record for the same source URL. This is not final content-hash dedupe, but it avoids repeated downloads for the same saved source.
+- Completed Save UI should point users back to the library because the library is now the durable archive surface.
 
 ## Mistakes To Avoid
 
@@ -63,3 +68,5 @@
 - Do not use jobs.jsonl as the library source of truth. It contains retries and state transitions, not one clean record per saved item.
 - Do not add an Open Folder button inside the extension yet. That belongs with a native app wrapper or explicit browser download/open permissions, not the current lightweight popup.
 - Do not add client-side script to the local library until there is a real workflow that needs it.
+- Do not treat source-URL reuse as final deduplication. Hash-based object storage still belongs to the later archive engine.
+- Do not export job history as the user archive. Exports should come from archive records so retries and transient failures do not leak into the library.

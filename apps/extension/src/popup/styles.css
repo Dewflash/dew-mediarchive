@@ -156,6 +156,19 @@ body {
   white-space: nowrap;
 }
 
+.media-item__library-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.media-item__library-link:hover {
+  text-decoration: underline;
+}
+
 .media-item__message--success {
   color: #047857;
 }
@@ -255,6 +268,10 @@ body {
   .media-item__path {
     background: #0f172a;
     color: #cbd5e1;
+  }
+
+  .media-item__library-link {
+    color: #93c5fd;
   }
 
   .media-item__message--success {

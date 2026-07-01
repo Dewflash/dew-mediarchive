@@ -12,6 +12,9 @@
 - Local receiver accepts a non-DRM media URL and saves a file with `yt-dlp`.
 - Completed receiver saves create archive metadata with file hash and size.
 - Local library renders saved archive records.
+- Local library supports search, filtering, sorting, and export links.
+- Archive metadata exports are available as JSON and CSV.
+- Duplicate source saves reuse an existing archive record instead of downloading the same source again.
 - Unsupported sources are shown or filtered intentionally.
 
 ## Static Checks
@@ -50,13 +53,21 @@ See `docs/mvp-manual-test.md` for the full first-user checklist.
 12. Confirm `GET /archive` lists the completed save.
 13. Open `http://127.0.0.1:47321/library`.
 14. Confirm the saved item appears.
-15. For Copy fallback, run:
+15. Try a library search/filter/sort query.
+16. Confirm exports respond:
+
+```bash
+curl http://127.0.0.1:47321/export/archive.json
+curl http://127.0.0.1:47321/export/archive.csv
+```
+
+17. For Copy fallback, run:
 
 ```bash
 yt-dlp "PASTED_URL"
 ```
 
-16. Record result in `changelog.md`.
+18. Record result in `changelog.md`.
 
 ## Current Runtime Proof
 
@@ -96,6 +107,14 @@ Verified:
 - receiver tests prove `/library` renders empty and populated states
 - receiver tests prove `/library` escapes untrusted archive metadata
 - user manually confirmed `/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed
+- receiver tests prove `/library` search, kind filtering, and sort query handling
+- receiver tests prove JSON and CSV archive exports
+- receiver tests prove CSV formula escaping
+- receiver tests prove duplicate source saves reuse an existing archive record
+- popup tests prove completed saves link to the local library
+- popup tests prove duplicate saves show an already-saved state
+- `npm run dew:check` passed on a throwaway port outside the sandbox
+- `npm run dew` launched the receiver on a throwaway port, and `/health`, `/library`, plus `/export/archive.json` responded
 
 Pending:
 

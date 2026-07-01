@@ -21,6 +21,8 @@ mvp-extension
 - Popup Save action for candidate media.
 - Popup Save states for receiver unavailable, queued, downloading, completed, and failed jobs.
 - Popup shows the saved output path when the receiver returns one.
+- Popup links to the local library after completed Save.
+- Popup shows an already-saved state when the receiver reuses an existing archive record.
 - Copy remains available as a fallback beside Save.
 - Popup Save polling is cancelled when the popup closes.
 - Open popup keeps the last non-empty media list visible even if the temporary tab snapshot clears.
@@ -32,9 +34,12 @@ mvp-extension
 - Append-only receiver job history in JSONL.
 - Append-only archive metadata in JSONL for completed saves.
 - Archive endpoint at `GET /archive`.
+- Export endpoints at `GET /export/archive.json` and `GET /export/archive.csv`.
 - Archive records include source URL, page context, output path, byte size, and SHA-256 hash.
 - Local library page at `GET /library`.
+- Local library search, media-type filtering, sorting, source links, and export links.
 - Root receiver route redirects to `/library`.
+- Root `npm run dew` launcher and `npm run dew:check` verification command.
 - Manual verification guide in `docs/mvp-manual-test.md`.
 - Architecture, adapter, archive, security, verification, learning, and changelog docs.
 
@@ -93,15 +98,23 @@ queued -> downloading -> completed
 - Receiver tests prove completed downloads write archive records.
 - Receiver tests prove the local library renders empty and populated archive states.
 - Receiver tests prove the local library escapes untrusted archive metadata.
+- Receiver tests prove the local library can search, filter, and sort archive records.
+- Receiver tests prove JSON and CSV archive export.
+- Receiver tests prove CSV formula escaping.
+- Receiver tests prove duplicate source saves reuse an existing archive record.
 - Popup tests prove completed saves display the receiver output path.
+- Popup tests prove completed saves link to the local library.
+- Popup tests prove duplicate saves show an already-saved state.
 - User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
+- `npm run dew:check` passed on a throwaway port outside the sandbox.
+- `npm run dew` launched the receiver on a throwaway port, and `/health` plus `/library` responded.
 
 ## What Is Not Done Yet
 
 - Human Copy proof from the real toolbar popup is not complete.
-- Desktop app wrapper is not built.
+- Desktop app wrapper / packaged DMG is not built.
 - Safari support is not built.
-- Final content-addressed object storage, search, import/export, and polished gallery views are not built.
+- Final content-addressed object storage, thumbnails, import, and polished gallery views are not built.
 - YouTube and DRM-heavy platforms remain intentionally unsupported.
 
 ## Why The Remaining Copy Proof Is Still Open
@@ -131,7 +144,7 @@ confirm download
 Move from developer MVP to personal-tool MVP:
 
 ```text
-terminal receiver -> packaged local app/service -> richer library view -> export
+one-command receiver -> packaged local app/service -> richer gallery/archive engine -> cross-browser support
 ```
 
 Keep Copy available as the fallback while Save UX is improved.

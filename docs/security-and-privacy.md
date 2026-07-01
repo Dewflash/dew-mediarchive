@@ -35,6 +35,8 @@ Archive records intentionally store source URLs and page context because provena
 
 The local library renders archive metadata as untrusted content. Escape page titles, URLs, paths, and hashes before writing HTML. Keep the library script-free unless there is a specific need and matching review.
 
+Archive exports are local private data. JSON and CSV exports should not be uploaded or shared without redaction. CSV exports must escape spreadsheet formula prefixes in text fields so untrusted page metadata cannot execute when opened in a spreadsheet.
+
 ## User Promise
 
 Dew is for archiving media the user is allowed to save. Unsupported or protected sources should be visible states, not hidden failures.

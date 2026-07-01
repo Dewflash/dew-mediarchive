@@ -64,6 +64,10 @@ export class FileArchiveStore {
     );
   }
 
+  findBySourceUrl(sourceUrl: string): ArchiveRecord | undefined {
+    return this.list().find((record) => record.sourceUrl === sourceUrl);
+  }
+
   private async save(record: ArchiveRecord): Promise<void> {
     this.records.set(record.id, record);
     this.writeQueue = this.writeQueue.then(async () => {

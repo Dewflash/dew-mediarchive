@@ -7,7 +7,9 @@ import {
   type MediaDetectionSnapshot
 } from "../shared";
 import {
+  RECEIVER_BASE_URL,
   saveMediaToReceiver,
+  type ReceiverDownloadJob,
   type ReceiverDownloadJobStatus
 } from "./receiverClient";
 
@@ -176,7 +178,7 @@ export function Popup() {
           setSaveStateIfActive(
             media.id,
             saveController,
-            getSaveStateFromJob(job.status, job.error, job.outputPath)
+            getSaveStateFromJob(job)
           );
         },
         signal: saveController.signal
@@ -185,11 +187,7 @@ export function Popup() {
       setSaveStateIfActive(
         media.id,
         saveController,
-        getSaveStateFromJob(
-          finalJob.status,
-          finalJob.error,
-          finalJob.outputPath
-        )
+        getSaveStateFromJob(finalJob)
       );
     } catch (error) {
       if (saveController.signal.aborted || !isMountedRef.current) {
@@ -359,6 +357,16 @@ function MediaItem({
                 {formatOutputPath(saveState.outputPath)}
               </p>
             ) : null}
+            {saveState.status === "completed" ? (
+              <a
+                className="media-item__library-link"
+                href={`${RECEIVER_BASE_URL}/library`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                View library
+              </a>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -412,35 +420,35 @@ function getMediaLabel(media: DetectedMedia): string {
   return media.unsupportedReason.replaceAll("-", " ");
 }
 
-function getSaveStateFromJob(
-  status: ReceiverDownloadJobStatus,
-  error: string | undefined,
-  outputPath: string | undefined
-): SaveState {
-  if (status === "completed") {
+function getSaveStateFromJob(job: ReceiverDownloadJob): SaveState {
+  if (job.status === "completed") {
     return {
-      status,
-      message: "Saved locally.",
-      outputPath
+      status: job.status,
+      message: job.reusedArchiveRecord
+        ? "Already saved. Using existing local file."
+        : "Saved locally. Added to library.",
+      outputPath: job.outputPath
     };
   }
 
-  if (status === "failed") {
+  if (job.status === "failed") {
     return {
-      status,
-      message: error || "Save failed in the local receiver."
+      status: job.status,
+      message:
+        job.error ||
+        "Save failed in the local receiver. Copy the URL and test it with yt-dlp."
     };
   }
 
-  if (status === "downloading") {
+  if (job.status === "downloading") {
     return {
-      status,
+      status: job.status,
       message: "Downloading locally."
     };
   }
 
   return {
-    status,
+    status: job.status,
     message: "Queued in local receiver."
   };
 }

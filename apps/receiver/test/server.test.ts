@@ -118,7 +118,7 @@ describe("receiver server", () => {
     expect(response.headers.get("content-type")).toContain("text/html");
     expect(html).toContain("Dew MediArchive");
     expect(html).toContain("0 saved items");
-    expect(html).toContain("No saved media yet");
+    expect(html).toContain("No saved media found");
   });
 
   it("rejects normal website origins", async () => {
@@ -232,6 +232,94 @@ describe("receiver server", () => {
     expect(html).toContain("flower.mp4");
     expect(html).toContain("18 B");
     expect(html).toContain("mp4");
+    expect(html).toContain("Export JSON");
+    expect(html).toContain("Export CSV");
+  });
+
+  it("filters and sorts archive records in the local library", async () => {
+    await createCompletedDownload({
+      pageTitle: "MDN Flower",
+      url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+      kind: "mp4"
+    });
+    await createCompletedDownload({
+      pageTitle: "Rose Audio",
+      url: "https://cdn.example.test/rose.webm",
+      kind: "webm"
+    });
+
+    const response = await fetch(`${baseUrl}/library?q=rose&kind=webm&sort=source`);
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toContain("1 shown from 2");
+    expect(html).toContain("Rose Audio");
+    expect(html).not.toContain("MDN Flower");
+    expect(html).toContain("/export/archive.json?q=rose&amp;kind=webm&amp;sort=source");
+  });
+
+  it("exports archive records as JSON", async () => {
+    await createCompletedDownload({
+      pageTitle: "MDN Flower"
+    });
+
+    const response = await fetch(`${baseUrl}/export/archive.json`);
+    const body = (await response.json()) as { records: ArchiveRecord[] };
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-disposition")).toContain(
+      "dew-mediarchive.json"
+    );
+    expect(body.records).toHaveLength(1);
+    expect(body.records[0].pageTitle).toBe("MDN Flower");
+  });
+
+  it("exports archive records as CSV with spreadsheet formula escaping", async () => {
+    await createCompletedDownload({
+      pageTitle: "=cmd"
+    });
+
+    const response = await fetch(`${baseUrl}/export/archive.csv`);
+    const csv = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/csv");
+    expect(csv).toContain("source_url,page_url,page_title");
+    expect(csv).toContain("\"'=cmd\"");
+  });
+
+  it("reuses an existing archive record for duplicate source saves", async () => {
+    await createCompletedDownload({
+      pageTitle: "MDN Flower"
+    });
+
+    const response = await fetch(`${baseUrl}/downloads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "chrome-extension://example"
+      },
+      body: JSON.stringify({
+        url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        pageUrl: "https://interactive-examples.mdn.mozilla.net/",
+        pageTitle: "MDN Flower",
+        kind: "mp4"
+      })
+    });
+    const body = (await response.json()) as { job: DownloadJob };
+    const archiveResponse = await fetch(`${baseUrl}/archive`);
+    const archiveBody = (await archiveResponse.json()) as {
+      records: ArchiveRecord[];
+    };
+
+    expect(response.status).toBe(200);
+    expect(body.job).toMatchObject({
+      status: "completed",
+      outputPath: join(config.downloadDir, "flower.mp4"),
+      reusedArchiveRecord: true
+    });
+    expect(downloadedJobs).toHaveLength(1);
+    expect(archiveBody.records).toHaveLength(1);
   });
 
   it("escapes untrusted archive metadata in the local library", async () => {
@@ -302,9 +390,13 @@ describe("receiver server", () => {
   }
 
   async function createCompletedDownload({
-    pageTitle
+    kind = "mp4",
+    pageTitle,
+    url = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
   }: {
+    kind?: "mp4" | "webm";
     pageTitle: string;
+    url?: string;
   }): Promise<DownloadJob> {
     const response = await fetch(`${baseUrl}/downloads`, {
       method: "POST",
@@ -313,10 +405,10 @@ describe("receiver server", () => {
         Origin: "chrome-extension://example"
       },
       body: JSON.stringify({
-        url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        url,
         pageUrl: "https://interactive-examples.mdn.mozilla.net/",
         pageTitle,
-        kind: "mp4"
+        kind
       })
     });
     const body = (await response.json()) as { job: DownloadJob };

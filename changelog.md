@@ -143,3 +143,28 @@
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
 - User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
+- Added root `npm run dew` and `npm run dew:check` commands.
+- The launcher builds the receiver, checks `yt-dlp`, checks the configured port, prints library/download/job/archive paths, and starts the receiver.
+- Upgraded the local library with search, kind filtering, sorting, source links, and export links.
+- Added JSON archive export at `GET /export/archive.json`.
+- Added CSV archive export at `GET /export/archive.csv`.
+- Escaped spreadsheet formula-looking CSV text from untrusted archive metadata.
+- Added duplicate source save handling so the receiver reuses an existing archive record and output path instead of downloading the same source again.
+- Updated the popup Save success copy to mention the library.
+- Added a View library link after completed Save.
+- Updated the popup duplicate Save state to show `Already saved. Using existing local file.`
+- Updated the receiver-unavailable popup copy to tell the user to start `npm run dew`.
+- Added receiver tests for library search/filter/sort, JSON export, CSV export, CSV formula escaping, and duplicate source reuse.
+- Added popup tests for completed Save library links and duplicate Save messaging.
+- Ran extension `npm run test`: 5 files, 35 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.
+- Ran receiver `npm run test`: 1 file, 15 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.
+- `npm run dew:check` initially failed in the sandbox because direct localhost binding is blocked there.
+- Reran `DEW_RECEIVER_PORT=54987 npm run dew:check` outside the sandbox: passed.
+- Ran `DEW_RECEIVER_PORT=54987 npm run dew` outside the sandbox and confirmed the receiver started.
+- Confirmed `curl http://127.0.0.1:54987/health` returned `{ ok: true, name: "dew-mediarchive-receiver", version: "0.1.0" }`.
+- Confirmed `curl http://127.0.0.1:54987/library` returned the upgraded library HTML.
+- Confirmed `curl http://127.0.0.1:54987/export/archive.json` returned an empty records export from the launched receiver.

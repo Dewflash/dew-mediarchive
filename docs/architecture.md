@@ -102,6 +102,8 @@ The receiver in `apps/receiver` is a local-only HTTP service. It listens on `127
 ```text
 GET  /health
 GET  /archive
+GET  /export/archive.json
+GET  /export/archive.csv
 GET  /library
 GET  /downloads
 GET  /downloads/:id
@@ -120,6 +122,8 @@ popup Save
   -> job becomes completed or failed
   -> popup shows queued, downloading, saved, or retryable failure
 ```
+
+If the same source URL already has an archive record, the receiver creates a completed job that reuses the existing local file instead of downloading the same source again.
 
 The receiver deliberately does not depend on the extension internals. It accepts a normalized download request:
 
@@ -156,6 +160,19 @@ GET /library
 ```
 
 It renders `archive.jsonl` records as HTML and redirects `/` to `/library`. The page is server-rendered, has no client-side scripts, escapes archive metadata, and uses a restrictive content security policy.
+
+The personal-tool MVP library supports search, kind filtering, sorting, source links, and export links. JSON and CSV exports are generated from archive records, and CSV text is escaped so spreadsheet formulas cannot be injected through page titles or URLs.
+
+## Easy Launcher
+
+The repository root exposes:
+
+```text
+npm run dew
+npm run dew:check
+```
+
+The launcher builds the receiver, checks `yt-dlp`, checks the configured loopback port, prints the library/download/job/archive paths, and starts the receiver. It is still a developer/personal-tool launcher, not a packaged desktop app.
 
 ## Future App Shape
 

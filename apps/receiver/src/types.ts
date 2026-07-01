@@ -16,6 +16,8 @@ export type DownloadJob = DownloadRequest & {
   updatedAt: string;
   outputPath?: string;
   error?: string;
+  archiveRecordId?: string;
+  reusedArchiveRecord?: boolean;
 };
 
 export type ArchiveRecord = {

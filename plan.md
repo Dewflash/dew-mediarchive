@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-MVP local library.
+Personal-tool MVP hardening.
 
 ## Current Goal
 
-Make saved archive records visible through the local receiver without needing to inspect JSONL by hand.
+Make the proven MVP easier to run and use before moving into packaged-app productization.
 
 ## Handoff Status
 
@@ -79,13 +79,22 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Added a restrictive CSP for the local library page.
 - Verified the library route with receiver tests, typecheck, and build.
 - Manually confirmed the local library page shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
+- Added a root `npm run dew` launcher that builds the receiver, checks `yt-dlp`, checks the port, prints storage paths, and starts the local receiver.
+- Added `npm run dew:check` for launcher verification without leaving the receiver running.
+- Upgraded `/library` with search, media-type filtering, sorting, source links, and export links.
+- Added archive metadata exports at `/export/archive.json` and `/export/archive.csv`.
+- Escaped CSV text that could otherwise become spreadsheet formulas.
+- Added duplicate source handling so a repeated Save reuses an existing archive record and local file.
+- Updated the popup completed Save state with a local library link.
+- Updated the popup duplicate Save state with an already-saved message.
+- Verified launcher check and actual launcher start on a throwaway port.
+- Verified the hardening pass with extension and receiver tests, typecheck, and build.
 
 ## Next Steps
 
-1. Make the receiver easier to launch outside a terminal.
-2. Add export for archive metadata.
-3. Improve the library with filtering/search.
-4. Re-test a short MP4 and a page with multiple videos in normal Chrome.
+1. Re-test a short MP4 and a page with multiple videos in normal Chrome.
+2. Decide whether the next pass is packaged Mac app/service or deeper archive engine work.
+3. Add thumbnails/gallery polish when the archive engine shape is clearer.
 
 ## Open Questions
 

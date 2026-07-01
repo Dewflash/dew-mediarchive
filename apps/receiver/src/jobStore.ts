@@ -47,7 +47,16 @@ export class FileJobStore {
 
   async update(
     jobId: string,
-    patch: Partial<Pick<DownloadJob, "status" | "outputPath" | "error">>
+    patch: Partial<
+      Pick<
+        DownloadJob,
+        | "archiveRecordId"
+        | "error"
+        | "outputPath"
+        | "reusedArchiveRecord"
+        | "status"
+      >
+    >
   ): Promise<DownloadJob | undefined> {
     const previousJob = this.jobs.get(jobId);
 

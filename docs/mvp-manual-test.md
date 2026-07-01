@@ -13,6 +13,7 @@ This test proves:
 - a copied candidate URL can be tested manually with `yt-dlp`
 - the Save button can send a candidate to the local receiver
 - the receiver can save the media file locally with `yt-dlp`
+- the local library can show, filter, and export saved archive records
 
 This test does not prove:
 
@@ -87,22 +88,70 @@ apps/extension/dist
 Start the receiver before clicking Save:
 
 ```bash
-cd apps/receiver
-npm run build
-DEW_DOWNLOAD_DIR=/private/tmp/dew-save-test \
-DEW_JOBS_PATH=/private/tmp/dew-save-test/jobs.jsonl \
-npm run start
+npm run dew
+```
+
+For a temporary smoke folder instead of the default `~/Movies/Dew MediArchive` folder:
+
+```bash
+DEW_DOWNLOAD_DIR=/private/tmp/dew-save-test npm run dew
 ```
 
 Then in the popup:
 
 1. Click Save on a detected candidate.
-2. Confirm the popup reaches `Saved locally.`
-3. Confirm the file exists:
+2. Confirm the popup reaches `Saved locally. Added to library.`
+3. Confirm the popup shows `View library`.
+4. Open `http://127.0.0.1:47321/library`.
+5. Confirm the saved item appears.
+6. Try search, media-type filtering, and sorting.
+7. Confirm exports respond:
+
+```bash
+curl http://127.0.0.1:47321/export/archive.json
+curl http://127.0.0.1:47321/export/archive.csv
+```
+
+8. Confirm the file exists:
+
+```bash
+ls -lah /private/tmp/dew-save-test
+cat /private/tmp/dew-save-test/.dew/jobs.jsonl
+cat /private/tmp/dew-save-test/.dew/archive.jsonl
+```
+
+Expected job history:
+
+```text
+queued -> downloading -> completed
+```
+
+If you save the same source URL again, Dew should reuse the existing archive record:
+
+```text
+Already saved. Using existing local file.
+```
+
+## Legacy Temp-Path Note
+
+Older smoke tests used direct receiver overrides:
+
+```bash
+cd apps/receiver
+DEW_DOWNLOAD_DIR=/private/tmp/dew-save-test \
+DEW_JOBS_PATH=/private/tmp/dew-save-test/jobs.jsonl \
+DEW_ARCHIVE_PATH=/private/tmp/dew-save-test/archive.jsonl \
+npm run start
+```
+
+That path still works, but the preferred personal-tool command is now `npm run dew`.
+
+When using the older direct override, confirm the file exists:
 
 ```bash
 ls -lah /private/tmp/dew-save-test
 cat /private/tmp/dew-save-test/jobs.jsonl
+cat /private/tmp/dew-save-test/archive.jsonl
 ```
 
 Expected job history:
@@ -177,7 +226,7 @@ If Copy fails:
 
 If Save says the receiver is not running:
 
-- start `apps/receiver`
+- start `npm run dew`
 - confirm `curl http://127.0.0.1:47321/health` returns `ok: true`
 - reload the extension build if needed
 

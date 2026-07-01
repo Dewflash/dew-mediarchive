@@ -523,6 +523,92 @@ Save completes -> archive record is written -> /library displays it
 
 If `/library` ever says no saved media during testing, check that the receiver is the rebuilt version and make one fresh Save so `archive.jsonl` has a current record.
 
+## Why We Added `npm run dew`
+
+The MVP worked, but it still felt like a developer tool because you had to remember receiver commands.
+
+The new root command is:
+
+```bash
+npm run dew
+```
+
+It does the boring setup work:
+
+```text
+build receiver
+check yt-dlp exists
+check the local port
+print library/download/job/archive paths
+start the receiver
+```
+
+This is not the packaged Mac app yet. It is the bridge between:
+
+```text
+developer repo -> personal tool you can actually run
+```
+
+That is the right step before building a DMG or menubar app.
+
+## Why The Library Got Search, Filters, Sorts, And Exports
+
+Once `/library` could show saved items, the next MVP problem was finding and moving your archive records.
+
+The library now supports:
+
+```text
+search by title/source/path/hash
+filter by media type
+sort by newest, oldest, source, or largest
+export JSON
+export CSV
+```
+
+This still uses the simple `archive.jsonl` source of truth. That is intentional: the MVP archive remains inspectable and portable while we learn what the final archive engine needs.
+
+## Why Export Reads Archive Records, Not Jobs
+
+Job history is noisy. It records process states:
+
+```text
+queued -> downloading -> completed
+failed
+retried
+already saved
+```
+
+Archive records are cleaner. They describe saved media:
+
+```text
+source URL
+page context
+local path
+file size
+SHA-256
+capture time
+```
+
+That is why JSON and CSV exports come from archive records. Exporting jobs would mix operational history with your actual media library.
+
+## Why CSV Export Has Extra Escaping
+
+CSV looks harmless, but spreadsheets can treat cells starting with characters like `=` as formulas.
+
+Because page titles and URLs come from websites, Dew escapes those formula-looking values in CSV exports. This prevents a malicious title from turning into executable spreadsheet behavior when opened later.
+
+## Why Duplicate Saves Say Already Saved
+
+If you click Save again for the same source URL, Dew now checks the archive first.
+
+If the source URL is already archived, the receiver returns a completed job immediately:
+
+```text
+Already saved. Using existing local file.
+```
+
+This avoids downloading the same source again. It is useful MVP duplicate handling, but it is not final deduplication. Later, the archive engine should dedupe by file hash so Dew can recognize identical media even when it came from different URLs.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

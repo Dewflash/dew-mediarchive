@@ -51,3 +51,12 @@ Each completed receiver download appends one record:
 ```
 
 The downloaded media file still stays in the user-facing download folder. The JSONL record is the first portable index for future search, dedupe, export, and gallery views.
+
+The personal-tool MVP exposes portable metadata exports while the receiver is running:
+
+```text
+GET /export/archive.json
+GET /export/archive.csv
+```
+
+Exports are generated from archive records, not job history. Query parameters shared with `/library` can filter exports by search, kind, and sort order.

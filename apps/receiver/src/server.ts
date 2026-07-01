@@ -6,9 +6,17 @@ import {
 } from "node:http";
 import { URL } from "node:url";
 import type { Downloader, ReceiverConfig } from "./types.js";
+import {
+  renderArchiveCsvExport,
+  renderArchiveJsonExport
+} from "./archiveExport.js";
 import { FileArchiveStore } from "./archiveStore.js";
 import { FileJobStore } from "./jobStore.js";
-import { renderLibraryPage } from "./libraryView.js";
+import {
+  filterAndSortArchiveRecords,
+  getLibraryOptionsFromSearchParams,
+  renderLibraryPage
+} from "./libraryView.js";
 import { validateDownloadRequest } from "./validation.js";
 
 export type ReceiverServerOptions = {
@@ -91,7 +99,44 @@ async function handleRequest(
   }
 
   if (request.method === "GET" && url.pathname === "/library") {
-    sendHtml(response, 200, renderLibraryPage(archiveStore.list()));
+    sendHtml(
+      response,
+      200,
+      renderLibraryPage(
+        archiveStore.list(),
+        getLibraryOptionsFromSearchParams(url.searchParams)
+      )
+    );
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/export/archive.json") {
+    const records = filterAndSortArchiveRecords(
+      archiveStore.list(),
+      getLibraryOptionsFromSearchParams(url.searchParams)
+    );
+    sendExport(
+      response,
+      200,
+      "application/json; charset=utf-8",
+      "dew-mediarchive.json",
+      renderArchiveJsonExport(records)
+    );
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/export/archive.csv") {
+    const records = filterAndSortArchiveRecords(
+      archiveStore.list(),
+      getLibraryOptionsFromSearchParams(url.searchParams)
+    );
+    sendExport(
+      response,
+      200,
+      "text/csv; charset=utf-8",
+      "dew-mediarchive.csv",
+      renderArchiveCsvExport(records)
+    );
     return;
   }
 
@@ -164,6 +209,21 @@ async function handleCreateDownload(
     return;
   }
 
+  const existingRecord = archiveStore.findBySourceUrl(validation.value.url);
+
+  if (existingRecord) {
+    const job = await jobStore.create(validation.value);
+    const completedJob = await jobStore.update(job.id, {
+      archiveRecordId: existingRecord.id,
+      outputPath: existingRecord.outputPath,
+      reusedArchiveRecord: true,
+      status: "completed"
+    });
+
+    sendJson(response, 200, { job: completedJob ?? job });
+    return;
+  }
+
   const job = await jobStore.create(validation.value);
   void runDownloadJob(job.id, config, jobStore, archiveStore, downloader);
   sendJson(response, 202, { job });
@@ -186,17 +246,20 @@ async function runDownloadJob(
 
   try {
     const result = await downloader.download(downloadingJob, config);
+    let archiveRecordId: string | undefined;
 
     if (result.outputPath) {
-      await archiveStore.createFromCompletedJob({
+      const archiveRecord = await archiveStore.createFromCompletedJob({
         ...downloadingJob,
         status: "completed",
         outputPath: result.outputPath,
         updatedAt: new Date().toISOString()
       });
+      archiveRecordId = archiveRecord?.id;
     }
 
     await jobStore.update(jobId, {
+      archiveRecordId,
       status: "completed",
       outputPath: result.outputPath,
       error: undefined
@@ -251,6 +314,20 @@ function sendHtml(response: ServerResponse, statusCode: number, body: string): v
   response.writeHead(statusCode, {
     "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
     "Content-Type": "text/html; charset=utf-8"
+  });
+  response.end(body);
+}
+
+function sendExport(
+  response: ServerResponse,
+  statusCode: number,
+  contentType: string,
+  filename: string,
+  body: string
+): void {
+  response.writeHead(statusCode, {
+    "Content-Disposition": `attachment; filename="${filename}"`,
+    "Content-Type": contentType
   });
   response.end(body);
 }
