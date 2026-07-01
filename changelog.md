@@ -277,3 +277,4 @@
 - Ran extension `npm run test`: 5 files, 49 tests passed.
 - Ran extension `npm run typecheck`: passed.
 - Ran extension `npm run build`: passed.
+- Added `docs/how-to-run.md` explaining when to use `npm run dew`, extension build commands, receiver build commands, and normal frontend/backend dev server patterns.
