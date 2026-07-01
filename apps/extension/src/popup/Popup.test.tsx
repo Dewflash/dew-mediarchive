@@ -223,6 +223,58 @@ describe("Popup", () => {
     expect(screen.getByRole("button", { name: "Saved" })).toBeInTheDocument();
   });
 
+  it("shows receiver download progress while saving", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("queued")
+        })
+      )
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("downloading", {
+            progress: {
+              downloaded: "512KiB",
+              eta: "00:01",
+              percent: 42,
+              speed: "1.0MiB/s",
+              stage: "downloading",
+              total: "1.2MiB",
+              updatedAt: new Date().toISOString()
+            }
+          })
+        })
+      )
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("completed", {
+            outputPath: "/Users/example/Movies/Dew MediArchive/video.mp4",
+            progress: {
+              percent: 100,
+              stage: "processing",
+              updatedAt: new Date().toISOString()
+            }
+          })
+        })
+      );
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+      ])
+    });
+
+    render(<Popup />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("Downloading locally. 42%")).toBeInTheDocument();
+    expect(screen.getByRole("progressbar", { name: "Download progress" })).toHaveAttribute(
+      "aria-valuenow",
+      "42"
+    );
+    expect(screen.getByText("512KiB / 1.2MiB · 1.0MiB/s · ETA 00:01")).toBeInTheDocument();
+  });
+
   it("shows a receiver unavailable state when Save cannot connect", async () => {
     fetchMock.mockRejectedValue(new Error("connection refused"));
     storageGet.mockResolvedValue({

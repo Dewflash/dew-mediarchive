@@ -41,6 +41,9 @@
 - CSV export is a security surface. Escape spreadsheet formula prefixes in untrusted text before writing CSV cells.
 - Duplicate handling in the personal-tool MVP can safely reuse an existing archive record for the same source URL. This is not final content-hash dedupe, but it avoids repeated downloads for the same saved source.
 - Completed Save UI should point users back to the library because the library is now the durable archive surface.
+- Save progress belongs in the receiver job model. The popup should poll structured job progress instead of parsing logs or guessing.
+- `yt-dlp` needs `--progress` when spawned without a terminal; otherwise progress-template lines may not appear even though the download succeeds.
+- Progress is best-effort. Small direct files may complete before percent updates are useful, so queued/downloading/completed states still matter.
 
 ## Mistakes To Avoid
 
@@ -70,3 +73,4 @@
 - Do not add client-side script to the local library until there is a real workflow that needs it.
 - Do not treat source-URL reuse as final deduplication. Hash-based object storage still belongs to the later archive engine.
 - Do not export job history as the user archive. Exports should come from archive records so retries and transient failures do not leak into the library.
+- Do not invent fake percentages when `yt-dlp` has not reported a total. Show an indeterminate/downloading state or byte/speed details instead.

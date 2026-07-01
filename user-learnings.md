@@ -609,6 +609,33 @@ Already saved. Using existing local file.
 
 This avoids downloading the same source again. It is useful MVP duplicate handling, but it is not final deduplication. Later, the archive engine should dedupe by file hash so Dew can recognize identical media even when it came from different URLs.
 
+## Why Progress Was Missing
+
+Before this pass, the receiver only saved job states:
+
+```text
+queued
+downloading
+completed
+failed
+```
+
+So the popup could say "Saving", but it could not show percent complete.
+
+Dew now asks `yt-dlp` for progress output and stores that progress on the receiver job:
+
+```text
+percent
+downloaded size
+total size
+speed
+ETA
+```
+
+The popup polls the job and renders a progress bar when that data exists.
+
+One important caveat: not every download will have useful progress. Tiny direct MP4 files can finish so fast that they jump straight from downloading to saved. Some streams may not know total size, so Dew may show activity/details without a true percentage. That is better than inventing a fake number.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

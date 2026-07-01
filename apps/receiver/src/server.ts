@@ -5,7 +5,7 @@ import {
   type ServerResponse
 } from "node:http";
 import { URL } from "node:url";
-import type { Downloader, ReceiverConfig } from "./types.js";
+import type { DownloadProgress, Downloader, ReceiverConfig } from "./types.js";
 import {
   renderArchiveCsvExport,
   renderArchiveJsonExport
@@ -245,7 +245,9 @@ async function runDownloadJob(
   }
 
   try {
-    const result = await downloader.download(downloadingJob, config);
+    const result = await downloader.download(downloadingJob, config, {
+      onProgress: createProgressReporter(jobId, jobStore)
+    });
     let archiveRecordId: string | undefined;
 
     if (result.outputPath) {
@@ -260,6 +262,11 @@ async function runDownloadJob(
 
     await jobStore.update(jobId, {
       archiveRecordId,
+      progress: {
+        stage: "processing",
+        percent: 100,
+        updatedAt: new Date().toISOString()
+      },
       status: "completed",
       outputPath: result.outputPath,
       error: undefined
@@ -270,6 +277,35 @@ async function runDownloadJob(
       error: error instanceof Error ? error.message : "Download failed."
     });
   }
+}
+
+function createProgressReporter(
+  jobId: string,
+  jobStore: FileJobStore
+): (progress: DownloadProgress) => void {
+  let lastProgressAt = 0;
+  let lastPercent: number | undefined;
+
+  return (progress) => {
+    const now = Date.now();
+
+    if (
+      progress.percent !== undefined &&
+      lastPercent !== undefined &&
+      Math.abs(progress.percent - lastPercent) < 1 &&
+      now - lastProgressAt < 1500
+    ) {
+      return;
+    }
+
+    lastProgressAt = now;
+    lastPercent = progress.percent ?? lastPercent;
+
+    void jobStore.update(jobId, {
+      progress,
+      status: "downloading"
+    });
+  };
 }
 
 function readRequestBody(

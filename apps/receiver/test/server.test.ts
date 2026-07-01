@@ -38,9 +38,19 @@ describe("receiver server", () => {
     downloadedJobs = [];
 
     const downloader: Downloader = {
-      async download(job) {
+      async download(job, _config, options) {
         const outputPath = join(config.downloadDir, "flower.mp4");
         downloadedJobs.push(job);
+        options?.onProgress?.({
+          downloaded: "512KiB",
+          eta: "00:01",
+          percent: 42,
+          speed: "1.0MiB/s",
+          stage: "downloading",
+          total: "1.2MiB",
+          updatedAt: new Date().toISOString()
+        });
+        await new Promise((resolve) => setTimeout(resolve, 20));
         await mkdir(config.downloadDir, { recursive: true });
         await writeFile(outputPath, "flower video bytes", "utf8");
         return { outputPath };
@@ -173,6 +183,35 @@ describe("receiver server", () => {
       outputPath: join(config.downloadDir, "flower.mp4")
     });
     expect(downloadedJobs).toHaveLength(1);
+  });
+
+  it("exposes download progress while a job is running", async () => {
+    const response = await fetch(`${baseUrl}/downloads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "chrome-extension://example"
+      },
+      body: JSON.stringify({
+        url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        pageUrl: "https://interactive-examples.mdn.mozilla.net/",
+        pageTitle: "MDN Flower",
+        kind: "mp4"
+      })
+    });
+    const body = (await response.json()) as { job: DownloadJob };
+    const downloadingJob = await waitForJobProgress(body.job.id, 42);
+
+    expect(downloadingJob).toMatchObject({
+      progress: {
+        downloaded: "512KiB",
+        eta: "00:01",
+        percent: 42,
+        speed: "1.0MiB/s",
+        total: "1.2MiB"
+      },
+      status: "downloading"
+    });
   });
 
   it("writes an archive record for completed downloads", async () => {
@@ -387,6 +426,23 @@ describe("receiver server", () => {
     }
 
     throw new Error(`Timed out waiting for job ${jobId} to become ${status}.`);
+  }
+
+  async function waitForJobProgress(
+    jobId: string,
+    percent: number
+  ): Promise<DownloadJob> {
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const job = jobStore.get(jobId);
+
+      if (job?.progress?.percent === percent) {
+        return job;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    throw new Error(`Timed out waiting for job ${jobId} progress ${percent}.`);
   }
 
   async function createCompletedDownload({

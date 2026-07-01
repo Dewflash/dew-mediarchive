@@ -100,19 +100,21 @@ DEW_DOWNLOAD_DIR=/private/tmp/dew-save-test npm run dew
 Then in the popup:
 
 1. Click Save on a detected candidate.
-2. Confirm the popup reaches `Saved locally. Added to library.`
-3. Confirm the popup shows `View library`.
-4. Open `http://127.0.0.1:47321/library`.
-5. Confirm the saved item appears.
-6. Try search, media-type filtering, and sorting.
-7. Confirm exports respond:
+2. Confirm the popup shows Saving/Downloading.
+3. For larger files, confirm the popup shows a progress bar and percent/size/speed details.
+4. Confirm the popup reaches `Saved locally. Added to library.`
+5. Confirm the popup shows `View library`.
+6. Open `http://127.0.0.1:47321/library`.
+7. Confirm the saved item appears.
+8. Try search, media-type filtering, and sorting.
+9. Confirm exports respond:
 
 ```bash
 curl http://127.0.0.1:47321/export/archive.json
 curl http://127.0.0.1:47321/export/archive.csv
 ```
 
-8. Confirm the file exists:
+10. Confirm the file exists:
 
 ```bash
 ls -lah /private/tmp/dew-save-test

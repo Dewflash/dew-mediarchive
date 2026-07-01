@@ -168,3 +168,20 @@
 - Confirmed `curl http://127.0.0.1:54987/health` returned `{ ok: true, name: "dew-mediarchive-receiver", version: "0.1.0" }`.
 - Confirmed `curl http://127.0.0.1:54987/library` returned the upgraded library HTML.
 - Confirmed `curl http://127.0.0.1:54987/export/archive.json` returned an empty records export from the launched receiver.
+- Added structured download progress to receiver jobs.
+- Updated the `yt-dlp` invocation to use `--progress`, `--newline`, and a prefixed progress template.
+- Added parser handling for real `yt-dlp` progress lines, including unavailable `NA` and `Unknown` values.
+- Added popup progress bar rendering with percent, downloaded/total size, speed, and ETA details.
+- Added receiver tests for progress parsing and exposing progress on running jobs.
+- Added popup tests for progress bar rendering.
+- Ran receiver `npm run test`: 3 files, 22 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.
+- Ran extension `npm run test`: 5 files, 36 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.
+- Real `yt-dlp` progress smoke against the larger Blender Big Buck Bunny MP4 emitted `dew-progress` lines from 0% to 100% and a final `dew-file` path.
+- Launched the receiver on `DEW_RECEIVER_PORT=54989` with `DEW_DOWNLOAD_DIR=/private/tmp/dew-progress-api-proof`.
+- Posted the larger Blender Big Buck Bunny MP4 to `POST /downloads`.
+- Confirmed `/private/tmp/dew-progress-api-proof/.dew/jobs.jsonl` recorded progress snapshots from 0% through 100%.
+- Confirmed `GET /downloads/:id` ended completed with `progress.percent: 100` and the saved output path.

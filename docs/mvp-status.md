@@ -20,6 +20,7 @@ mvp-extension
 - Popup states for loading, empty, error, candidates, unsupported media, Copy success, and Copy failure.
 - Popup Save action for candidate media.
 - Popup Save states for receiver unavailable, queued, downloading, completed, and failed jobs.
+- Popup shows receiver download progress with a progress bar when `yt-dlp` reports percent progress.
 - Popup shows the saved output path when the receiver returns one.
 - Popup links to the local library after completed Save.
 - Popup shows an already-saved state when the receiver reuses an existing archive record.
@@ -31,6 +32,7 @@ mvp-extension
 - Receiver endpoints for health checks, creating download jobs, listing jobs, and reading a job by id.
 - Receiver validation for JSON bodies, HTTP/HTTPS media URLs, optional page metadata, and media kind.
 - Receiver `yt-dlp` downloader that saves files locally without shell command interpolation.
+- Receiver parses `yt-dlp` progress-template output into structured job progress.
 - Append-only receiver job history in JSONL.
 - Append-only archive metadata in JSONL for completed saves.
 - Archive endpoint at `GET /archive`.
@@ -102,12 +104,17 @@ queued -> downloading -> completed
 - Receiver tests prove JSON and CSV archive export.
 - Receiver tests prove CSV formula escaping.
 - Receiver tests prove duplicate source saves reuse an existing archive record.
+- Receiver tests prove `yt-dlp` progress-template lines parse into structured progress.
+- Receiver tests prove running jobs expose progress through the job record.
 - Popup tests prove completed saves display the receiver output path.
+- Popup tests prove download progress renders as a progress bar with details.
 - Popup tests prove completed saves link to the local library.
 - Popup tests prove duplicate saves show an already-saved state.
 - User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
 - `npm run dew:check` passed on a throwaway port outside the sandbox.
 - `npm run dew` launched the receiver on a throwaway port, and `/health` plus `/library` responded.
+- A real `yt-dlp` smoke against the larger Blender Big Buck Bunny MP4 emitted `dew-progress` lines from 0% to 100% with `--progress`.
+- A full receiver API smoke on a throwaway port saved the larger Blender Big Buck Bunny MP4 and recorded progress snapshots from 0% through 100% in `jobs.jsonl`.
 
 ## What Is Not Done Yet
 

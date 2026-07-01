@@ -8,6 +8,16 @@ export type ReceiverDownloadJobStatus =
   | "completed"
   | "failed";
 
+export type ReceiverDownloadProgress = {
+  stage: "downloading" | "processing";
+  percent?: number;
+  downloaded?: string;
+  total?: string;
+  speed?: string;
+  eta?: string;
+  updatedAt: string;
+};
+
 export type ReceiverDownloadJob = {
   id: string;
   status: ReceiverDownloadJobStatus;
@@ -17,6 +27,7 @@ export type ReceiverDownloadJob = {
   kind?: MediaCandidate["kind"];
   outputPath?: string;
   error?: string;
+  progress?: ReceiverDownloadProgress;
   reusedArchiveRecord?: boolean;
 };
 

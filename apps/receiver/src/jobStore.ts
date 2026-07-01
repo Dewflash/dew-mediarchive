@@ -53,6 +53,7 @@ export class FileJobStore {
         | "archiveRecordId"
         | "error"
         | "outputPath"
+        | "progress"
         | "reusedArchiveRecord"
         | "status"
       >

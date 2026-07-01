@@ -10,6 +10,8 @@
 - At least one copied non-DRM media URL downloads successfully with `yt-dlp`.
 - Save button sends a detected candidate to the local receiver.
 - Local receiver accepts a non-DRM media URL and saves a file with `yt-dlp`.
+- Receiver job records expose `yt-dlp` progress when progress is available.
+- Popup renders Save progress when the receiver reports it.
 - Completed receiver saves create archive metadata with file hash and size.
 - Local library renders saved archive records.
 - Local library supports search, filtering, sorting, and export links.
@@ -113,8 +115,12 @@ Verified:
 - receiver tests prove duplicate source saves reuse an existing archive record
 - popup tests prove completed saves link to the local library
 - popup tests prove duplicate saves show an already-saved state
+- popup tests prove Save progress renders as a progress bar with byte/speed/ETA details
+- receiver tests prove `yt-dlp` progress-template parsing and job progress exposure
 - `npm run dew:check` passed on a throwaway port outside the sandbox
 - `npm run dew` launched the receiver on a throwaway port, and `/health`, `/library`, plus `/export/archive.json` responded
+- a real `yt-dlp` smoke against the larger Blender Big Buck Bunny MP4 emitted progress-template lines from 0% to 100%
+- a full receiver API smoke on a throwaway port saved the larger Blender Big Buck Bunny MP4 and recorded progress snapshots from 0% through 100% in `jobs.jsonl`
 
 Pending:
 

@@ -117,10 +117,11 @@ popup Save
   -> POST http://127.0.0.1:47321/downloads
   -> receiver validates JSON and URL shape
   -> job is appended to jobs.jsonl
-  -> yt-dlp runs with argument-array spawning
+  -> yt-dlp runs with argument-array spawning and progress-template output
+  -> receiver parses progress into the download job
   -> completed output is hashed and appended to archive.jsonl
   -> job becomes completed or failed
-  -> popup shows queued, downloading, saved, or retryable failure
+  -> popup shows queued, downloading progress, saved, or retryable failure
 ```
 
 If the same source URL already has an archive record, the receiver creates a completed job that reuses the existing local file instead of downloading the same source again.
@@ -142,6 +143,14 @@ The first receiver store is append-only JSONL:
 ```
 
 Each job state transition writes a new complete job record. On startup, the receiver replays the file and keeps the latest record for each job id in memory.
+
+Active download jobs may include progress:
+
+```text
+percent, downloaded, total, speed, eta
+```
+
+Progress comes from `yt-dlp` and is best-effort. Some direct or very small files may complete before useful progress is emitted, so the UI must still handle queued/downloading/completed states without a percentage.
 
 Completed saves also create archive records:
 

@@ -10,6 +10,7 @@ import {
   RECEIVER_BASE_URL,
   saveMediaToReceiver,
   type ReceiverDownloadJob,
+  type ReceiverDownloadProgress,
   type ReceiverDownloadJobStatus
 } from "./receiverClient";
 
@@ -24,6 +25,7 @@ type SaveState = {
   status: SaveStatus;
   message: string;
   outputPath?: string;
+  progress?: ReceiverDownloadProgress;
 };
 
 export function Popup() {
@@ -352,6 +354,9 @@ function MediaItem({
             >
               {saveState.message}
             </p>
+            {saveState.progress ? (
+              <SaveProgress progress={saveState.progress} />
+            ) : null}
             {saveState.outputPath ? (
               <p className="media-item__path" title={saveState.outputPath}>
                 {formatOutputPath(saveState.outputPath)}
@@ -398,6 +403,38 @@ function MediaItem({
   );
 }
 
+function SaveProgress({ progress }: { progress: ReceiverDownloadProgress }) {
+  const roundedPercent =
+    progress.percent === undefined ? undefined : Math.round(progress.percent);
+  const progressDetails = formatProgressDetails(progress);
+
+  return (
+    <div className="media-item__progress">
+      <div
+        aria-label="Download progress"
+        aria-valuemax={100}
+        aria-valuemin={0}
+        aria-valuenow={roundedPercent}
+        className="media-item__progress-track"
+        role="progressbar"
+      >
+        <span
+          className="media-item__progress-fill"
+          style={{
+            width:
+              roundedPercent === undefined
+                ? "100%"
+                : `${Math.min(100, Math.max(0, roundedPercent))}%`
+          }}
+        />
+      </div>
+      {progressDetails ? (
+        <p className="media-item__progress-details">{progressDetails}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function getTitle(popupState: PopupState, mediaCount: number): string {
   if (popupState.status === "loading") {
     return "Checking tab";
@@ -427,13 +464,15 @@ function getSaveStateFromJob(job: ReceiverDownloadJob): SaveState {
       message: job.reusedArchiveRecord
         ? "Already saved. Using existing local file."
         : "Saved locally. Added to library.",
-      outputPath: job.outputPath
+      outputPath: job.outputPath,
+      progress: job.progress
     };
   }
 
   if (job.status === "failed") {
     return {
       status: job.status,
+      progress: job.progress,
       message:
         job.error ||
         "Save failed in the local receiver. Copy the URL and test it with yt-dlp."
@@ -441,15 +480,22 @@ function getSaveStateFromJob(job: ReceiverDownloadJob): SaveState {
   }
 
   if (job.status === "downloading") {
+    const percent =
+      job.progress?.percent === undefined
+        ? ""
+        : ` ${Math.round(job.progress.percent)}%`;
+
     return {
       status: job.status,
-      message: "Downloading locally."
+      message: `Downloading locally.${percent}`,
+      progress: job.progress
     };
   }
 
   return {
     status: job.status,
-    message: "Queued in local receiver."
+    message: "Queued in local receiver.",
+    progress: job.progress
   };
 }
 
@@ -523,6 +569,20 @@ function formatOutputPath(outputPath: string): string {
   }
 
   return `.../${pathParts.slice(-3).join("/")}`;
+}
+
+function formatProgressDetails(progress: ReceiverDownloadProgress): string {
+  const sizeText =
+    progress.downloaded && progress.total
+      ? `${progress.downloaded} / ${progress.total}`
+      : progress.downloaded;
+  const detailParts = [
+    sizeText,
+    progress.speed ? `${progress.speed}` : undefined,
+    progress.eta ? `ETA ${progress.eta}` : undefined
+  ].filter(Boolean);
+
+  return detailParts.join(" · ");
 }
 
 function getRequestedTabId(search: string): number | undefined {

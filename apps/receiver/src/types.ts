@@ -9,6 +9,16 @@ export type DownloadRequest = {
 
 export type DownloadJobStatus = "queued" | "downloading" | "completed" | "failed";
 
+export type DownloadProgress = {
+  stage: "downloading" | "processing";
+  percent?: number;
+  downloaded?: string;
+  total?: string;
+  speed?: string;
+  eta?: string;
+  updatedAt: string;
+};
+
 export type DownloadJob = DownloadRequest & {
   id: string;
   status: DownloadJobStatus;
@@ -17,6 +27,7 @@ export type DownloadJob = DownloadRequest & {
   outputPath?: string;
   error?: string;
   archiveRecordId?: string;
+  progress?: DownloadProgress;
   reusedArchiveRecord?: boolean;
 };
 
@@ -44,6 +55,14 @@ export type ReceiverConfig = {
   bodyLimitBytes: number;
 };
 
+export type DownloaderOptions = {
+  onProgress?: (progress: DownloadProgress) => void;
+};
+
 export type Downloader = {
-  download(job: DownloadJob, config: ReceiverConfig): Promise<{ outputPath?: string }>;
+  download(
+    job: DownloadJob,
+    config: ReceiverConfig,
+    options?: DownloaderOptions
+  ): Promise<{ outputPath?: string }>;
 };
