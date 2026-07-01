@@ -51,6 +51,7 @@
 - Double-clicked macOS command files can have a thinner PATH than a normal developer terminal. Keep the personal launcher explicit about Homebrew paths and readable failure output.
 - Plain macOS `open URL` can focus an existing browser window without making the intended navigation obvious. For the Chromium-extension MVP, prefer Chrome explicitly and print the local URL as the user's fallback.
 - Downloadable candidates should render before unsupported observations. Unsupported items are useful transparency, but they should not lead the user's decision flow.
+- Removing from the library should mean removing Dew's archive/history record only. Deleting the actual saved media file should be a separate, more explicit action.
 
 ## Mistakes To Avoid
 

@@ -229,3 +229,8 @@
 - Ran the actual `Dew.command` launcher on throwaway port `54989`; the receiver started and `GET /health` returned `{"ok":true,"name":"dew-mediarchive-receiver","version":"0.1.0"}`.
 - Updated the launcher opener to prefer Google Chrome on macOS, fall back to the default browser, and print the library URL when automatic opening fails.
 - Ran the actual `Dew.command` launcher on throwaway port `54991`; it reached `Opening library: http://127.0.0.1:54991/library` without an opener warning, and `GET /health` returned the Dew receiver identity.
+- Added library Remove actions backed by `POST /archive/:id/remove`.
+- Removing a library item now rewrites `archive.jsonl` without that record while leaving the saved media file on disk.
+- Ran receiver `npm run test`: 3 files, 25 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.

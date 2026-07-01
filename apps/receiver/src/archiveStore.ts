@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import { appendFile, mkdir, readFile, stat } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { dirname } from "node:path";
 import type { ArchiveRecord, DownloadJob } from "./types.js";
@@ -69,6 +69,23 @@ export class FileArchiveStore {
     return this.list().find((record) => record.sourceUrl === sourceUrl);
   }
 
+  async remove(recordId: string): Promise<boolean> {
+    const removeOperation = this.writeQueue.then(async () => {
+      if (!this.records.has(recordId)) {
+        return false;
+      }
+
+      const nextRecords = new Map(this.records);
+      nextRecords.delete(recordId);
+      await this.rewriteRecords(nextRecords);
+      this.records.delete(recordId);
+      return true;
+    });
+
+    this.writeQueue = removeOperation;
+    return removeOperation;
+  }
+
   private async save(record: ArchiveRecord): Promise<void> {
     this.records.set(record.id, record);
     this.writeQueue = this.writeQueue.then(async () => {
@@ -77,6 +94,19 @@ export class FileArchiveStore {
     });
 
     await this.writeQueue;
+  }
+
+  private async rewriteRecords(records: Map<string, ArchiveRecord>): Promise<void> {
+    await mkdir(dirname(this.archivePath), { recursive: true });
+    const body = [...records.values()]
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+      .map((record) => JSON.stringify(record))
+      .join("\n");
+    const nextBody = body ? `${body}\n` : "";
+    const tempPath = `${this.archivePath}.tmp-${process.pid}-${Date.now()}`;
+
+    await writeFile(tempPath, nextBody, "utf8");
+    await rename(tempPath, this.archivePath);
   }
 }
 

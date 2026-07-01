@@ -19,6 +19,7 @@
 - Local library renders saved archive records.
 - Local privacy page explains local storage and network visibility.
 - Local library supports search, filtering, sorting, and export links.
+- Local library can remove archive history records without deleting saved media files.
 - Archive metadata exports are available as JSON and CSV.
 - Duplicate source saves reuse an existing archive record instead of downloading the same source again.
 - Unsupported sources are shown or filtered intentionally.
@@ -114,6 +115,7 @@ Verified:
 - receiver tests prove `/library` escapes untrusted archive metadata
 - user manually confirmed `/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed
 - receiver tests prove `/library` search, kind filtering, and sort query handling
+- receiver tests prove library Remove deletes archive history records without deleting saved media files
 - receiver tests prove JSON and CSV archive exports
 - receiver tests prove CSV formula escaping
 - receiver tests prove duplicate source saves reuse an existing archive record

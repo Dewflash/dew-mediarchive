@@ -172,6 +172,23 @@ async function handleRequest(
     return;
   }
 
+  const archiveRecordIdToRemove = matchArchiveRemovePath(url.pathname);
+
+  if (request.method === "POST" && archiveRecordIdToRemove) {
+    const removed = await archiveStore.remove(archiveRecordIdToRemove);
+
+    if (!removed) {
+      sendJson(response, 404, { error: "Archive record was not found." });
+      return;
+    }
+
+    response.writeHead(303, {
+      Location: "/library"
+    });
+    response.end();
+    return;
+  }
+
   sendJson(response, 404, { error: "Route was not found." });
 }
 
@@ -409,4 +426,17 @@ function isAllowedOrigin(origin: string | undefined): boolean {
 function matchDownloadJobPath(pathname: string): string | undefined {
   const match = /^\/downloads\/([^/]+)$/.exec(pathname);
   return match?.[1];
+}
+
+function matchArchiveRemovePath(pathname: string): string | undefined {
+  const match = /^\/archive\/([^/]+)\/remove$/.exec(pathname);
+  if (!match) {
+    return undefined;
+  }
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return undefined;
+  }
 }

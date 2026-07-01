@@ -18,7 +18,7 @@ export function renderLibraryPage(
   const exportQuery = createQueryString(normalizedOptions);
   const body =
     visibleRecords.length > 0
-      ? `<table class="library-table"><thead><tr><th>Media</th><th>Saved</th><th>Size</th><th>Hash</th><th>Source</th></tr></thead><tbody>${rows}</tbody></table>`
+      ? `<table class="library-table"><thead><tr><th>Media</th><th>Saved</th><th>Size</th><th>Hash</th><th>Source</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`
       : `<section class="empty"><h2>No saved media found</h2><p>Try clearing filters or saving a new authorized media item.</p></section>`;
 
   return `<!doctype html>
@@ -134,6 +134,24 @@ export function renderLibraryPage(
       background: #2563eb;
       border-color: #2563eb;
       color: #ffffff;
+    }
+
+    .remove-form {
+      display: grid;
+      gap: 6px;
+    }
+
+    .remove-button {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #991b1b;
+      width: 100%;
+    }
+
+    .action-note {
+      color: #64748b;
+      font-size: 11px;
+      line-height: 1.35;
     }
 
     .exports {
@@ -262,6 +280,7 @@ export function renderLibraryPage(
       .meta,
       .path,
       .hash,
+      .action-note,
       .empty h2,
       .empty p {
         color: #cbd5e1;
@@ -288,6 +307,12 @@ export function renderLibraryPage(
 
       .title {
         color: #f8fafc;
+      }
+
+      .remove-button {
+        background: #3f1d1d;
+        border-color: #7f1d1d;
+        color: #fecaca;
       }
     }
   </style>
@@ -407,6 +432,12 @@ function renderArchiveRow(record: ArchiveRecord): string {
   <td>${escapeHtml(formatBytes(record.byteSize))}</td>
   <td><span class="hash" title="${escapeHtml(record.sha256)}">${escapeHtml(record.sha256.slice(0, 12))}</span></td>
   <td><a href="${escapeHtml(record.sourceUrl)}" rel="noreferrer">Open source</a></td>
+  <td>
+    <form class="remove-form" method="post" action="${escapeHtml(`/archive/${encodeURIComponent(record.id)}/remove`)}">
+      <button class="remove-button" type="submit">Remove history</button>
+      <span class="action-note">History only. File stays on disk.</span>
+    </form>
+  </td>
 </tr>`;
 }
 

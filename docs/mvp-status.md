@@ -44,6 +44,7 @@ mvp-extension
 - Local library page at `GET /library`.
 - Local privacy page at `GET /privacy`.
 - Local library search, media-type filtering, sorting, source links, and export links.
+- Local library can remove archive history records without deleting saved media files.
 - Root receiver route redirects to `/library`.
 - Double-clickable `Dew.command` launcher that starts the receiver and opens the local library.
 - `Dew.command` adds common Homebrew paths, preflights `node` and `npm`, and keeps readable startup errors open in Terminal.
@@ -81,7 +82,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 3 files, 23 tests.
+- Receiver `npm run test` passes: 3 files, 25 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -108,6 +109,7 @@ queued -> downloading -> completed
 - Receiver tests prove the local library renders empty and populated archive states.
 - Receiver tests prove the local library escapes untrusted archive metadata.
 - Receiver tests prove the local library can search, filter, and sort archive records.
+- Receiver tests prove library Remove deletes archive history records without deleting saved media files.
 - Receiver tests prove the local privacy page renders.
 - Receiver tests prove JSON and CSV archive export.
 - Receiver tests prove CSV formula escaping.

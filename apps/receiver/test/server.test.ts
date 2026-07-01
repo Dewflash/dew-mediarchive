@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AddressInfo } from "node:net";
@@ -295,6 +295,56 @@ describe("receiver server", () => {
     expect(html).toContain("mp4");
     expect(html).toContain("Export JSON");
     expect(html).toContain("Export CSV");
+    expect(html).toContain("Remove");
+    expect(html).toContain("History only. File stays on disk.");
+    expect(html).toContain("/archive/");
+    expect(html).toContain("/remove");
+  });
+
+  it("removes archive records from the local library without deleting files", async () => {
+    await createCompletedDownload({
+      mediaTitle: "Flower clip",
+      pageTitle: "MDN Flower"
+    });
+    const archiveResponse = await fetch(`${baseUrl}/archive`);
+    const archiveBody = (await archiveResponse.json()) as {
+      records: ArchiveRecord[];
+    };
+    const record = archiveBody.records[0];
+
+    const removeResponse = await fetch(
+      `${baseUrl}/archive/${encodeURIComponent(record.id)}/remove`,
+      {
+        method: "POST",
+        redirect: "manual"
+      }
+    );
+    const nextArchiveResponse = await fetch(`${baseUrl}/archive`);
+    const nextArchiveBody = (await nextArchiveResponse.json()) as {
+      records: ArchiveRecord[];
+    };
+    const libraryResponse = await fetch(`${baseUrl}/library`);
+    const libraryHtml = await libraryResponse.text();
+
+    expect(removeResponse.status).toBe(303);
+    expect(removeResponse.headers.get("location")).toBe("/library");
+    expect(nextArchiveBody.records).toHaveLength(0);
+    expect(libraryHtml).toContain("0 saved items");
+    expect(libraryHtml).not.toContain("Flower clip");
+    await expect(readFile(record.outputPath, "utf8")).resolves.toBe(
+      "flower video bytes"
+    );
+  });
+
+  it("returns 404 when removing an unknown archive record", async () => {
+    const response = await fetch(`${baseUrl}/archive/missing-record/remove`, {
+      method: "POST"
+    });
+
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "Archive record was not found."
+    });
   });
 
   it("filters and sorts archive records in the local library", async () => {

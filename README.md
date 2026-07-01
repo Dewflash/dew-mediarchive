@@ -69,7 +69,7 @@ Open the local library while the receiver is running:
 http://127.0.0.1:47321/library
 ```
 
-The library supports search, media-type filtering, sorting, and archive exports:
+The library supports search, media-type filtering, sorting, archive exports, and removing history records without deleting saved media files:
 
 ```text
 http://127.0.0.1:47321/export/archive.json
