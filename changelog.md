@@ -133,3 +133,12 @@
 - Ran extension `npm run test`: 5 files, 34 tests passed.
 - Ran extension `npm run typecheck`: passed.
 - Ran extension `npm run build`: passed.
+- Added a server-rendered local library at `GET /library`.
+- Added root redirect from `/` to `/library`.
+- Added library empty state and archive-record table.
+- Escaped archive metadata before rendering local library HTML.
+- Added a restrictive content security policy for the local library.
+- Added receiver tests for root redirect, empty library, populated library, and HTML escaping.
+- Ran receiver `npm run test`: 1 file, 11 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.

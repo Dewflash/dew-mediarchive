@@ -62,6 +62,12 @@ popup Save -> POST /downloads -> receiver starts yt-dlp -> file saved locally
 
 By default, saved files go to `~/Movies/Dew MediArchive`, job history is appended to `~/Movies/Dew MediArchive/.dew/jobs.jsonl`, and completed saves are indexed in `~/Movies/Dew MediArchive/.dew/archive.jsonl`.
 
+Open the local library while the receiver is running:
+
+```text
+http://127.0.0.1:47321/library
+```
+
 ## Extension Commands
 
 From `apps/extension`:

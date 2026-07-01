@@ -102,6 +102,7 @@ The receiver in `apps/receiver` is a local-only HTTP service. It listens on `127
 ```text
 GET  /health
 GET  /archive
+GET  /library
 GET  /downloads
 GET  /downloads/:id
 POST /downloads
@@ -145,6 +146,16 @@ Completed saves also create archive records:
 ```
 
 Each archive record stores source URL, page context, output path, byte size, SHA-256 hash, and capture timestamps. This is not the final object-store layout, but it gives the future library view a durable index.
+
+## Local Library View
+
+The receiver serves a simple local library page:
+
+```text
+GET /library
+```
+
+It renders `archive.jsonl` records as HTML and redirects `/` to `/library`. The page is server-rendered, has no client-side scripts, escapes archive metadata, and uses a restrictive content security policy.
 
 ## Future App Shape
 

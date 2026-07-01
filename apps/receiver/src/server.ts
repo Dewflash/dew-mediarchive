@@ -8,6 +8,7 @@ import { URL } from "node:url";
 import type { Downloader, ReceiverConfig } from "./types.js";
 import { FileArchiveStore } from "./archiveStore.js";
 import { FileJobStore } from "./jobStore.js";
+import { renderLibraryPage } from "./libraryView.js";
 import { validateDownloadRequest } from "./validation.js";
 
 export type ReceiverServerOptions = {
@@ -62,6 +63,14 @@ async function handleRequest(
 
   const url = new URL(request.url ?? "/", `http://${config.host}:${config.port}`);
 
+  if (request.method === "GET" && url.pathname === "/") {
+    response.writeHead(302, {
+      Location: "/library"
+    });
+    response.end();
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/health") {
     sendJson(response, 200, {
       ok: true,
@@ -78,6 +87,11 @@ async function handleRequest(
 
   if (request.method === "GET" && url.pathname === "/archive") {
     sendJson(response, 200, { records: archiveStore.list() });
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/library") {
+    sendHtml(response, 200, renderLibraryPage(archiveStore.list()));
     return;
   }
 
@@ -231,6 +245,14 @@ function sendJson(
     "Content-Type": "application/json; charset=utf-8"
   });
   response.end(JSON.stringify(body));
+}
+
+function sendHtml(response: ServerResponse, statusCode: number, body: string): void {
+  response.writeHead(statusCode, {
+    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+    "Content-Type": "text/html; charset=utf-8"
+  });
+  response.end(body);
 }
 
 function setCorsHeaders(response: ServerResponse, origin: string | undefined): void {

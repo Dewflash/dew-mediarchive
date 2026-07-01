@@ -471,6 +471,40 @@ instead of forcing the full filesystem path into a tiny extension window. The fu
 
 We are not adding an Open Folder button yet because that is really native-app behavior. For now, showing the path gives confirmation without pretending the extension is already a desktop app.
 
+## Why We Added A Local Library Page
+
+Once Dew had archive records, looking at raw JSON was the wrong user experience.
+
+The receiver now serves:
+
+```text
+http://127.0.0.1:47321/library
+```
+
+That page reads the archive records and shows saved items in a simple table:
+
+```text
+media title/source
+saved time
+local file path
+file size
+hash preview
+```
+
+This is not the final app UI. It is the first useful local library surface.
+
+## Why The Library Has No JavaScript Yet
+
+The library page is rendered by the receiver as plain HTML. That is enough for the MVP because the first need is visibility:
+
+```text
+what have I saved?
+where is the file?
+what source did it come from?
+```
+
+Avoiding client-side JavaScript keeps the first library safer and simpler. Since page titles and source URLs come from websites, Dew escapes them before rendering HTML so a saved page title cannot become executable code in the library.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

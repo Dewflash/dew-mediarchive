@@ -97,6 +97,30 @@ describe("receiver server", () => {
     });
   });
 
+  it("redirects the root route to the local library", async () => {
+    const response = await fetch(`${baseUrl}/`, {
+      redirect: "manual"
+    });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toBe("/library");
+  });
+
+  it("renders an empty local library", async () => {
+    const response = await fetch(`${baseUrl}/library`, {
+      headers: {
+        Origin: "chrome-extension://example"
+      }
+    });
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/html");
+    expect(html).toContain("Dew MediArchive");
+    expect(html).toContain("0 saved items");
+    expect(html).toContain("No saved media yet");
+  });
+
   it("rejects normal website origins", async () => {
     const response = await fetch(`${baseUrl}/health`, {
       headers: {
@@ -190,6 +214,42 @@ describe("receiver server", () => {
     expect(archiveBody.records[0].sha256).toMatch(/^[a-f0-9]{64}$/);
   });
 
+  it("renders archive records in the local library", async () => {
+    await createCompletedDownload({
+      pageTitle: "MDN Flower"
+    });
+
+    const response = await fetch(`${baseUrl}/library`, {
+      headers: {
+        Origin: "chrome-extension://example"
+      }
+    });
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toContain("1 saved item");
+    expect(html).toContain("MDN Flower");
+    expect(html).toContain("flower.mp4");
+    expect(html).toContain("18 B");
+    expect(html).toContain("mp4");
+  });
+
+  it("escapes untrusted archive metadata in the local library", async () => {
+    await createCompletedDownload({
+      pageTitle: "<script>alert(1)</script>"
+    });
+
+    const response = await fetch(`${baseUrl}/library`, {
+      headers: {
+        Origin: "chrome-extension://example"
+      }
+    });
+    const html = await response.text();
+
+    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(html).not.toContain("<script>alert(1)</script>");
+  });
+
   it("rejects unsupported download URL schemes", async () => {
     const response = await fetch(`${baseUrl}/downloads`, {
       method: "POST",
@@ -239,5 +299,28 @@ describe("receiver server", () => {
     }
 
     throw new Error(`Timed out waiting for job ${jobId} to become ${status}.`);
+  }
+
+  async function createCompletedDownload({
+    pageTitle
+  }: {
+    pageTitle: string;
+  }): Promise<DownloadJob> {
+    const response = await fetch(`${baseUrl}/downloads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "chrome-extension://example"
+      },
+      body: JSON.stringify({
+        url: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        pageUrl: "https://interactive-examples.mdn.mozilla.net/",
+        pageTitle,
+        kind: "mp4"
+      })
+    });
+    const body = (await response.json()) as { job: DownloadJob };
+
+    return waitForJobStatus(body.job.id, "completed");
   }
 });

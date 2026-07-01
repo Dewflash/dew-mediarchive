@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-MVP Save UX polish.
+MVP local library.
 
 ## Current Goal
 
-Make completed saves explain where the file landed while keeping the extension popup compact.
+Make saved archive records visible through the local receiver without needing to inspect JSONL by hand.
 
 ## Handoff Status
 
@@ -72,12 +72,18 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Shortened long output paths in the popup while preserving the full path in the element title.
 - Added popup test coverage for output path display.
 - Verified the Save output-path UI with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Added a server-rendered local library page at `/library`.
+- Added root redirect from `/` to `/library`.
+- Rendered empty and populated archive states from `archive.jsonl`.
+- Escaped archive metadata before rendering HTML.
+- Added a restrictive CSP for the local library page.
+- Verified the library route with receiver tests, typecheck, and build.
 
 ## Next Steps
 
 1. Make the receiver easier to launch outside a terminal.
-2. Start a local library/gallery surface backed by `/archive`.
-3. Add export for archive metadata.
+2. Add export for archive metadata.
+3. Improve the library with filtering/search.
 4. Re-test a short MP4 and a page with multiple videos in normal Chrome.
 
 ## Open Questions

@@ -33,6 +33,8 @@ mvp-extension
 - Append-only archive metadata in JSONL for completed saves.
 - Archive endpoint at `GET /archive`.
 - Archive records include source URL, page context, output path, byte size, and SHA-256 hash.
+- Local library page at `GET /library`.
+- Root receiver route redirects to `/library`.
 - Manual verification guide in `docs/mvp-manual-test.md`.
 - Architecture, adapter, archive, security, verification, learning, and changelog docs.
 
@@ -65,7 +67,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 1 file, 7 tests.
+- Receiver `npm run test` passes: 1 file, 11 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -89,6 +91,8 @@ queued -> downloading -> completed
 ```
 
 - Receiver tests prove completed downloads write archive records.
+- Receiver tests prove the local library renders empty and populated archive states.
+- Receiver tests prove the local library escapes untrusted archive metadata.
 - Popup tests prove completed saves display the receiver output path.
 
 ## What Is Not Done Yet
@@ -96,7 +100,7 @@ queued -> downloading -> completed
 - Human Copy proof from the real toolbar popup is not complete.
 - Desktop app wrapper is not built.
 - Safari support is not built.
-- Final content-addressed object storage, search, import/export, and gallery views are not built.
+- Final content-addressed object storage, search, import/export, and polished gallery views are not built.
 - YouTube and DRM-heavy platforms remain intentionally unsupported.
 
 ## Why The Remaining Copy Proof Is Still Open
@@ -126,7 +130,7 @@ confirm download
 Move from developer MVP to personal-tool MVP:
 
 ```text
-terminal receiver -> packaged local app/service -> archive records -> library view
+terminal receiver -> packaged local app/service -> richer library view -> export
 ```
 
 Keep Copy available as the fallback while Save UX is improved.
