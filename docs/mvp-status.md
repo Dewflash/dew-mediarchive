@@ -25,6 +25,7 @@ mvp-extension
 - Popup Save states for receiver unavailable, queued, downloading, completed, and failed jobs.
 - Popup shows receiver download progress with a progress bar when `yt-dlp` reports percent progress.
 - Popup restores session-backed Save job state when reopened and resumes polling unfinished receiver jobs.
+- Popup shows global queued/downloading/failed receiver jobs at the bottom, below detected unsupported media.
 - Popup shows the saved output path when the receiver returns one.
 - Popup links to the local library after completed Save.
 - Popup shows an already-saved state when the receiver reuses an existing archive record.
@@ -61,7 +62,7 @@ mvp-extension
 
 ## What Is Proven
 
-- Extension `npm run test` passes: 5 files, 48 tests.
+- Extension `npm run test` passes: 5 files, 49 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -133,6 +134,7 @@ queued -> downloading -> completed
 - Popup tests prove detected cards show media-specific titles.
 - Popup tests prove title-less network stream candidates use page-title fallback labels instead of duplicating the source URL.
 - Popup tests prove saved receiver jobs restore after popup reopen and resume progress polling.
+- Popup tests prove global receiver activity renders below detected and unsupported media.
 - Popup tests prove Clear temp removes detected media and session-backed Save progress for the current tab.
 - Popup tests prove downloadable candidates render above unsupported observations.
 - Receiver tests prove media-specific titles are preserved in archive records, library rendering, search, JSON export, and CSV export.

@@ -19,6 +19,7 @@
 - The local library can clear failed receiver job records without touching archive records or saved files.
 - Popup renders Save progress when the receiver reports it.
 - Popup restores Save progress after closing and reopening while a receiver job is still running.
+- Popup renders global queued/downloading/failed receiver jobs below detected and unsupported media.
 - Popup can clear detected media and session-backed Save progress for the current tab.
 - Completed receiver saves create archive metadata with file hash and size.
 - Local library renders saved archive records.
@@ -137,6 +138,7 @@ Verified:
 - popup tests prove candidate cards can render media-specific titles instead of only source URLs
 - popup tests prove title-less network stream candidates use page-title fallback labels before falling back to source URLs
 - popup tests prove session-backed Save jobs restore and resume progress polling after popup reopen
+- popup tests prove global receiver activity renders below detected and unsupported media
 - popup tests prove Clear temp removes detected media and session-backed Save progress for the current tab
 - popup tests prove downloadable candidates render before unsupported observations
 - background tests prove closed-tab badge update races are ignored without hiding unexpected badge failures

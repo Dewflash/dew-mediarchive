@@ -24,6 +24,7 @@ export type ReceiverDownloadJob = {
   url: string;
   pageUrl?: string;
   pageTitle?: string;
+  mediaTitle?: string;
   kind?: MediaCandidate["kind"];
   outputPath?: string;
   error?: string;
@@ -33,6 +34,11 @@ export type ReceiverDownloadJob = {
 
 type ReceiverJobResponse = {
   job?: ReceiverDownloadJob;
+  error?: string;
+};
+
+type ReceiverJobsResponse = {
+  jobs?: ReceiverDownloadJob[];
   error?: string;
 };
 
@@ -82,6 +88,26 @@ export async function resumeReceiverDownloadJob(
     pollIntervalMs: options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS,
     signal: options.signal
   });
+}
+
+export async function listReceiverDownloadJobs(
+  options: Pick<ReceiverSaveOptions, "fetcher" | "signal"> = {}
+): Promise<ReceiverDownloadJob[]> {
+  const fetcher = options.fetcher ?? fetch;
+  const response = await fetchReceiver(fetcher, `${RECEIVER_BASE_URL}/downloads`, {
+    signal: options.signal
+  });
+  const body = (await response.json().catch(() => ({}))) as ReceiverJobsResponse;
+
+  if (!response.ok) {
+    throw new Error(body.error || "Local receiver rejected the jobs request.");
+  }
+
+  if (!Array.isArray(body.jobs)) {
+    throw new Error("Local receiver returned an invalid jobs response.");
+  }
+
+  return body.jobs;
 }
 
 async function createDownloadJob(

@@ -58,6 +58,7 @@
 - Chrome tabs can close between media detection and badge updates. Treat `No tab with id` badge failures as a harmless lifecycle race, but keep other badge errors visible.
 - Cross-page download visibility belongs to the receiver/library, not the current tab popup. The receiver job store is the global truth for queued/downloading/failed saves.
 - Failed download cleanup should remove only the receiver job record. It should not touch archive records or saved files.
+- The popup can mirror receiver-global activity, but it should stay below page detections and unsupported observations so the current-page capture flow remains primary.
 
 ## Mistakes To Avoid
 
@@ -95,3 +96,4 @@
 - Do not swallow all background badge errors. Only the known closed-tab race should be ignored.
 - Do not make failed receiver jobs auto-refresh the library forever. Refresh only while queued/downloading work can actually change quickly.
 - Do not allow queued/downloading jobs to be cleared from the library; only terminal failed job records are safe to clear there.
+- Do not turn receiver-global popup activity into a second source of truth. Read it from `/downloads`; keep mutation in the receiver/library flow.

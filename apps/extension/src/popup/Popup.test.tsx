@@ -82,6 +82,7 @@ describe("Popup", () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -567,6 +568,76 @@ describe("Popup", () => {
       screen.getByText("Only http and https media URLs are supported.")
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Copy" })).not.toBeInTheDocument();
+  });
+
+  it("shows receiver activity below detected and unsupported media", async () => {
+    fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
+      if (String(input) === "http://127.0.0.1:47321/downloads") {
+        return createJsonResponse({
+          jobs: [
+            createReceiverJob("completed", {
+              id: "job-complete",
+              mediaTitle: "Completed clip"
+            }),
+            createReceiverJob("downloading", {
+              id: "job-downloading",
+              mediaTitle: "Previous page clip",
+              progress: {
+                downloaded: "512KiB",
+                eta: "00:01",
+                percent: 42,
+                speed: "1.0MiB/s",
+                stage: "downloading",
+                total: "1.2MiB",
+                updatedAt: new Date().toISOString()
+              }
+            }),
+            createReceiverJob("failed", {
+              error: "yt-dlp could not download this URL.",
+              id: "job-failed",
+              mediaTitle: "Broken clip"
+            })
+          ]
+        });
+      }
+
+      return createJsonResponse({ error: "Unexpected request" }, 500);
+    });
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/video.mp4", {
+          mediaTitle: "Downloadable clip"
+        }),
+        createUnsupported("unsupported-1", "blob:https://example.test/video")
+      ])
+    });
+
+    render(<Popup />);
+
+    const unsupportedMessage = await screen.findByText(
+      "Only http and https media URLs are supported."
+    );
+    const receiverHeading = await screen.findByRole(
+      "region",
+      { name: "Receiver activity" },
+      { timeout: 2500 }
+    );
+
+    expect(receiverHeading).toBeInTheDocument();
+    expect(screen.getByText("Previous page clip")).toBeInTheDocument();
+    expect(screen.getByText("Downloading locally. 42%")).toBeInTheDocument();
+    expect(screen.getByText("512KiB / 1.2MiB · 1.0MiB/s · ETA 00:01")).toBeInTheDocument();
+    expect(screen.getByText("Broken clip")).toBeInTheDocument();
+    expect(screen.getByText("yt-dlp could not download this URL.")).toBeInTheDocument();
+    expect(screen.queryByText("Completed clip")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
+      "href",
+      "http://127.0.0.1:47321/library"
+    );
+    expect(
+      unsupportedMessage.compareDocumentPosition(receiverHeading) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 
   it("updates when the active tab snapshot changes", async () => {

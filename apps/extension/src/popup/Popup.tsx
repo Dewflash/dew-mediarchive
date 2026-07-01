@@ -8,6 +8,7 @@ import {
   type MediaDetectionSnapshot
 } from "../shared";
 import {
+  listReceiverDownloadJobs,
   RECEIVER_BASE_URL,
   resumeReceiverDownloadJob,
   saveMediaToReceiver,
@@ -28,6 +29,13 @@ type PopupState =
   | { status: "error"; message: string };
 
 type SaveStatus = ReceiverDownloadJobStatus | "saving" | "unavailable";
+type ReceiverActivityJobStatus = Extract<
+  ReceiverDownloadJobStatus,
+  "queued" | "downloading" | "failed"
+>;
+type ReceiverActivityJob = ReceiverDownloadJob & {
+  status: ReceiverActivityJobStatus;
+};
 
 type SaveState = {
   status: SaveStatus;
@@ -41,6 +49,9 @@ export function Popup() {
   const [copiedMediaId, setCopiedMediaId] = useState<string | undefined>();
   const [copyErrorMediaId, setCopyErrorMediaId] = useState<string | undefined>();
   const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({});
+  const [receiverActivityJobs, setReceiverActivityJobs] = useState<
+    ReceiverActivityJob[]
+  >([]);
   const isMountedRef = useRef(true);
   const saveControllersRef = useRef(new Map<string, AbortController>());
   const resumedJobIdsRef = useRef(new Set<string>());
@@ -154,6 +165,39 @@ export function Popup() {
       isMountedRef.current = false;
       abortActiveSaves(saveControllersRef.current);
       chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+    let timeoutId: number | undefined;
+
+    async function refreshReceiverActivity() {
+      try {
+        const jobs = await listReceiverDownloadJobs();
+
+        if (isActive) {
+          setReceiverActivityJobs(getReceiverActivityJobs(jobs));
+        }
+      } catch {
+        if (isActive) {
+          setReceiverActivityJobs([]);
+        }
+      } finally {
+        if (isActive) {
+          timeoutId = window.setTimeout(refreshReceiverActivity, 1500);
+        }
+      }
+    }
+
+    timeoutId = window.setTimeout(refreshReceiverActivity, 1000);
+
+    return () => {
+      isActive = false;
+
+      if (timeoutId !== undefined) {
+        window.clearTimeout(timeoutId);
+      }
     };
   }, []);
 
@@ -404,6 +448,7 @@ export function Popup() {
         popupState={popupState}
         saveStates={saveStates}
       />
+      <ReceiverActivity jobs={receiverActivityJobs} />
     </main>
   );
 }
@@ -606,6 +651,44 @@ function SaveProgress({ progress }: { progress: ReceiverDownloadProgress }) {
   );
 }
 
+function ReceiverActivity({ jobs }: { jobs: ReceiverActivityJob[] }) {
+  if (jobs.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="receiver-activity" aria-label="Receiver activity">
+      <div className="receiver-activity__header">
+        <h2>Receiver activity</h2>
+        <a href={`${RECEIVER_BASE_URL}/library`} rel="noreferrer" target="_blank">
+          Library
+        </a>
+      </div>
+      <div className="receiver-activity__list">
+        {jobs.map((job) => (
+          <article className="receiver-job" key={job.id}>
+            <div className="receiver-job__header">
+              <span className="receiver-job__title">{getReceiverJobTitle(job)}</span>
+              <span
+                className={`receiver-job__status receiver-job__status--${job.status}`}
+              >
+                {job.status}
+              </span>
+            </div>
+            <p className="receiver-job__url">{formatUrl(job.url)}</p>
+            <p
+              className={`receiver-job__message receiver-job__message--${getReceiverActivityMessageTone(job.status)}`}
+            >
+              {getReceiverActivityMessage(job)}
+            </p>
+            {job.progress ? <SaveProgress progress={job.progress} /> : null}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function getTitle(popupState: PopupState, mediaCount: number): string {
   if (popupState.status === "loading") {
     return "Checking tab";
@@ -748,6 +831,47 @@ function isSaveBusy(saveState: SaveState | undefined): boolean {
 
 function isTerminalSaveState(saveState: SaveState): boolean {
   return saveState.status === "completed" || saveState.status === "failed";
+}
+
+function getReceiverActivityJobs(jobs: ReceiverDownloadJob[]): ReceiverActivityJob[] {
+  return jobs.filter(isReceiverActivityJob);
+}
+
+function isReceiverActivityJob(
+  job: ReceiverDownloadJob
+): job is ReceiverDownloadJob & { status: ReceiverActivityJobStatus } {
+  return (
+    job.status === "queued" ||
+    job.status === "downloading" ||
+    job.status === "failed"
+  );
+}
+
+function getReceiverJobTitle(job: ReceiverDownloadJob): string {
+  return job.mediaTitle?.trim() || job.pageTitle?.trim() || formatUrl(job.url);
+}
+
+function getReceiverActivityMessage(job: ReceiverDownloadJob): string {
+  if (job.status === "failed") {
+    return job.error || "Download failed in the local receiver.";
+  }
+
+  if (job.status === "downloading") {
+    const percent =
+      job.progress?.percent === undefined
+        ? ""
+        : ` ${Math.round(job.progress.percent)}%`;
+
+    return `Downloading locally.${percent}`;
+  }
+
+  return "Queued in local receiver.";
+}
+
+function getReceiverActivityMessageTone(
+  status: ReceiverActivityJobStatus
+): "error" | "neutral" {
+  return status === "failed" ? "error" : "neutral";
 }
 
 function getSaveMessageTone(status: SaveStatus): "success" | "error" | "neutral" {

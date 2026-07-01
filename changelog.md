@@ -265,3 +265,9 @@
 - Ran receiver `npm run test`: 3 files, 31 tests passed.
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
+- Added a bottom-of-popup receiver activity section for global queued, downloading, and failed receiver jobs.
+- The receiver activity section reads `/downloads`, excludes completed jobs, and links to the local library.
+- Added popup regression coverage proving receiver activity renders below detected candidates and unsupported observations.
+- Ran extension `npm run test`: 5 files, 49 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.
