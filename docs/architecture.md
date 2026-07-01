@@ -9,10 +9,10 @@ detect -> classify -> normalize -> queue -> download -> hash -> store -> index -
 The MVP implements only the first user-visible slice:
 
 ```text
-detect -> classify -> normalize -> present/copy
+detect -> classify -> normalize -> present/copy/save
 ```
 
-The receiver phase implements the first local save backend slice:
+The receiver implements the first local save backend slice:
 
 ```text
 queue -> download
@@ -80,6 +80,7 @@ popup opens
   -> read session snapshot
   -> render loading, empty, error, candidates, or unsupported states
   -> copy candidate URL on request
+  -> save candidate URL to local receiver on request
 ```
 
 The shared storage helper owns the snapshot key so the background worker and popup cannot drift.
@@ -105,7 +106,7 @@ GET  /downloads/:id
 POST /downloads
 ```
 
-The intended next extension flow is:
+The extension Save flow is:
 
 ```text
 popup Save
@@ -114,6 +115,7 @@ popup Save
   -> job is appended to jobs.jsonl
   -> yt-dlp runs with argument-array spawning
   -> job becomes completed or failed
+  -> popup shows queued, downloading, saved, or retryable failure
 ```
 
 The receiver deliberately does not depend on the extension internals. It accepts a normalized download request:

@@ -12,6 +12,7 @@ const storageAddListener = vi.fn();
 const storageRemoveListener = vi.fn();
 const tabsQuery = vi.fn();
 const writeText = vi.fn();
+const fetchMock = vi.fn();
 
 let storageChangeHandler:
   | ((
@@ -29,6 +30,7 @@ describe("Popup", () => {
     storageRemoveListener.mockReset();
     tabsQuery.mockReset();
     writeText.mockReset();
+    fetchMock.mockReset();
 
     tabsQuery.mockResolvedValue([
       {
@@ -63,6 +65,8 @@ describe("Popup", () => {
         writeText
       }
     });
+
+    vi.stubGlobal("fetch", fetchMock);
   });
 
   afterEach(() => {
@@ -143,6 +147,96 @@ describe("Popup", () => {
 
     expect(writeText).toHaveBeenCalledWith("https://cdn.example.test/video.mp4");
     expect(await screen.findByRole("button", { name: "Copied" })).toBeInTheDocument();
+  });
+
+  it("sends a candidate URL to the local receiver and shows saved state", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("queued")
+        })
+      )
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("completed", {
+            outputPath: "/Users/example/Movies/Dew MediArchive/video.mp4"
+          })
+        })
+      );
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+      ])
+    });
+
+    render(<Popup />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "http://127.0.0.1:47321/downloads",
+        expect.objectContaining({
+          method: "POST"
+        })
+      );
+    });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
+      url: "https://cdn.example.test/video.mp4",
+      pageUrl: "https://example.test/watch",
+      pageTitle: "Smoke Page",
+      kind: "mp4"
+    });
+    expect(await screen.findByText("Saved locally.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Saved" })).toBeInTheDocument();
+  });
+
+  it("shows a receiver unavailable state when Save cannot connect", async () => {
+    fetchMock.mockRejectedValue(new Error("connection refused"));
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+      ])
+    });
+
+    render(<Popup />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Save" }));
+
+    expect(
+      await screen.findByText("Local receiver is not running.")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+  });
+
+  it("shows receiver download failures and allows retry", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("queued")
+        })
+      )
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("failed", {
+            error: "yt-dlp could not download this URL."
+          })
+        })
+      );
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createCandidate("media-1", "https://cdn.example.test/video.mp4")
+      ])
+    });
+
+    render(<Popup />);
+
+    await userEvent.click(await screen.findByRole("button", { name: "Save" }));
+
+    expect(
+      await screen.findByText("yt-dlp could not download this URL.")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
   });
 
   it("shows a copy failure state when clipboard write fails", async () => {
@@ -280,4 +374,28 @@ function createCandidate(
       detectorVersion: "test"
     }
   };
+}
+
+function createReceiverJob(
+  status: "queued" | "downloading" | "completed" | "failed",
+  overrides: Record<string, unknown> = {}
+) {
+  return {
+    id: "job-1",
+    status,
+    url: "https://cdn.example.test/video.mp4",
+    pageUrl: "https://example.test/watch",
+    pageTitle: "Smoke Page",
+    kind: "mp4",
+    ...overrides
+  };
+}
+
+function createJsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    status
+  });
 }

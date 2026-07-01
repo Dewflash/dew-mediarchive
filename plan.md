@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-MVP local save receiver.
+MVP Save loop.
 
 ## Current Goal
 
-Build the first local save backend so the extension can move from Copy to Save without sending media URLs to a cloud service.
+Prove the extension can Save detected media through the local receiver without sending media URLs to a cloud service.
 
 ## Handoff Status
 
@@ -55,13 +55,21 @@ See `docs/mvp-status.md` for the concise done/not-done MVP handoff.
 - Added a `yt-dlp` downloader that spawns the binary with argument arrays rather than shell command strings.
 - Verified the receiver with `npm run test`, `npm run typecheck`, and `npm run build`.
 - Smoke-tested the receiver with the MDN flower MP4 and verified the saved output with `ffprobe`.
+- Added a Save button beside Copy for candidate media in the popup.
+- Added a popup receiver client that posts to `http://127.0.0.1:47321/downloads` and polls job status.
+- Added Save states for queued, downloading, completed, receiver unavailable, and receiver failure.
+- Kept Copy available as the fallback action.
+- Added abort handling so active Save polling is cancelled when the popup closes.
+- Added popup tests for Save request shape, saved state, receiver unavailable state, and receiver failure retry state.
+- Verified the Save wiring with `npm run test`, `npm run typecheck`, and `npm run build`.
+- Manually smoke-tested extension Save with the MDN flower MP4 and confirmed `/private/tmp/dew-save-test/flower-[flower].mp4` plus `queued -> downloading -> completed` job history.
 
 ## Next Steps
 
-1. Add a Save button in the popup beside Copy.
-2. Have Save call `POST http://127.0.0.1:47321/downloads`.
-3. Show receiver states in the popup: receiver missing, queued, downloading, completed, failed.
-4. Keep Copy available as a fallback.
+1. Improve Save UX with saved output path display.
+2. Make the receiver easier to launch outside a terminal.
+3. Add archive records for saved media metadata.
+4. Start a local library/gallery surface.
 5. Re-test a short MP4 and a page with multiple videos in normal Chrome.
 
 ## Open Questions

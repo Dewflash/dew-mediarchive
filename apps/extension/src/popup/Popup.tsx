@@ -1,24 +1,40 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getMediaSnapshotStorageKey,
   readMediaDetectionSnapshot,
   type DetectedMedia,
+  type MediaCandidate,
   type MediaDetectionSnapshot
 } from "../shared";
+import {
+  saveMediaToReceiver,
+  type ReceiverDownloadJobStatus
+} from "./receiverClient";
 
 type PopupState =
   | { status: "loading" }
   | { status: "ready"; tabId: number; snapshot?: MediaDetectionSnapshot }
   | { status: "error"; message: string };
 
+type SaveStatus = ReceiverDownloadJobStatus | "saving" | "unavailable";
+
+type SaveState = {
+  status: SaveStatus;
+  message: string;
+};
+
 export function Popup() {
   const [popupState, setPopupState] = useState<PopupState>({ status: "loading" });
   const [copiedMediaId, setCopiedMediaId] = useState<string | undefined>();
   const [copyErrorMediaId, setCopyErrorMediaId] = useState<string | undefined>();
+  const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({});
+  const isMountedRef = useRef(true);
+  const saveControllersRef = useRef(new Map<string, AbortController>());
 
   useEffect(() => {
     let isMounted = true;
     let activeTabId: number | undefined;
+    isMountedRef.current = true;
 
     async function loadCurrentTabSnapshot() {
       try {
@@ -110,6 +126,8 @@ export function Popup() {
 
     return () => {
       isMounted = false;
+      isMountedRef.current = false;
+      abortActiveSaves(saveControllersRef.current);
       chrome.storage.onChanged.removeListener(handleStorageChange);
     };
   }, []);
@@ -137,6 +155,79 @@ export function Popup() {
     }
   }
 
+  async function saveMediaUrl(media: DetectedMedia) {
+    if (media.status !== "candidate") {
+      return;
+    }
+
+    saveControllersRef.current.get(media.id)?.abort();
+    const saveController = new AbortController();
+    saveControllersRef.current.set(media.id, saveController);
+
+    setSaveState(media.id, {
+      status: "saving",
+      message: "Sending to local receiver."
+    });
+
+    try {
+      const finalJob = await saveMediaToReceiver(media, {
+        onJobUpdate(job) {
+          setSaveStateIfActive(
+            media.id,
+            saveController,
+            getSaveStateFromJob(job.status, job.error)
+          );
+        },
+        signal: saveController.signal
+      });
+
+      setSaveStateIfActive(
+        media.id,
+        saveController,
+        getSaveStateFromJob(finalJob.status, finalJob.error)
+      );
+    } catch (error) {
+      if (saveController.signal.aborted || !isMountedRef.current) {
+        return;
+      }
+
+      setSaveStateIfActive(media.id, saveController, {
+        status: "unavailable",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Dew could not reach the local receiver."
+      });
+    } finally {
+      if (saveControllersRef.current.get(media.id) === saveController) {
+        saveControllersRef.current.delete(media.id);
+      }
+    }
+  }
+
+  function setSaveState(mediaId: string, saveState: SaveState) {
+    setSaveStates((currentSaveStates) => ({
+      ...currentSaveStates,
+      [mediaId]: saveState
+    }));
+  }
+
+  function setSaveStateIfActive(
+    mediaId: string,
+    saveController: AbortController,
+    saveState: SaveState
+  ) {
+    if (
+      !isMountedRef.current ||
+      saveController.signal.aborted ||
+      saveControllersRef.current.get(mediaId) !== saveController
+    ) {
+      return;
+    }
+
+    setSaveState(mediaId, saveState);
+  }
+
   return (
     <main className="popup">
       <header className="popup__header">
@@ -151,7 +242,9 @@ export function Popup() {
         copyErrorMediaId={copyErrorMediaId}
         mediaItems={mediaItems}
         onCopy={copyMediaUrl}
+        onSave={saveMediaUrl}
         popupState={popupState}
+        saveStates={saveStates}
       />
     </main>
   );
@@ -162,13 +255,17 @@ function PopupContent({
   copyErrorMediaId,
   mediaItems,
   onCopy,
-  popupState
+  onSave,
+  popupState,
+  saveStates
 }: {
   copiedMediaId: string | undefined;
   copyErrorMediaId: string | undefined;
   mediaItems: DetectedMedia[];
   onCopy: (media: DetectedMedia) => Promise<void>;
+  onSave: (media: DetectedMedia) => Promise<void>;
   popupState: PopupState;
+  saveStates: Record<string, SaveState>;
 }) {
   if (popupState.status === "loading") {
     return (
@@ -200,37 +297,84 @@ function PopupContent({
   return (
     <section className="media-list" aria-live="polite">
       {mediaItems.map((media) => (
-        <article className="media-item" key={media.id}>
-          <div className="media-item__content">
-            <div className="media-item__header">
-              <span className="media-item__kind">{getMediaLabel(media)}</span>
-              <span className={`media-item__status media-item__status--${media.status}`}>
-                {media.status}
-              </span>
-            </div>
-            <p className="media-item__url">{formatUrl(media.url)}</p>
-            {media.status === "unsupported" ? (
-              <p className="media-item__message">{media.message}</p>
-            ) : null}
-            {copyErrorMediaId === media.id ? (
-              <p className="media-item__message">Copy failed. Try again.</p>
-            ) : null}
-          </div>
-
-          {media.status === "candidate" ? (
-            <button
-              className="media-item__button"
-              onClick={() => {
-                void onCopy(media);
-              }}
-              type="button"
-            >
-              {copiedMediaId === media.id ? "Copied" : "Copy"}
-            </button>
-          ) : null}
-        </article>
+        <MediaItem
+          copiedMediaId={copiedMediaId}
+          copyErrorMediaId={copyErrorMediaId}
+          key={media.id}
+          media={media}
+          onCopy={onCopy}
+          onSave={onSave}
+          saveState={saveStates[media.id]}
+        />
       ))}
     </section>
+  );
+}
+
+function MediaItem({
+  copiedMediaId,
+  copyErrorMediaId,
+  media,
+  onCopy,
+  onSave,
+  saveState
+}: {
+  copiedMediaId: string | undefined;
+  copyErrorMediaId: string | undefined;
+  media: DetectedMedia;
+  onCopy: (media: DetectedMedia) => Promise<void>;
+  onSave: (media: DetectedMedia) => Promise<void>;
+  saveState: SaveState | undefined;
+}) {
+  return (
+    <article className="media-item">
+      <div className="media-item__content">
+        <div className="media-item__header">
+          <span className="media-item__kind">{getMediaLabel(media)}</span>
+          <span className={`media-item__status media-item__status--${media.status}`}>
+            {media.status}
+          </span>
+        </div>
+        <p className="media-item__url">{formatUrl(media.url)}</p>
+        {media.status === "unsupported" ? (
+          <p className="media-item__message">{media.message}</p>
+        ) : null}
+        {copyErrorMediaId === media.id ? (
+          <p className="media-item__message">Copy failed. Try again.</p>
+        ) : null}
+        {saveState ? (
+          <p
+            className={`media-item__message media-item__message--${getSaveMessageTone(saveState.status)}`}
+          >
+            {saveState.message}
+          </p>
+        ) : null}
+      </div>
+
+      {media.status === "candidate" ? (
+        <div className="media-item__actions">
+          <button
+            className="media-item__button media-item__button--secondary"
+            onClick={() => {
+              void onCopy(media);
+            }}
+            type="button"
+          >
+            {copiedMediaId === media.id ? "Copied" : "Copy"}
+          </button>
+          <button
+            className="media-item__button"
+            disabled={isSaveBusy(saveState)}
+            onClick={() => {
+              void onSave(media);
+            }}
+            type="button"
+          >
+            {getSaveButtonLabel(saveState)}
+          </button>
+        </div>
+      ) : null}
+    </article>
   );
 }
 
@@ -254,6 +398,89 @@ function getMediaLabel(media: DetectedMedia): string {
   }
 
   return media.unsupportedReason.replaceAll("-", " ");
+}
+
+function getSaveStateFromJob(
+  status: ReceiverDownloadJobStatus,
+  error: string | undefined
+): SaveState {
+  if (status === "completed") {
+    return {
+      status,
+      message: "Saved locally."
+    };
+  }
+
+  if (status === "failed") {
+    return {
+      status,
+      message: error || "Save failed in the local receiver."
+    };
+  }
+
+  if (status === "downloading") {
+    return {
+      status,
+      message: "Downloading locally."
+    };
+  }
+
+  return {
+    status,
+    message: "Queued in local receiver."
+  };
+}
+
+function getSaveButtonLabel(saveState: SaveState | undefined): string {
+  if (!saveState) {
+    return "Save";
+  }
+
+  if (saveState.status === "saving") {
+    return "Saving";
+  }
+
+  if (saveState.status === "queued") {
+    return "Queued";
+  }
+
+  if (saveState.status === "downloading") {
+    return "Saving";
+  }
+
+  if (saveState.status === "completed") {
+    return "Saved";
+  }
+
+  return "Retry";
+}
+
+function isSaveBusy(saveState: SaveState | undefined): boolean {
+  return (
+    saveState?.status === "saving" ||
+    saveState?.status === "queued" ||
+    saveState?.status === "downloading"
+  );
+}
+
+function getSaveMessageTone(status: SaveStatus): "success" | "error" | "neutral" {
+  if (status === "completed") {
+    return "success";
+  }
+
+  if (status === "failed" || status === "unavailable") {
+    return "error";
+  }
+
+  return "neutral";
+}
+
+function abortActiveSaves(saveControllers: Map<string, AbortController>) {
+  for (const saveController of saveControllers.values()) {
+    saveController.abort();
+  }
+
+  saveControllers.clear();
 }
 
 function formatUrl(url: string): string {

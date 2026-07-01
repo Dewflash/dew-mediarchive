@@ -28,6 +28,9 @@
 - The receiver should run `yt-dlp` with `spawn(command, args)`, not a shell string, so media URLs are passed as data instead of executable text.
 - The receiver should bind to loopback and reject normal website origins. A random website should not be able to trigger local downloads through the user's browser.
 - Store receiver job transitions as append-only JSONL for the MVP. It is inspectable, replayable, and easy to replace later with archive storage.
+- Keep Copy beside Save. Save is the product path, but Copy remains the best fallback when the receiver is not running or `yt-dlp` needs manual inspection.
+- The extension should poll receiver jobs only while the popup is alive. Close/unmount should cancel active polling instead of leaving hidden work in the popup process.
+- Use `/private/tmp` only for smoke tests. Real default saves belong in `~/Movies/Dew MediArchive`.
 
 ## Mistakes To Avoid
 
@@ -51,3 +54,4 @@
 - Do not let arbitrary websites call the local receiver.
 - Do not run `yt-dlp` through shell interpolation.
 - Do not treat the receiver as archive storage. It is only the first save-job backend.
+- Do not push a manually passing Save flow before automated popup tests, typecheck, build, docs, and changelog are updated.

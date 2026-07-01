@@ -18,6 +18,10 @@ mvp-extension
 - Per-tab session snapshot storage in `chrome.storage.session`.
 - Badge count updates for supported candidates.
 - Popup states for loading, empty, error, candidates, unsupported media, Copy success, and Copy failure.
+- Popup Save action for candidate media.
+- Popup Save states for receiver unavailable, queued, downloading, completed, and failed jobs.
+- Copy remains available as a fallback beside Save.
+- Popup Save polling is cancelled when the popup closes.
 - Open popup keeps the last non-empty media list visible even if the temporary tab snapshot clears.
 - Explicit popup verification URL: `popup.html?tabId=<tab-id>`.
 - Local receiver in `apps/receiver`.
@@ -30,7 +34,7 @@ mvp-extension
 
 ## What Is Proven
 
-- `npm run test` passes: 5 files, 31 tests.
+- Extension `npm run test` passes: 5 files, 34 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -68,26 +72,36 @@ duration=5.055000
 size=1128375
 ```
 
+- Manual extension Save smoke test saved the MDN flower MP4 to:
+
+```text
+/private/tmp/dew-save-test/flower-[flower].mp4
+```
+
+- The Save smoke job history recorded:
+
+```text
+queued -> downloading -> completed
+```
+
 ## What Is Not Done Yet
 
-- Real toolbar-popup proof in normal Chromium is not complete.
 - Human Copy proof from the real toolbar popup is not complete.
-- Extension Save button is not wired to the receiver yet.
 - Desktop app wrapper is not built.
 - Safari support is not built.
 - Persistent archive storage, hashing, indexing, search, import/export, and gallery views are not built.
 - YouTube and DRM-heavy platforms remain intentionally unsupported.
 
-## Why The Remaining Toolbar Proof Is Still Open
+## Why The Remaining Copy Proof Is Still Open
 
-Automation hit browser and OS limits:
+Automation hit browser and OS limits during earlier popup checks:
 
 - `chrome.action.openPopup()` in Chrome for Testing returned `Could not find an active browser window`.
 - Screen capture for toolbar evidence failed in this environment.
 - Normal Google Chrome launched from this sandbox did not expose the unpacked Dew extension worker through DevTools.
 - Automated clipboard writes from an extension page were blocked by Chrome.
 
-The product behavior still needs a normal human-visible check:
+The normal toolbar popup path is now proven for Save by the MDN flower smoke test. The remaining human-visible Copy fallback check is:
 
 ```text
 load apps/extension/dist in Chrome
@@ -102,10 +116,10 @@ confirm download
 
 ## Recommended Next Phase
 
-Wire the popup Save action to the local receiver:
+Move from developer MVP to personal-tool MVP:
 
 ```text
-popup Save -> local receiver -> yt-dlp job -> file saved locally
+terminal receiver -> packaged local app/service -> archive records -> library view
 ```
 
-Keep Copy available as the fallback while Save is being proven.
+Keep Copy available as the fallback while Save UX is improved.

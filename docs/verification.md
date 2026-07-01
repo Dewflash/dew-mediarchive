@@ -8,6 +8,7 @@
 - Popup lists detected media for the current tab.
 - Copy button writes the media URL to the clipboard.
 - At least one copied non-DRM media URL downloads successfully with `yt-dlp`.
+- Save button sends a detected candidate to the local receiver.
 - Local receiver accepts a non-DRM media URL and saves a file with `yt-dlp`.
 - Unsupported sources are shown or filtered intentionally.
 
@@ -41,13 +42,16 @@ See `docs/mvp-manual-test.md` for the full first-user checklist.
 6. Confirm the badge count updates.
 7. Open the popup.
 8. Copy a media candidate.
-9. Run:
+9. Save a media candidate while the local receiver is running.
+10. Confirm the receiver records `queued -> downloading -> completed`.
+11. Confirm the saved media file exists.
+12. For Copy fallback, run:
 
 ```bash
 yt-dlp "PASTED_URL"
 ```
 
-10. Record result in `changelog.md`.
+13. Record result in `changelog.md`.
 
 ## Current Runtime Proof
 
@@ -70,6 +74,10 @@ Verified:
 - automated Copy clicks are blocked by Chrome clipboard rules and correctly show `Copy failed. Try again.`
 - the exact rendered candidate URL downloaded successfully with `yt-dlp`
 - downloaded popup-proof file probes as 1.000000 seconds and 17122 bytes
+- extension tests passed: 5 files, 34 tests
+- extension typecheck passed
+- extension build passed
+- popup Save tests prove receiver POST, completed save state, receiver unavailable state, and receiver failure retry state
 - receiver tests passed: 1 file, 6 tests
 - receiver typecheck passed
 - receiver build passed
@@ -77,13 +85,13 @@ Verified:
 - receiver accepted the MDN flower MP4 URL as a download job
 - receiver completed the job through `yt-dlp`
 - receiver output file probes as 5.055000 seconds and 1128375 bytes
+- manual extension Save smoke saved the MDN flower MP4 to `/private/tmp/dew-save-test/flower-[flower].mp4`
+- manual extension Save smoke job history recorded `queued -> downloading -> completed`
 
 Pending:
 
-- normal Chromium window load-unpacked test
-- popup-visible candidate proof
 - human-click Copy button proof from the real toolbar popup
-- extension Save button wiring to the receiver
+- packaged receiver/app launch flow
 
 ## Automation Limitation
 

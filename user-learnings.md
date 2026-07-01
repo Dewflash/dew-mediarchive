@@ -318,11 +318,11 @@ the browser extension
 local development tools
 ```
 
-## Why Save Is Not Wired Yet
+## Why We Wired Save After Proving The Receiver
 
-The receiver itself is now proven: it accepted the MDN flower MP4 URL, ran `yt-dlp`, saved the file, and `ffprobe` confirmed the file is valid.
+The receiver itself was proven first: it accepted the MDN flower MP4 URL, ran `yt-dlp`, saved the file, and `ffprobe` confirmed the file is valid.
 
-The next small phase is extension wiring:
+The next small phase wired the extension popup to the receiver:
 
 ```text
 add Save button
@@ -331,7 +331,72 @@ show queued/downloading/completed/failed
 keep Copy as fallback
 ```
 
-This split is intentional. If Save has a problem later, we can tell whether the issue is in the extension UI or in the local receiver.
+This split was intentional. If Save had a problem, we could tell whether the issue was in the extension UI or in the local receiver.
+
+## What The Save Button Does Now
+
+When you click Save, the popup sends a small JSON request to your local receiver:
+
+```text
+POST http://127.0.0.1:47321/downloads
+```
+
+The receiver creates a job, runs `yt-dlp`, and records each state:
+
+```text
+queued -> downloading -> completed
+```
+
+The popup polls that job and shows the user-facing state:
+
+```text
+Save -> Saving/Queued -> Saved
+```
+
+If the receiver is not running, the popup says so and lets you retry. Copy stays beside Save so you still have a manual fallback.
+
+## Why The Test File Went To `/private/tmp`
+
+The successful Save smoke test used:
+
+```bash
+DEW_DOWNLOAD_DIR=/private/tmp/dew-save-test
+```
+
+That means the saved file was intentionally placed in a temporary test folder:
+
+```text
+/private/tmp/dew-save-test/flower-[flower].mp4
+```
+
+That is not browser cache and not final archive storage. It is a local macOS temp folder used so tests do not clutter your real media library.
+
+When the receiver runs without that test override, the default save folder is:
+
+```text
+/Users/kevinyongcj/Movies/Dew MediArchive
+```
+
+## Why We Still Ran Tests After Manual Success
+
+The manual proof answered:
+
+```text
+does Save actually download a file?
+```
+
+The automated checks answer different questions:
+
+```text
+does the popup send the right JSON?
+does it show Saved when the receiver completes?
+does it show a useful message when the receiver is missing?
+does it show retry when the receiver or yt-dlp fails?
+does TypeScript still agree with the code?
+does the extension still build?
+```
+
+Both kinds of proof matter. Manual smoke proves the product path. Tests make the repo safe to continue from.
 
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 

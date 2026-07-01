@@ -1,6 +1,6 @@
 # Dew MediArchive
 
-Dew MediArchive is a local-first media archiving tool. The first milestone is a Chromium browser companion that detects common non-DRM media URLs on the current page. The next MVP slice adds a local receiver that can accept a save job from the browser companion and download the media on the user's machine with `yt-dlp`.
+Dew MediArchive is a local-first media archiving tool. The first milestone is a Chromium browser companion that detects common non-DRM media URLs on the current page and sends approved save jobs to a local receiver that downloads media on the user's machine with `yt-dlp`.
 
 ## MVP Scope
 
@@ -12,7 +12,7 @@ The MVP should:
 - Show a badge when candidates are found.
 - List candidates in the popup.
 - Copy a detected media URL for manual `yt-dlp` testing.
-- Run a local receiver on `127.0.0.1` for future one-click Save jobs.
+- Run a local receiver on `127.0.0.1` for one-click Save jobs.
 - Save approved media through `yt-dlp` without sending URLs to a cloud service.
 - Mark obvious unsupported commercial/DRM-heavy platforms as unsupported.
 
@@ -22,7 +22,6 @@ The MVP should not:
 - Download from YouTube or premium streaming platforms.
 - Store cookies, tokens, or private page content.
 - Include a desktop app, installer, payment, account system, or cloud sync.
-- Wire the extension Save button yet.
 
 ## Repository Layout
 
@@ -55,7 +54,7 @@ user-learnings.md  Plain-English decision notes for the project owner
 
 ## First Save Flow
 
-The local receiver is now available as the save backend. The extension does not call it yet, but this is the contract the next phase will use:
+The local receiver is the save backend:
 
 ```text
 popup Save -> POST /downloads -> receiver starts yt-dlp -> file saved locally
@@ -69,6 +68,7 @@ From `apps/extension`:
 
 ```bash
 npm install
+npm run test
 npm run typecheck
 npm run build
 ```

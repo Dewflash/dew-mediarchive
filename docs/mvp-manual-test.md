@@ -11,10 +11,11 @@ This test proves:
 - the popup can read detected media for the current tab
 - the Copy button can place a candidate URL on the clipboard
 - a copied candidate URL can be tested manually with `yt-dlp`
+- the Save button can send a candidate to the local receiver
+- the receiver can save the media file locally with `yt-dlp`
 
 This test does not prove:
 
-- automatic downloading
 - desktop app behavior
 - Safari support
 - DRM or protected platform support
@@ -81,6 +82,35 @@ apps/extension/dist
 5. Confirm detected candidates appear.
 6. Click Copy on a candidate.
 
+## Test Save
+
+Start the receiver before clicking Save:
+
+```bash
+cd apps/receiver
+npm run build
+DEW_DOWNLOAD_DIR=/private/tmp/dew-save-test \
+DEW_JOBS_PATH=/private/tmp/dew-save-test/jobs.jsonl \
+npm run start
+```
+
+Then in the popup:
+
+1. Click Save on a detected candidate.
+2. Confirm the popup reaches `Saved locally.`
+3. Confirm the file exists:
+
+```bash
+ls -lah /private/tmp/dew-save-test
+cat /private/tmp/dew-save-test/jobs.jsonl
+```
+
+Expected job history:
+
+```text
+queued -> downloading -> completed
+```
+
 ## Test Download Manually
 
 After copying a candidate URL:
@@ -122,6 +152,15 @@ size: 17122 bytes
 
 That explicit `tabId` URL is only for automation/debugging. The real first-user proof is still opening Dew from the toolbar while the media page is active.
 
+The popup Save flow has also been verified manually against the MDN flower MP4:
+
+```text
+source: https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4
+receiver download dir: /private/tmp/dew-save-test
+output: /private/tmp/dew-save-test/flower-[flower].mp4
+job history: queued -> downloading -> completed
+```
+
 ## Failure Notes
 
 If the popup is empty:
@@ -135,6 +174,17 @@ If Copy fails:
 
 - click Copy again
 - check whether the popup shows `Copy failed. Try again.`
+
+If Save says the receiver is not running:
+
+- start `apps/receiver`
+- confirm `curl http://127.0.0.1:47321/health` returns `ok: true`
+- reload the extension build if needed
+
+If Save fails inside the receiver:
+
+- check `jobs.jsonl` for the final failure reason
+- retry with Copy and a manual `yt-dlp` command
 
 If `yt-dlp` fails:
 

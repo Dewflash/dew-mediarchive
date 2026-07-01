@@ -77,9 +77,9 @@ body {
 
 .media-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
-  align-items: center;
+  align-items: stretch;
   border: 1px solid #dbe4ef;
   border-radius: 8px;
   background: #ffffff;
@@ -139,8 +139,26 @@ body {
   color: #b91c1c;
 }
 
+.media-item__message--success {
+  color: #047857;
+}
+
+.media-item__message--neutral {
+  color: #475569;
+}
+
+.media-item__message--error {
+  color: #b91c1c;
+}
+
+.media-item__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .media-item__button {
-  min-width: 68px;
+  min-width: 0;
   border: 0;
   border-radius: 8px;
   background: #2563eb;
@@ -154,6 +172,21 @@ body {
 
 .media-item__button:hover {
   background: #1d4ed8;
+}
+
+.media-item__button:disabled {
+  background: #94a3b8;
+  cursor: wait;
+}
+
+.media-item__button--secondary {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+}
+
+.media-item__button--secondary:hover {
+  background: #f1f5f9;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -200,5 +233,27 @@ body {
 
   .media-item__message {
     color: #fca5a5;
+  }
+
+  .media-item__message--success {
+    color: #6ee7b7;
+  }
+
+  .media-item__message--neutral {
+    color: #cbd5e1;
+  }
+
+  .media-item__message--error {
+    color: #fca5a5;
+  }
+
+  .media-item__button--secondary {
+    border-color: #475569;
+    background: #111827;
+    color: #f8fafc;
+  }
+
+  .media-item__button--secondary:hover {
+    background: #0f172a;
   }
 }

@@ -106,3 +106,15 @@
 - Smoke-tested the receiver against `https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4`.
 - Confirmed the receiver completed the job and saved `/private/tmp/dew-receiver-smoke/flower-[flower].mp4`.
 - Verified the receiver smoke output with `ffprobe`: duration 5.055000, size 1128375 bytes.
+- Added popup Save wiring to the local receiver at `http://127.0.0.1:47321`.
+- Added a receiver client that posts detected candidates to `/downloads` and polls `/downloads/:id`.
+- Added popup Save states for queued, downloading, saved, receiver unavailable, and receiver failure.
+- Kept Copy beside Save as the fallback action.
+- Added abort handling so closing the popup cancels active Save polling.
+- Added popup tests for Save request payload, completed Save state, receiver-unavailable state, and receiver-failure retry state.
+- Ran extension `npm run test`: 5 files, 34 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.
+- Manually smoke-tested extension Save with the MDN flower MP4.
+- Confirmed the Save smoke test saved `/private/tmp/dew-save-test/flower-[flower].mp4`.
+- Confirmed the Save smoke job history recorded `queued -> downloading -> completed`.
