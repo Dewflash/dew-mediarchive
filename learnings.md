@@ -46,6 +46,7 @@
 - Progress is best-effort. Small direct files may complete before percent updates are useful, so queued/downloading/completed states still matter.
 - Keep media-specific titles separate from page titles and source URLs. `mediaTitle` helps users distinguish multiple videos on one page; `pageTitle` remains provenance for the browser page; `url` remains the real downloadable source.
 - Network-only stream candidates may not have element context. The popup should use page title as a readable fallback before using the raw source URL as the title.
+- Popup state is not durable by itself. Any user-visible long-running receiver job needs a session-backed job id so the popup can restore progress after being closed.
 
 ## Mistakes To Avoid
 
@@ -78,3 +79,4 @@
 - Do not invent fake percentages when `yt-dlp` has not reported a total. Show an indeterminate/downloading state or byte/speed details instead.
 - Do not overwrite `pageTitle` with a guessed media label. That would make provenance worse and still would not solve multi-video identification cleanly.
 - Do not show the same manifest URL twice in a media card unless no title, page title, or element index exists.
+- Do not create a second receiver job just because the popup reopened. Resume polling the existing job id when one is known.

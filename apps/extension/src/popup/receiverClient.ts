@@ -71,6 +71,19 @@ export async function saveMediaToReceiver(
   });
 }
 
+export async function resumeReceiverDownloadJob(
+  jobId: string,
+  options: ReceiverSaveOptions = {}
+): Promise<ReceiverDownloadJob> {
+  return pollDownloadJob(jobId, {
+    fetcher: options.fetcher ?? fetch,
+    maxPollAttempts: options.maxPollAttempts ?? DEFAULT_MAX_POLL_ATTEMPTS,
+    onJobUpdate: options.onJobUpdate,
+    pollIntervalMs: options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS,
+    signal: options.signal
+  });
+}
+
 async function createDownloadJob(
   media: MediaCandidate,
   fetcher: typeof fetch,

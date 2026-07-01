@@ -203,3 +203,10 @@
 - Added popup regression coverage for title-less HLS candidates and Save fallback titles.
 - Ran extension `npm run test`: 5 files, 37 tests passed.
 - Ran extension `npm run typecheck`: passed.
+- Added session-backed Save job persistence for the extension popup.
+- The popup now writes receiver job id, status, progress, and output path to Chrome session storage as Save updates arrive.
+- Reopening the popup now restores queued/downloading/completed Save UI and resumes polling unfinished receiver jobs without requiring another Save click.
+- Added popup regression coverage for restoring an existing receiver job and showing resumed download progress.
+- Ran extension `npm run test`: 5 files, 38 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.

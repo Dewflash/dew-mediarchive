@@ -8,11 +8,17 @@ import {
 } from "../shared";
 import {
   RECEIVER_BASE_URL,
+  resumeReceiverDownloadJob,
   saveMediaToReceiver,
   type ReceiverDownloadJob,
   type ReceiverDownloadProgress,
   type ReceiverDownloadJobStatus
 } from "./receiverClient";
+import {
+  readSaveJobs,
+  writeSaveJob,
+  type PersistedSaveJob
+} from "./saveJobStorage";
 
 type PopupState =
   | { status: "loading" }
@@ -35,6 +41,7 @@ export function Popup() {
   const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({});
   const isMountedRef = useRef(true);
   const saveControllersRef = useRef(new Map<string, AbortController>());
+  const resumedJobIdsRef = useRef(new Set<string>());
 
   useEffect(() => {
     let isMounted = true;
@@ -55,6 +62,7 @@ export function Popup() {
               tabId: requestedTabId,
               snapshot
             });
+            void restoreSaveJobsForTab(requestedTabId, snapshot);
           }
           return;
         }
@@ -83,6 +91,7 @@ export function Popup() {
             tabId: activeTab.id,
             snapshot
           });
+          void restoreSaveJobsForTab(activeTab.id, snapshot);
         }
       } catch {
         if (isMounted) {
@@ -161,10 +170,11 @@ export function Popup() {
   }
 
   async function saveMediaUrl(media: DetectedMedia) {
-    if (media.status !== "candidate") {
+    if (media.status !== "candidate" || popupState.status !== "ready") {
       return;
     }
 
+    const tabId = popupState.tabId;
     saveControllersRef.current.get(media.id)?.abort();
     const saveController = new AbortController();
     saveControllersRef.current.set(media.id, saveController);
@@ -177,20 +187,22 @@ export function Popup() {
     try {
       const finalJob = await saveMediaToReceiver(media, {
         onJobUpdate(job) {
-          setSaveStateIfActive(
-            media.id,
-            saveController,
-            getSaveStateFromJob(job)
-          );
+          const saveState = getSaveStateFromJob(job);
+
+          setSaveStateIfActive(media.id, saveController, saveState);
+          void persistSaveJob(tabId, media.id, job.id, saveState);
         },
         signal: saveController.signal
       });
 
+      const finalSaveState = getSaveStateFromJob(finalJob);
+
       setSaveStateIfActive(
         media.id,
         saveController,
-        getSaveStateFromJob(finalJob)
+        finalSaveState
       );
+      void persistSaveJob(tabId, media.id, finalJob.id, finalSaveState);
     } catch (error) {
       if (saveController.signal.aborted || !isMountedRef.current) {
         return;
@@ -203,6 +215,89 @@ export function Popup() {
             ? error.message
             : "Dew could not reach the local receiver."
       });
+    } finally {
+      if (saveControllersRef.current.get(media.id) === saveController) {
+        saveControllersRef.current.delete(media.id);
+      }
+    }
+  }
+
+  async function restoreSaveJobsForTab(
+    tabId: number,
+    snapshot: MediaDetectionSnapshot | undefined
+  ) {
+    const saveJobs = await readSaveJobs(tabId);
+
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    setSaveStates((currentSaveStates) => ({
+      ...currentSaveStates,
+      ...Object.fromEntries(
+        Object.entries(saveJobs).map(([mediaId, saveJob]) => [
+          mediaId,
+          saveJob.saveState
+        ])
+      )
+    }));
+
+    for (const saveJob of Object.values(saveJobs)) {
+      if (isTerminalSaveState(saveJob.saveState)) {
+        continue;
+      }
+
+      const media = (snapshot?.candidates.filter(isMediaCandidate) ?? []).find(
+        (candidate) => candidate.id === saveJob.mediaId
+      );
+
+      if (!media || resumedJobIdsRef.current.has(saveJob.jobId)) {
+        continue;
+      }
+
+      void resumeSaveJobForMedia(tabId, media, saveJob);
+    }
+  }
+
+  async function resumeSaveJobForMedia(
+    tabId: number,
+    media: MediaCandidate,
+    saveJob: PersistedSaveJob
+  ) {
+    resumedJobIdsRef.current.add(saveJob.jobId);
+    saveControllersRef.current.get(media.id)?.abort();
+    const saveController = new AbortController();
+    saveControllersRef.current.set(media.id, saveController);
+
+    try {
+      const finalJob = await resumeReceiverDownloadJob(saveJob.jobId, {
+        onJobUpdate(job) {
+          const saveState = getSaveStateFromJob(job);
+
+          setSaveStateIfActive(media.id, saveController, saveState);
+          void persistSaveJob(tabId, media.id, job.id, saveState);
+        },
+        signal: saveController.signal
+      });
+      const finalSaveState = getSaveStateFromJob(finalJob);
+
+      setSaveStateIfActive(media.id, saveController, finalSaveState);
+      void persistSaveJob(tabId, media.id, finalJob.id, finalSaveState);
+    } catch (error) {
+      if (saveController.signal.aborted || !isMountedRef.current) {
+        return;
+      }
+
+      const unavailableState = {
+        status: "unavailable" as const,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Dew could not reach the local receiver."
+      };
+
+      setSaveStateIfActive(media.id, saveController, unavailableState);
+      void persistSaveJob(tabId, media.id, saveJob.jobId, unavailableState);
     } finally {
       if (saveControllersRef.current.get(media.id) === saveController) {
         saveControllersRef.current.delete(media.id);
@@ -253,6 +348,20 @@ export function Popup() {
       />
     </main>
   );
+}
+
+function persistSaveJob(
+  tabId: number,
+  mediaId: string,
+  jobId: string,
+  saveState: SaveState
+): Promise<void> {
+  return writeSaveJob(tabId, {
+    jobId,
+    mediaId,
+    saveState,
+    updatedAt: new Date().toISOString()
+  });
 }
 
 function PopupContent({
@@ -461,6 +570,10 @@ function getMediaLabel(media: DetectedMedia): string {
   return media.unsupportedReason.replaceAll("-", " ");
 }
 
+function isMediaCandidate(media: DetectedMedia): media is MediaCandidate {
+  return media.status === "candidate";
+}
+
 function getMediaTitle(media: DetectedMedia, mediaItems: DetectedMedia[]): string {
   if (media.mediaTitle) {
     return media.mediaTitle;
@@ -563,6 +676,10 @@ function isSaveBusy(saveState: SaveState | undefined): boolean {
     saveState?.status === "queued" ||
     saveState?.status === "downloading"
   );
+}
+
+function isTerminalSaveState(saveState: SaveState): boolean {
+  return saveState.status === "completed" || saveState.status === "failed";
 }
 
 function getSaveMessageTone(status: SaveStatus): "success" | "error" | "neutral" {

@@ -25,6 +25,10 @@
 - Store receiver job records locally, not in a cloud service.
 - Keep raw tokenized URLs out of logs.
 
+## Extension Session State
+
+The extension may store temporary detected media and Save job state in Chrome session storage so the popup can reopen with the same progress. Treat this as private browser-session data. It should contain only normalized media records, receiver job ids, status/progress, and local output paths, not credentials or private page bodies.
+
 ## Logging
 
 Logs should use structured status and failure reasons. Avoid raw URLs when they may contain tokens.

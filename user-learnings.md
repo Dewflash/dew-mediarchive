@@ -677,6 +677,20 @@ So on a page with five videos, the popup should no longer show five anonymous li
 
 One real-page nuance: HLS/DASH streams sometimes come from browser network requests, not directly from the `video` element. In that case Dew may not know the exact element caption. The popup now uses the page title before falling back to the raw stream URL, and if there are several title-less stream candidates from the same page it adds an ordinal label.
 
+## Why Save Progress Used To Disappear When The Popup Closed
+
+The receiver kept downloading, but the popup forgot the job because browser extension popups are short-lived. Closing the popup destroys its React state.
+
+Dew now stores the receiver job id and latest Save state in Chrome session storage:
+
+```text
+media item -> receiver job id -> queued/downloading/progress/saved
+```
+
+So if you click Save, close Dew, and open it again during the same browser session, it should show the existing job and resume checking the receiver instead of asking you to press Save again.
+
+This is still privacy-conscious: it is temporary browser session state, not permanent tracking history. The long-term record remains the local archive after a Save completes.
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

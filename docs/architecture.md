@@ -134,6 +134,14 @@ popup Save
 
 If the same source URL already has an archive record, the receiver creates a completed job that reuses the existing local file instead of downloading the same source again.
 
+The popup stores active receiver job state in Chrome session storage:
+
+```text
+media id -> receiver job id, status, progress, output path
+```
+
+This is popup continuity, not durable archive history. If the popup closes while a receiver job is still running, reopening Dew can restore the visible state and resume polling `/downloads/:id` without creating a second job.
+
 The receiver deliberately does not depend on the extension internals. It accepts a normalized download request:
 
 ```text

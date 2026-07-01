@@ -8,6 +8,7 @@ import { Popup } from "./Popup";
 import type { MediaCandidate, MediaDetectionSnapshot } from "../shared";
 
 const storageGet = vi.fn();
+const storageSet = vi.fn();
 const storageAddListener = vi.fn();
 const storageRemoveListener = vi.fn();
 const tabsQuery = vi.fn();
@@ -26,6 +27,7 @@ describe("Popup", () => {
     window.history.replaceState(null, "", "/popup.html");
     storageChangeHandler = undefined;
     storageGet.mockReset();
+    storageSet.mockReset();
     storageAddListener.mockReset();
     storageRemoveListener.mockReset();
     tabsQuery.mockReset();
@@ -47,7 +49,8 @@ describe("Popup", () => {
     vi.stubGlobal("chrome", {
       storage: {
         session: {
-          get: storageGet
+          get: storageGet,
+          set: storageSet
         },
         onChanged: {
           addListener: storageAddListener,
@@ -330,6 +333,76 @@ describe("Popup", () => {
       "42"
     );
     expect(screen.getByText("512KiB / 1.2MiB · 1.0MiB/s · ETA 00:01")).toBeInTheDocument();
+  });
+
+  it("restores saved receiver jobs and resumes progress polling", async () => {
+    storageGet.mockImplementation(async (key: string) => {
+      if (key === "media-snapshot:7") {
+        return {
+          [key]: createSnapshot([
+            createCandidate("media-1", "https://cdn.example.test/video.mp4")
+          ])
+        };
+      }
+
+      if (key === "save-jobs:7") {
+        return {
+          [key]: {
+            "media-1": {
+              jobId: "job-1",
+              mediaId: "media-1",
+              saveState: {
+                message: "Queued in local receiver.",
+                status: "queued"
+              },
+              updatedAt: new Date().toISOString()
+            }
+          }
+        };
+      }
+
+      return {};
+    });
+    fetchMock
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("downloading", {
+            progress: {
+              downloaded: "512KiB",
+              eta: "00:01",
+              percent: 42,
+              speed: "1.0MiB/s",
+              stage: "downloading",
+              total: "1.2MiB",
+              updatedAt: new Date().toISOString()
+            }
+          })
+        })
+      )
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          job: createReceiverJob("completed", {
+            outputPath: "/Users/example/Movies/Dew MediArchive/video.mp4",
+            progress: {
+              percent: 100,
+              stage: "processing",
+              updatedAt: new Date().toISOString()
+            }
+          })
+        })
+      );
+
+    render(<Popup />);
+
+    expect(await screen.findByText("Downloading locally. 42%")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://127.0.0.1:47321/downloads/job-1",
+      expect.any(Object)
+    );
+    expect(screen.getByRole("progressbar", { name: "Download progress" })).toHaveAttribute(
+      "aria-valuenow",
+      "42"
+    );
   });
 
   it("shows a receiver unavailable state when Save cannot connect", async () => {

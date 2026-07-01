@@ -13,6 +13,7 @@
 - Local receiver accepts a non-DRM media URL and saves a file with `yt-dlp`.
 - Receiver job records expose `yt-dlp` progress when progress is available.
 - Popup renders Save progress when the receiver reports it.
+- Popup restores Save progress after closing and reopening while a receiver job is still running.
 - Completed receiver saves create archive metadata with file hash and size.
 - Local library renders saved archive records.
 - Local library supports search, filtering, sorting, and export links.
@@ -119,6 +120,7 @@ Verified:
 - popup tests prove Save progress renders as a progress bar with byte/speed/ETA details
 - popup tests prove candidate cards can render media-specific titles instead of only source URLs
 - popup tests prove title-less network stream candidates use page-title fallback labels before falling back to source URLs
+- popup tests prove session-backed Save jobs restore and resume progress polling after popup reopen
 - receiver tests prove completed archive records preserve media-specific titles and expose them in library/export surfaces
 - receiver tests prove `yt-dlp` progress-template parsing and job progress exposure
 - `npm run dew:check` passed on a throwaway port outside the sandbox
