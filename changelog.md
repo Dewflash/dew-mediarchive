@@ -251,3 +251,10 @@
 - Ran extension `npm run test`: 5 files, 48 tests passed.
 - Ran extension `npm run typecheck`: passed.
 - Ran extension `npm run build`: passed.
+- Added active receiver jobs to the local library so queued, downloading, and failed saves remain visible after navigating away from the original page.
+- Added library progress rendering for active jobs, including percent, size, speed, and ETA details when available.
+- Added library auto-refresh while queued/downloading jobs are active, without refreshing forever for failed jobs.
+- Added receiver regression coverage for active, completed, and failed job rendering in the library.
+- Ran receiver `npm run test`: 3 files, 29 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.

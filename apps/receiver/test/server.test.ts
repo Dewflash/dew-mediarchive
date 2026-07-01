@@ -232,6 +232,84 @@ describe("receiver server", () => {
     });
   });
 
+  it("renders active download jobs in the local library", async () => {
+    const job = await jobStore.create({
+      url: "https://cdn.example.test/<video>.mp4",
+      pageTitle: "MDN Flower",
+      mediaTitle: "<Flower clip>",
+      kind: "mp4"
+    });
+
+    await jobStore.update(job.id, {
+      progress: {
+        downloaded: "512KiB",
+        eta: "00:01",
+        percent: 42,
+        speed: "1.0MiB/s",
+        stage: "downloading",
+        total: "1.2MiB",
+        updatedAt: new Date().toISOString()
+      },
+      status: "downloading"
+    });
+
+    const response = await fetch(`${baseUrl}/library`, {
+      headers: {
+        Origin: "chrome-extension://example"
+      }
+    });
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toContain("http-equiv=\"refresh\"");
+    expect(html).toContain("Active downloads");
+    expect(html).toContain("downloading");
+    expect(html).toContain("&lt;Flower clip&gt;");
+    expect(html).toContain("https://cdn.example.test/&lt;video&gt;.mp4");
+    expect(html).toContain("42%");
+    expect(html).toContain("512KiB / 1.2MiB");
+    expect(html).toContain("1.0MiB/s");
+    expect(html).toContain("ETA 00:01");
+    expect(html).not.toContain("<Flower clip>");
+  });
+
+  it("does not duplicate completed jobs in the active library section", async () => {
+    await createCompletedDownload({
+      mediaTitle: "Flower clip",
+      pageTitle: "MDN Flower"
+    });
+
+    const response = await fetch(`${baseUrl}/library`);
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toContain("1 saved item");
+    expect(html).not.toContain("Active downloads");
+    expect(html).not.toContain("http-equiv=\"refresh\"");
+  });
+
+  it("renders failed jobs without auto-refreshing the library", async () => {
+    const job = await jobStore.create({
+      url: "https://cdn.example.test/broken.mp4",
+      pageTitle: "Broken page",
+      kind: "mp4"
+    });
+
+    await jobStore.update(job.id, {
+      error: "Download failed.",
+      status: "failed"
+    });
+
+    const response = await fetch(`${baseUrl}/library`);
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toContain("Active downloads");
+    expect(html).toContain("failed");
+    expect(html).toContain("Download failed.");
+    expect(html).not.toContain("http-equiv=\"refresh\"");
+  });
+
   it("writes an archive record for completed downloads", async () => {
     const response = await fetch(`${baseUrl}/downloads`, {
       method: "POST",

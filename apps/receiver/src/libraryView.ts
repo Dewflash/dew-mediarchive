@@ -1,4 +1,9 @@
-import type { ArchiveRecord, DownloadKind } from "./types.js";
+import type {
+  ArchiveRecord,
+  DownloadJob,
+  DownloadKind,
+  DownloadProgress
+} from "./types.js";
 
 export type LibrarySort = "newest" | "oldest" | "source" | "size";
 
@@ -14,10 +19,13 @@ export type LibraryViewOptions = {
 
 export function renderLibraryPage(
   records: LibraryArchiveRecord[],
-  options: LibraryViewOptions = {}
+  options: LibraryViewOptions = {},
+  jobs: DownloadJob[] = []
 ): string {
   const normalizedOptions = normalizeOptions(options);
   const visibleRecords = filterAndSortArchiveRecords(records, normalizedOptions);
+  const activeJobs = getVisibleDownloadJobs(jobs);
+  const shouldRefresh = hasRefreshableJobs(activeJobs);
   const rows = visibleRecords.map(renderArchiveRow).join("");
   const exportQuery = createQueryString(normalizedOptions);
   const body =
@@ -30,6 +38,7 @@ export function renderLibraryPage(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  ${shouldRefresh ? '<meta http-equiv="refresh" content="3">' : ""}
   <title>Dew MediArchive Library</title>
   <style>
     :root {
@@ -177,6 +186,86 @@ export function renderLibraryPage(
       font-size: 13px;
     }
 
+    .download-panel {
+      border: 1px solid #dbe4ef;
+      background: #ffffff;
+      margin-bottom: 18px;
+      padding: 16px;
+    }
+
+    .download-panel__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .download-panel h2 {
+      color: #0f172a;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .download-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .download-job {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 10px;
+    }
+
+    .download-job:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .download-status {
+      display: inline-block;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      text-transform: uppercase;
+    }
+
+    .download-status--failed {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .progress {
+      display: grid;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e2e8f0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: #2563eb;
+      width: var(--progress-value, 0%);
+    }
+
+    .progress-details {
+      color: #64748b;
+      font-size: 12px;
+    }
+
     .library-table {
       width: 100%;
       border-collapse: collapse;
@@ -315,6 +404,7 @@ export function renderLibraryPage(
       }
 
       .library-table,
+      .download-panel,
       .empty {
         border-color: #334155;
         background: #1f2937;
@@ -343,6 +433,28 @@ export function renderLibraryPage(
       .file-status--missing {
         background: #3f1d1d;
         color: #fecaca;
+      }
+
+      .download-panel h2 {
+        color: #f8fafc;
+      }
+
+      .download-job {
+        border-top-color: #334155;
+      }
+
+      .download-status {
+        background: #1e3a8a;
+        color: #bfdbfe;
+      }
+
+      .download-status--failed {
+        background: #3f1d1d;
+        color: #fecaca;
+      }
+
+      .progress-track {
+        background: #334155;
       }
     }
   </style>
@@ -375,6 +487,7 @@ export function renderLibraryPage(
       <a class="export-link" href="${escapeHtml(`/export/archive.json${exportQuery}`)}">Export JSON</a>
       <a class="export-link" href="${escapeHtml(`/export/archive.csv${exportQuery}`)}">Export CSV</a>
     </div>
+    ${renderActiveDownloads(activeJobs)}
     <p class="summary">${visibleRecords.length} shown${visibleRecords.length === records.length ? "" : ` from ${records.length}`}</p>
     ${body}
   </main>
@@ -426,6 +539,87 @@ export function filterAndSortArchiveRecords(
 
     return right.createdAt.localeCompare(left.createdAt);
   });
+}
+
+function getVisibleDownloadJobs(jobs: DownloadJob[]): DownloadJob[] {
+  return jobs.filter((job) => job.status !== "completed");
+}
+
+function hasRefreshableJobs(jobs: DownloadJob[]): boolean {
+  return jobs.some(
+    (job) => job.status === "queued" || job.status === "downloading"
+  );
+}
+
+function renderActiveDownloads(jobs: DownloadJob[]): string {
+  if (jobs.length === 0) {
+    return "";
+  }
+
+  return `<section class="download-panel" aria-label="Active downloads">
+  <div class="download-panel__header">
+    <h2>Active downloads</h2>
+    <p class="count">${jobs.length} job${jobs.length === 1 ? "" : "s"}</p>
+  </div>
+  <div class="download-list">
+    ${jobs.map(renderDownloadJob).join("")}
+  </div>
+</section>`;
+}
+
+function renderDownloadJob(job: DownloadJob): string {
+  const title = job.mediaTitle?.trim() || job.pageTitle?.trim() || job.url;
+  const pageContext = job.mediaTitle && job.pageTitle ? job.pageTitle : undefined;
+  const statusClass =
+    job.status === "failed"
+      ? "download-status download-status--failed"
+      : "download-status";
+
+  return `<article class="download-job">
+  <div>
+    <p class="title">${escapeHtml(title)}</p>
+    ${pageContext ? `<p class="meta">${escapeHtml(pageContext)}</p>` : ""}
+    <p class="meta">${escapeHtml(job.url)}</p>
+    ${job.kind ? `<span class="kind">${escapeHtml(job.kind)}</span>` : ""}
+    ${job.progress ? renderProgress(job.progress) : ""}
+    ${job.error ? `<p class="meta">${escapeHtml(job.error)}</p>` : ""}
+  </div>
+  <div>
+    <span class="${statusClass}">${escapeHtml(job.status)}</span>
+    <p class="meta">${escapeHtml(formatTimestamp(job.updatedAt))}</p>
+  </div>
+</article>`;
+}
+
+function renderProgress(progress: DownloadProgress): string {
+  const progressValue =
+    progress.percent === undefined
+      ? 0
+      : Math.min(100, Math.max(0, Math.round(progress.percent)));
+  const details = formatProgressDetails(progress);
+
+  return `<div class="progress">
+  <div class="progress-track" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100"${progress.percent === undefined ? "" : ` aria-valuenow="${progressValue}"`}>
+    <div class="progress-fill" style="--progress-value: ${progressValue}%"></div>
+  </div>
+  ${details ? `<p class="progress-details">${escapeHtml(details)}</p>` : ""}
+</div>`;
+}
+
+function formatProgressDetails(progress: DownloadProgress): string {
+  const sizeDetails =
+    progress.downloaded && progress.total
+      ? `${progress.downloaded} / ${progress.total}`
+      : progress.downloaded;
+
+  return [
+    progress.percent === undefined ? undefined : `${Math.round(progress.percent)}%`,
+    sizeDetails,
+    progress.speed,
+    progress.eta ? `ETA ${progress.eta}` : undefined
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 export function getLibraryOptionsFromSearchParams(

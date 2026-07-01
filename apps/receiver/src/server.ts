@@ -114,7 +114,8 @@ async function handleRequest(
       200,
       renderLibraryPage(
         libraryRecords,
-        getLibraryOptionsFromSearchParams(url.searchParams)
+        getLibraryOptionsFromSearchParams(url.searchParams),
+        jobStore.list()
       )
     );
     return;

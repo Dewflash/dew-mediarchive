@@ -14,6 +14,8 @@
 - Save button sends a detected candidate to the local receiver.
 - Local receiver accepts a non-DRM media URL and saves a file with `yt-dlp`.
 - Receiver job records expose `yt-dlp` progress when progress is available.
+- The local library shows queued, downloading, and failed receiver jobs before completion writes archive records.
+- The local library auto-refreshes only while queued/downloading receiver jobs are active.
 - Popup renders Save progress when the receiver reports it.
 - Popup restores Save progress after closing and reopening while a receiver job is still running.
 - Popup can clear detected media and session-backed Save progress for the current tab.
@@ -105,7 +107,7 @@ Verified:
 - extension typecheck passed
 - extension build passed
 - popup Save tests prove receiver POST, completed save state, receiver unavailable state, and receiver failure retry state
-- receiver tests passed: 1 file, 11 tests
+- receiver tests passed: 3 files, 29 tests
 - receiver typecheck passed
 - receiver build passed
 - receiver health endpoint returned `{ ok: true, name: "dew-mediarchive-receiver", version: "0.1.0" }`
@@ -116,6 +118,9 @@ Verified:
 - manual extension Save smoke job history recorded `queued -> downloading -> completed`
 - receiver tests prove completed saves append archive records with output path, byte size, and SHA-256
 - receiver tests prove `/library` renders empty and populated states
+- receiver tests prove `/library` renders active download jobs with progress before they become archive records
+- receiver tests prove completed jobs do not duplicate in the active download section
+- receiver tests prove failed jobs remain visible without causing library auto-refresh
 - receiver tests prove `/library` escapes untrusted archive metadata
 - user manually confirmed `/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed
 - receiver tests prove `/library` search, kind filtering, and sort query handling
