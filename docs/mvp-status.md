@@ -126,6 +126,7 @@ queued -> downloading -> completed
 - `npm run dew:check` passed on a throwaway port outside the sandbox.
 - `Dew.command` passed shell syntax validation and has executable permissions.
 - Hardened `Dew.command` passed shell syntax validation after adding Homebrew PATH and readable failure handling.
+- Actual `Dew.command` launch on throwaway port `54989` started the receiver, and `GET /health` returned the Dew receiver identity.
 - `npm run dew` launched the receiver on a throwaway port, and `/health` plus `/library` responded.
 - A real `yt-dlp` smoke against the larger Blender Big Buck Bunny MP4 emitted `dew-progress` lines from 0% to 100% with `--progress`.
 - A full receiver API smoke on a throwaway port saved the larger Blender Big Buck Bunny MP4 and recorded progress snapshots from 0% through 100% in `jobs.jsonl`.
