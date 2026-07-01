@@ -195,6 +195,30 @@ describe("mediaStore", () => {
     });
   });
 
+  it("ignores badge update races for tabs that have already closed", async () => {
+    setBadgeText.mockRejectedValueOnce(new Error("No tab with id: 911883160."));
+
+    await expect(
+      updateBadgeForSnapshot(911883160, {
+        tabId: 911883160,
+        updatedAt: new Date().toISOString(),
+        candidates: [
+          createCandidate("media-1", "https://cdn.example.test/video.mp4")
+        ]
+      })
+    ).resolves.toBeUndefined();
+
+    expect(setBadgeBackgroundColor).not.toHaveBeenCalled();
+  });
+
+  it("keeps unexpected badge update failures visible", async () => {
+    setBadgeText.mockRejectedValueOnce(new Error("permission denied"));
+
+    await expect(updateBadgeForSnapshot(7, undefined)).rejects.toThrow(
+      "permission denied"
+    );
+  });
+
   it("clears a tab snapshot", async () => {
     await appendDetectedMedia(
       7,

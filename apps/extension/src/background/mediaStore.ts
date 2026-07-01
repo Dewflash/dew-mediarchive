@@ -38,15 +38,23 @@ export async function updateBadgeForSnapshot(
     snapshot?.candidates.filter((candidate) => candidate.status === "candidate")
       .length ?? 0;
 
-  await chrome.action.setBadgeText({
-    tabId,
-    text: candidateCount > 0 ? String(candidateCount) : ""
-  });
+  try {
+    await chrome.action.setBadgeText({
+      tabId,
+      text: candidateCount > 0 ? String(candidateCount) : ""
+    });
 
-  await chrome.action.setBadgeBackgroundColor({
-    tabId,
-    color: "#2563EB"
-  });
+    await chrome.action.setBadgeBackgroundColor({
+      tabId,
+      color: "#2563EB"
+    });
+  } catch (error) {
+    if (isMissingTabError(error)) {
+      return;
+    }
+
+    throw error;
+  }
 }
 
 async function appendDetectedMediaNow(
@@ -176,4 +184,11 @@ function getQualityHeight(quality: string | undefined): number {
 
   const match = /^(\d{3,4})p$/.exec(quality);
   return match ? Number(match[1]) : 0;
+}
+
+function isMissingTabError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /No tab with id:/i.test(error.message)
+  );
 }

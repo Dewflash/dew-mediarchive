@@ -101,7 +101,7 @@ Verified:
 - automated Copy clicks are blocked by Chrome clipboard rules and correctly show `Copy failed. Try again.`
 - the exact rendered candidate URL downloaded successfully with `yt-dlp`
 - downloaded popup-proof file probes as 1.000000 seconds and 17122 bytes
-- extension tests passed: 5 files, 34 tests
+- extension tests passed: 5 files, 48 tests
 - extension typecheck passed
 - extension build passed
 - popup Save tests prove receiver POST, completed save state, receiver unavailable state, and receiver failure retry state
@@ -132,6 +132,7 @@ Verified:
 - popup tests prove session-backed Save jobs restore and resume progress polling after popup reopen
 - popup tests prove Clear temp removes detected media and session-backed Save progress for the current tab
 - popup tests prove downloadable candidates render before unsupported observations
+- background tests prove closed-tab badge update races are ignored without hiding unexpected badge failures
 - receiver tests prove completed archive records preserve media-specific titles and expose them in library/export surfaces
 - receiver tests prove `/privacy` renders local privacy information
 - receiver tests prove `yt-dlp` progress-template parsing and job progress exposure

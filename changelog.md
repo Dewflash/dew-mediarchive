@@ -246,3 +246,8 @@
 - Ran extension `npm run test`: 5 files, 46 tests passed.
 - Ran extension `npm run typecheck`: passed.
 - Ran extension `npm run build`: passed.
+- Handled Chrome tab lifecycle races where the background worker tries to update a badge after the tab has already closed.
+- Added regression coverage proving closed-tab badge errors are ignored while unexpected badge failures still surface.
+- Ran extension `npm run test`: 5 files, 48 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.

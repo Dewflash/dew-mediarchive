@@ -55,6 +55,7 @@
 - Library file presence should be checked at render time. A missing file is a visible row state, not a reason to silently delete archive history.
 - Popup temporary state is browser-session state. Clearing it should remove only the current tab's detections and Save progress, not receiver jobs, archive records, or saved files.
 - Stream detection should avoid exposing internal playback plumbing as separate user choices. Ignore fragments/chunks, prefer master playlists, and keep only the highest-quality variant when no master has appeared.
+- Chrome tabs can close between media detection and badge updates. Treat `No tab with id` badge failures as a harmless lifecycle race, but keep other badge errors visible.
 
 ## Mistakes To Avoid
 
@@ -89,3 +90,4 @@
 - Do not show the same manifest URL twice in a media card unless no title, page title, or element index exists.
 - Do not create a second receiver job just because the popup reopened. Resume polling the existing job id when one is known.
 - Do not hide unsupported observations entirely while the detector is still maturing; keep them visible below the actionable candidates.
+- Do not swallow all background badge errors. Only the known closed-tab race should be ignored.

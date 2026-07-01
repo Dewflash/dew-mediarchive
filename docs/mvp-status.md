@@ -58,7 +58,7 @@ mvp-extension
 
 ## What Is Proven
 
-- Extension `npm run test` passes: 5 files, 46 tests.
+- Extension `npm run test` passes: 5 files, 48 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -131,6 +131,7 @@ queued -> downloading -> completed
 - Receiver tests prove media-specific titles are preserved in archive records, library rendering, search, JSON export, and CSV export.
 - Popup tests prove completed saves link to the local library.
 - Popup tests prove duplicate saves show an already-saved state.
+- Background tests prove closed-tab badge update races are ignored without hiding unexpected badge failures.
 - User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
 - `npm run dew:check` passed on a throwaway port outside the sandbox.
 - `Dew.command` passed shell syntax validation and has executable permissions.
