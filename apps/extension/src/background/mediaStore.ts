@@ -96,15 +96,84 @@ function upsertById(
   existingCandidates: DetectedMedia[],
   nextCandidate: DetectedMedia
 ): DetectedMedia[] {
-  const existingIndex = existingCandidates.findIndex(
-    (candidate) => candidate.id === nextCandidate.id
-  );
+  const existingIndex = findExistingMediaIndex(existingCandidates, nextCandidate);
 
   if (existingIndex < 0) {
     return [...existingCandidates, nextCandidate];
   }
 
+  if (!shouldReplaceMedia(existingCandidates[existingIndex], nextCandidate)) {
+    return existingCandidates;
+  }
+
   const nextCandidates = [...existingCandidates];
   nextCandidates[existingIndex] = nextCandidate;
   return nextCandidates;
+}
+
+function findExistingMediaIndex(
+  existingCandidates: DetectedMedia[],
+  nextCandidate: DetectedMedia
+): number {
+  const exactIndex = existingCandidates.findIndex(
+    (candidate) => candidate.id === nextCandidate.id
+  );
+
+  if (exactIndex >= 0 || nextCandidate.status !== "candidate") {
+    return exactIndex;
+  }
+
+  const nextStreamGroupKey = nextCandidate.streamGroupKey;
+
+  if (!nextStreamGroupKey) {
+    return -1;
+  }
+
+  return existingCandidates.findIndex(
+    (candidate) =>
+      candidate.status === "candidate" &&
+      candidate.streamGroupKey === nextStreamGroupKey &&
+      candidate.kind === nextCandidate.kind
+  );
+}
+
+function shouldReplaceMedia(
+  existingCandidate: DetectedMedia,
+  nextCandidate: DetectedMedia
+): boolean {
+  if (
+    existingCandidate.status !== "candidate" ||
+    nextCandidate.status !== "candidate"
+  ) {
+    return true;
+  }
+
+  return getStreamCandidatePriority(nextCandidate) >= getStreamCandidatePriority(
+    existingCandidate
+  );
+}
+
+function getStreamCandidatePriority(candidate: DetectedMedia): number {
+  if (candidate.status !== "candidate") {
+    return 0;
+  }
+
+  if (candidate.streamRole === "master-playlist") {
+    return 10_000;
+  }
+
+  if (candidate.streamRole === "variant-playlist") {
+    return 100 + getQualityHeight(candidate.quality);
+  }
+
+  return 1;
+}
+
+function getQualityHeight(quality: string | undefined): number {
+  if (!quality) {
+    return 0;
+  }
+
+  const match = /^(\d{3,4})p$/.exec(quality);
+  return match ? Number(match[1]) : 0;
 }

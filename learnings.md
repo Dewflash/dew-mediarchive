@@ -54,6 +54,7 @@
 - Removing from the library should mean removing Dew's archive/history record only. Deleting the actual saved media file should be a separate, more explicit action.
 - Library file presence should be checked at render time. A missing file is a visible row state, not a reason to silently delete archive history.
 - Popup temporary state is browser-session state. Clearing it should remove only the current tab's detections and Save progress, not receiver jobs, archive records, or saved files.
+- Stream detection should avoid exposing internal playback plumbing as separate user choices. Ignore fragments/chunks, prefer master playlists, and keep only the highest-quality variant when no master has appeared.
 
 ## Mistakes To Avoid
 

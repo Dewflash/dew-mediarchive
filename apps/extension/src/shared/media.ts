@@ -48,6 +48,8 @@ export type MediaCandidate = DetectedMediaBase & {
   label: string;
   mimeType?: string;
   quality?: string;
+  streamGroupKey?: string;
+  streamRole?: "master-playlist" | "variant-playlist";
 };
 
 export type UnsupportedMedia = DetectedMediaBase & {

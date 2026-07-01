@@ -1,6 +1,6 @@
 # MVP Status
 
-Updated: 2026-07-01
+Updated: 2026-07-02
 
 ## Current Branch
 
@@ -13,6 +13,7 @@ mvp-extension
 - Chromium Manifest V3 extension in `apps/extension`.
 - React popup UI.
 - Background request detector for HTTP/HTTPS media URLs.
+- Stream cleanup that ignores obvious media fragments and dedupes HLS/DASH variants under a preferred master playlist when available.
 - Content-script fallback that scans page `video`, `audio`, and nested `source` elements.
 - Best-effort media labels from page-visible element context, with stable `Video N` / `Audio N` fallback labels for multi-media pages.
 - Shared media detection model with provenance, status, media kind, and unsupported reasons.
@@ -57,7 +58,7 @@ mvp-extension
 
 ## What Is Proven
 
-- Extension `npm run test` passes: 5 files, 40 tests.
+- Extension `npm run test` passes: 5 files, 46 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -76,6 +77,7 @@ Copy
 
 - Automated Copy clicks can be blocked by Chrome, and Dew shows `Copy failed. Try again.`
 - Popup unit tests prove a visible media list is not removed when the tab snapshot clears while the popup is open.
+- Detector tests prove stream fragments are ignored, master playlists are labeled as auto-best-quality saves, and stream variants are deduped toward the best available playlist.
 - The exact rendered candidate URL downloads successfully with `yt-dlp`.
 - The downloaded proof file probes as:
 

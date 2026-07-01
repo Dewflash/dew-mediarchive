@@ -34,7 +34,9 @@ describe("createDetectedMediaFromRequest", () => {
     expect(detectedMedia).toMatchObject({
       status: "candidate",
       kind: "hls",
-      label: "HLS stream",
+      label: "HLS stream · Auto best quality",
+      streamGroupKey: "https://cdn.example.test/video",
+      streamRole: "master-playlist",
       url: "https://cdn.example.test/video/master.m3u8",
       pageUrl: "https://example.test/watch",
       pageTitle: "Smoke Page",
@@ -44,6 +46,23 @@ describe("createDetectedMediaFromRequest", () => {
         initiator: "https://example.test"
       }
     });
+  });
+
+  it("ignores stream fragments from network requests", async () => {
+    const detectedMedia = await createDetectedMediaFromRequest({
+      requestId: "request-fragment",
+      url: "https://cdn.example.test/video/1080p/segment-00001.m4s?token=123",
+      tabId: 42,
+      frameId: 0,
+      parentFrameId: -1,
+      timeStamp: Date.now(),
+      type: "xmlhttprequest",
+      initiator: "https://example.test",
+      method: "GET",
+      requestBody: {}
+    });
+
+    expect(detectedMedia).toBeUndefined();
   });
 
   it("returns undefined for ignored non-media requests", async () => {

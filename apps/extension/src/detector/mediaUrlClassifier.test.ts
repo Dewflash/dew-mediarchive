@@ -8,7 +8,32 @@ describe("classifyMediaUrl", () => {
     ).toMatchObject({
       status: "candidate",
       kind: "hls",
-      label: "HLS stream"
+      label: "HLS stream · Auto best quality",
+      streamRole: "master-playlist"
+    });
+  });
+
+  it("classifies quality-specific HLS playlists as variants", () => {
+    expect(
+      classifyMediaUrl("https://cdn.example.com/video/1080p/playlist.m3u8")
+    ).toMatchObject({
+      status: "candidate",
+      kind: "hls",
+      label: "HLS stream variant · 1080p",
+      quality: "1080p",
+      streamGroupKey: "https://cdn.example.com/video",
+      streamRole: "variant-playlist"
+    });
+  });
+
+  it("does not collapse unrelated root-level playlists into one stream group", () => {
+    expect(classifyMediaUrl("https://cdn.example.com/master.m3u8?stream=one")).toMatchObject({
+      status: "candidate",
+      streamGroupKey: "https://cdn.example.com/master.m3u8?stream=one"
+    });
+    expect(classifyMediaUrl("https://cdn.example.com/master.m3u8?stream=two")).toMatchObject({
+      status: "candidate",
+      streamGroupKey: "https://cdn.example.com/master.m3u8?stream=two"
     });
   });
 
@@ -20,16 +45,38 @@ describe("classifyMediaUrl", () => {
     });
   });
 
+  it("does not ignore normal MP4 filenames that happen to contain part numbers", () => {
+    expect(
+      classifyMediaUrl("https://media.example.com/course/part-1.mp4")
+    ).toMatchObject({
+      status: "candidate",
+      kind: "mp4",
+      label: "MP4 video"
+    });
+  });
+
   it("classifies DASH manifests as media candidates", () => {
     expect(classifyMediaUrl("https://cdn.example.com/manifest.mpd")).toMatchObject({
       status: "candidate",
       kind: "dash",
-      label: "DASH stream"
+      label: "DASH stream · Auto best quality"
     });
   });
 
   it("ignores common media segment files", () => {
     expect(classifyMediaUrl("https://cdn.example.com/chunk001.ts")).toEqual({
+      status: "ignored",
+      reason: "media-segment"
+    });
+    expect(
+      classifyMediaUrl("https://cdn.example.com/video/segment-001.m4s?token=123")
+    ).toEqual({
+      status: "ignored",
+      reason: "media-segment"
+    });
+    expect(
+      classifyMediaUrl("https://cdn.example.com/video/seg-00012.mp4?token=123")
+    ).toEqual({
       status: "ignored",
       reason: "media-segment"
     });
@@ -72,4 +119,3 @@ describe("classifyMediaUrl", () => {
     });
   });
 });
-

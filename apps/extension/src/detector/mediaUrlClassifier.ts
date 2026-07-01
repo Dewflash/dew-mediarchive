@@ -5,6 +5,9 @@ export type MediaUrlCandidateClassification = {
   kind: MediaKind;
   label: string;
   normalizedUrl: string;
+  quality?: string;
+  streamGroupKey?: string;
+  streamRole?: "master-playlist" | "variant-playlist";
 };
 
 export type MediaUrlUnsupportedClassification = {
@@ -37,7 +40,15 @@ const DIRECT_MEDIA_EXTENSIONS: Record<string, { kind: MediaKind; label: string }
   ".wav": { kind: "audio", label: "WAV audio" }
 };
 
-const MEDIA_SEGMENT_EXTENSIONS = new Set([".ts", ".m4s", ".cmfv", ".cmfa"]);
+const MEDIA_SEGMENT_EXTENSIONS = new Set([
+  ".ts",
+  ".m2ts",
+  ".m4s",
+  ".cmfv",
+  ".cmfa",
+  ".mp4v",
+  ".m4vfrag"
+]);
 
 const BLOCKED_PLATFORM_HOSTS = [
   "youtube.com",
@@ -95,22 +106,139 @@ export function classifyMediaUrl(rawUrl: string): MediaUrlClassification {
   }
 
   const extension = getPathExtension(parsedUrl.pathname);
-  const directMedia = DIRECT_MEDIA_EXTENSIONS[extension];
-
-  if (directMedia) {
-    return {
-      status: "candidate",
-      kind: directMedia.kind,
-      label: directMedia.label,
-      normalizedUrl: parsedUrl.href
-    };
-  }
-
-  if (MEDIA_SEGMENT_EXTENSIONS.has(extension)) {
+  if (MEDIA_SEGMENT_EXTENSIONS.has(extension) || looksLikeMediaSegment(parsedUrl)) {
     return { status: "ignored", reason: "media-segment" };
   }
 
+  const directMedia = DIRECT_MEDIA_EXTENSIONS[extension];
+
+  if (directMedia) {
+    const streamMetadata =
+      directMedia.kind === "hls" || directMedia.kind === "dash"
+        ? getStreamPlaylistMetadata(parsedUrl)
+        : undefined;
+
+    return {
+      status: "candidate",
+      kind: directMedia.kind,
+      label: getMediaLabel(directMedia.label, streamMetadata),
+      quality: streamMetadata?.quality,
+      normalizedUrl: parsedUrl.href,
+      streamGroupKey: streamMetadata?.streamGroupKey,
+      streamRole: streamMetadata?.streamRole
+    };
+  }
+
   return { status: "ignored", reason: "non-media-url" };
+}
+
+function getStreamPlaylistMetadata(
+  parsedUrl: URL
+): Pick<
+  MediaUrlCandidateClassification,
+  "quality" | "streamGroupKey" | "streamRole"
+> {
+  const pathSegments = parsedUrl.pathname.split("/").filter(Boolean);
+  const filename = pathSegments.at(-1) ?? "";
+  const normalizedFilename = filename.toLowerCase();
+  const quality = extractPlaylistQuality(parsedUrl);
+  const streamRole = isMasterPlaylistFilename(normalizedFilename, quality)
+    ? "master-playlist"
+    : "variant-playlist";
+  const groupSegments =
+    streamRole === "master-playlist"
+      ? pathSegments.slice(0, -1)
+      : trimVariantPathSegments(pathSegments);
+  const groupPath = groupSegments.join("/");
+
+  return {
+    quality,
+    streamGroupKey: groupPath
+      ? `${parsedUrl.protocol}//${parsedUrl.host}/${groupPath}`
+      : parsedUrl.href,
+    streamRole
+  };
+}
+
+function getMediaLabel(
+  baseLabel: string,
+  streamMetadata:
+    | Pick<
+        MediaUrlCandidateClassification,
+        "quality" | "streamRole"
+      >
+    | undefined
+): string {
+  if (!streamMetadata) {
+    return baseLabel;
+  }
+
+  if (streamMetadata.streamRole === "master-playlist") {
+    return `${baseLabel} · Auto best quality`;
+  }
+
+  return streamMetadata.quality
+    ? `${baseLabel} variant · ${streamMetadata.quality}`
+    : `${baseLabel} variant`;
+}
+
+function isMasterPlaylistFilename(
+  filename: string,
+  quality: string | undefined
+): boolean {
+  return (
+    filename.includes("master") ||
+    filename.includes("manifest") ||
+    (filename.includes("playlist") && !quality)
+  );
+}
+
+function trimVariantPathSegments(pathSegments: string[]): string[] {
+  const withoutFilename = pathSegments.slice(0, -1);
+  const lastDirectory = withoutFilename.at(-1)?.toLowerCase() ?? "";
+
+  if (isQualitySegment(lastDirectory) || isVariantSegment(lastDirectory)) {
+    return withoutFilename.slice(0, -1);
+  }
+
+  return withoutFilename;
+}
+
+function extractPlaylistQuality(parsedUrl: URL): string | undefined {
+  const pathAndQuery = `${parsedUrl.pathname} ${parsedUrl.search}`.toLowerCase();
+  const heightMatch = /(?:^|[^\d])([1-9]\d{2,3})p(?:[^\d]|$)/.exec(pathAndQuery);
+
+  if (heightMatch) {
+    return `${heightMatch[1]}p`;
+  }
+
+  const resolutionMatch = /(?:^|[^\d])\d{3,5}x([1-9]\d{2,3})(?:[^\d]|$)/.exec(
+    pathAndQuery
+  );
+
+  if (resolutionMatch) {
+    return `${resolutionMatch[1]}p`;
+  }
+
+  return undefined;
+}
+
+function looksLikeMediaSegment(parsedUrl: URL): boolean {
+  const pathname = parsedUrl.pathname.toLowerCase();
+  const filename = pathname.split("/").pop() ?? "";
+
+  return (
+    /(?:^|[-_.])(?:seg|segment|frag|fragment|chunk)[-_.]?\d+/.test(filename) ||
+    /(?:^|[-_.])\d{3,}(?:[-_.](?:seg|fragment|chunk))/.test(filename)
+  );
+}
+
+function isQualitySegment(value: string): boolean {
+  return /^\d{3,4}p$/.test(value) || /^\d{3,5}x\d{3,5}$/.test(value);
+}
+
+function isVariantSegment(value: string): boolean {
+  return /^(?:variant|quality|rendition)[-_]?\d*$/.test(value);
 }
 
 function parseUrl(rawUrl: string): URL | null {
@@ -137,4 +265,3 @@ function getPathExtension(pathname: string): string {
 
   return lastSegment.slice(dotIndex).toLowerCase();
 }
-

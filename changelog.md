@@ -242,3 +242,7 @@
 - Ran extension `npm run test`: 5 files, 40 tests passed.
 - Ran extension `npm run typecheck`: passed.
 - Ran extension `npm run build`: passed.
+- Added stream cleanup for HLS/DASH detection: numbered fragments/chunks are ignored, master playlists are labeled as auto-best-quality saves, and stream variants dedupe toward the master playlist or highest-quality variant seen.
+- Ran extension `npm run test`: 5 files, 46 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.

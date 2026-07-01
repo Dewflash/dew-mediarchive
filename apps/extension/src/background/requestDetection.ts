@@ -45,7 +45,10 @@ export async function createDetectedMediaFromRequest(
     return {
       ...baseRecord,
       status: "candidate",
-      label: classification.label
+      label: classification.label,
+      quality: classification.quality,
+      streamGroupKey: classification.streamGroupKey,
+      streamRole: classification.streamRole
     };
   }
 
@@ -90,7 +93,10 @@ export function createDetectedMediaFromPageMessage(
     return {
       ...baseRecord,
       status: "candidate",
-      label: classification.label
+      label: classification.label,
+      quality: classification.quality,
+      streamGroupKey: classification.streamGroupKey,
+      streamRole: classification.streamRole
     };
   }
 

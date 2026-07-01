@@ -5,7 +5,7 @@ import {
   readTabSnapshot,
   updateBadgeForSnapshot
 } from "./mediaStore";
-import type { DetectedMedia } from "../shared";
+import type { DetectedMedia, MediaCandidate } from "../shared";
 
 const sessionStorage = new Map<string, unknown>();
 const setBadgeText = vi.fn();
@@ -81,6 +81,75 @@ describe("mediaStore", () => {
     expect(snapshot.candidates[0]?.url).toBe("https://cdn.example.test/new.mp4");
   });
 
+  it("replaces stream variants with matching master playlists", async () => {
+    await appendDetectedMedia(
+      7,
+      "https://example.test/watch",
+      "Watch",
+      createCandidate("variant-720", "https://cdn.example.test/video/720p/playlist.m3u8", {
+        kind: "hls",
+        label: "HLS stream variant · 720p",
+        quality: "720p",
+        streamGroupKey: "https://cdn.example.test/video",
+        streamRole: "variant-playlist"
+      })
+    );
+
+    const snapshot = await appendDetectedMedia(
+      7,
+      "https://example.test/watch",
+      "Watch",
+      createCandidate("master", "https://cdn.example.test/video/master.m3u8", {
+        kind: "hls",
+        label: "HLS stream · Auto best quality",
+        streamGroupKey: "https://cdn.example.test/video",
+        streamRole: "master-playlist"
+      })
+    );
+
+    expect(snapshot.candidates).toHaveLength(1);
+    expect(snapshot.candidates[0]).toMatchObject({
+      id: "master",
+      label: "HLS stream · Auto best quality",
+      url: "https://cdn.example.test/video/master.m3u8"
+    });
+  });
+
+  it("keeps the highest quality stream variant when no master playlist is seen", async () => {
+    await appendDetectedMedia(
+      7,
+      "https://example.test/watch",
+      "Watch",
+      createCandidate("variant-720", "https://cdn.example.test/video/720p/playlist.m3u8", {
+        kind: "hls",
+        label: "HLS stream variant · 720p",
+        quality: "720p",
+        streamGroupKey: "https://cdn.example.test/video",
+        streamRole: "variant-playlist"
+      })
+    );
+
+    const snapshot = await appendDetectedMedia(
+      7,
+      "https://example.test/watch",
+      "Watch",
+      createCandidate("variant-1080", "https://cdn.example.test/video/1080p/playlist.m3u8", {
+        kind: "hls",
+        label: "HLS stream variant · 1080p",
+        quality: "1080p",
+        streamGroupKey: "https://cdn.example.test/video",
+        streamRole: "variant-playlist"
+      })
+    );
+
+    expect(snapshot.candidates).toHaveLength(1);
+    expect(snapshot.candidates[0]).toMatchObject({
+      id: "variant-1080",
+      label: "HLS stream variant · 1080p",
+      url: "https://cdn.example.test/video/1080p/playlist.m3u8"
+    });
+  });
+
   it("serializes concurrent appends for the same tab", async () => {
     await Promise.all([
       appendDetectedMedia(
@@ -140,7 +209,11 @@ describe("mediaStore", () => {
   });
 });
 
-function createCandidate(id: string, url: string): DetectedMedia {
+function createCandidate(
+  id: string,
+  url: string,
+  overrides: Partial<MediaCandidate> = {}
+): MediaCandidate {
   return {
     id,
     url,
@@ -153,7 +226,7 @@ function createCandidate(id: string, url: string): DetectedMedia {
     provenance: {
       source: "network-request",
       detectorVersion: "test"
-    }
+    },
+    ...overrides
   };
 }
-

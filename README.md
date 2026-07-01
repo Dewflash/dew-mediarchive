@@ -8,6 +8,7 @@ The MVP should:
 
 - Build as a Chromium Manifest V3 extension.
 - Detect common media request URLs such as `.mp4`, `.webm`, `.m3u8`, and `.mpd`.
+- Ignore common stream fragments and prefer master HLS/DASH playlists over quality-specific variants when they belong to the same stream.
 - Store detected media per tab.
 - Show a badge when candidates are found.
 - List candidates in the popup.

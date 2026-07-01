@@ -54,6 +54,8 @@ webRequest.onBeforeRequest
 
 The popup should read the same snapshot instead of duplicating detection logic.
 
+For HLS and DASH, the classifier ignores obvious segment/chunk requests and adds stream grouping metadata to playlist candidates. The tab media store uses that group to prefer a master playlist over quality-specific variants, and otherwise keeps the highest-quality variant seen. The Save path then hands that single playlist URL to `yt-dlp`, which chooses the best available format from master playlists by default.
+
 ## Page Media Fallback
 
 The extension also injects a content script on pages. It scans `video`, `audio`, and nested `source` elements, normalizes resolved media URLs, and sends page media messages to the background worker.

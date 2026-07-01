@@ -6,6 +6,7 @@
 - Extension loads as an unpacked Chromium extension.
 - Badge updates when supported media candidates are detected.
 - Popup lists detected media for the current tab.
+- Stream detection ignores common fragments/chunks and dedupes HLS/DASH variants toward a master playlist when available.
 - Popup gives each page-media candidate a readable title or stable fallback label on multi-video pages.
 - Popup shows downloadable candidates before unsupported observations.
 - Copy button writes the media URL to the clipboard.
@@ -91,6 +92,7 @@ Verified:
 - headless Chrome requested the local smoke-test page and media file
 - automated popup tests prove snapshot rendering and clipboard success/failure behavior
 - automated popup tests prove visible candidates remain available if the tab snapshot clears while the popup is open
+- detector tests prove stream fragments are ignored and stream variants dedupe toward master playlists or the highest-quality variant seen
 - Chrome for Testing loaded the rebuilt extension from `apps/extension/dist`
 - Chrome for Testing loaded the local smoke page and requested `sample.mp4`
 - extension session storage contained exactly one `MP4 video` candidate for `http://127.0.0.1:8765/sample.mp4`
