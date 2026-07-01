@@ -188,16 +188,25 @@ It renders `archive.jsonl` records as HTML and redirects `/` to `/library`. The 
 
 The personal-tool MVP library supports search, kind filtering, sorting, source links, and export links. JSON and CSV exports are generated from archive records, and CSV text is escaped so spreadsheet formulas cannot be injected through page titles or URLs.
 
+The receiver also serves a local privacy page:
+
+```text
+GET /privacy
+```
+
+The privacy page is server-rendered, script-free, and describes local storage, network visibility, private browsing behavior, and `yt-dlp`.
+
 ## Easy Launcher
 
 The repository root exposes:
 
 ```text
+Dew.command
 npm run dew
 npm run dew:check
 ```
 
-The launcher builds the receiver, checks `yt-dlp`, checks the configured loopback port, prints the library/download/job/archive paths, and starts the receiver. It is still a developer/personal-tool launcher, not a packaged desktop app.
+`Dew.command` is the personal-tool launcher. Double-clicking it starts the same receiver and opens the local library. `npm run dew` remains the developer fallback. The launcher builds the receiver, checks `yt-dlp`, checks the configured loopback port, prints the library/download/job/archive paths, and starts the receiver. It is still a personal-tool launcher, not a packaged desktop app.
 
 ## Future App Shape
 

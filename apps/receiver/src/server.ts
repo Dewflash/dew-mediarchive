@@ -17,6 +17,7 @@ import {
   getLibraryOptionsFromSearchParams,
   renderLibraryPage
 } from "./libraryView.js";
+import { renderPrivacyPage } from "./privacyView.js";
 import { validateDownloadRequest } from "./validation.js";
 
 export type ReceiverServerOptions = {
@@ -107,6 +108,11 @@ async function handleRequest(
         getLibraryOptionsFromSearchParams(url.searchParams)
       )
     );
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/privacy") {
+    sendHtml(response, 200, renderPrivacyPage());
     return;
   }
 

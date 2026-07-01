@@ -691,6 +691,29 @@ So if you click Save, close Dew, and open it again during the same browser sessi
 
 This is still privacy-conscious: it is temporary browser session state, not permanent tracking history. The long-term record remains the local archive after a Save completes.
 
+## Why We Added `Dew.command`
+
+`npm run dew` proved the local receiver worked, but it still felt like a developer workflow.
+
+`Dew.command` is a double-clickable macOS launcher. It runs the same receiver startup checks, starts the local receiver, and opens the local library page:
+
+```text
+double-click Dew.command -> receiver starts -> library opens
+```
+
+This is not a packaged Mac app yet. It is the bridge between a developer command and a personal tool you can use without typing Terminal commands.
+
+## Why Unsupported Items Move Below Downloadable Items
+
+Unsupported observations are still useful because they explain what Dew saw and why it cannot save that specific reference.
+
+But they should not be the first thing you see. The popup now keeps downloadable candidates first, then shows unsupported observations underneath. That makes the normal decision flow clearer:
+
+```text
+saveable media first
+seen-but-not-saveable details after
+```
+
 ## Why We Added More Tests Even Though The Popup Proof Is Still Manual
 
 The visible Chrome smoke test proved that the temporary browser could load the local page and request `sample.mp4`, but the remaining popup proof still needs a normal human-visible interaction.

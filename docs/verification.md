@@ -7,6 +7,7 @@
 - Badge updates when supported media candidates are detected.
 - Popup lists detected media for the current tab.
 - Popup gives each page-media candidate a readable title or stable fallback label on multi-video pages.
+- Popup shows downloadable candidates before unsupported observations.
 - Copy button writes the media URL to the clipboard.
 - At least one copied non-DRM media URL downloads successfully with `yt-dlp`.
 - Save button sends a detected candidate to the local receiver.
@@ -16,6 +17,7 @@
 - Popup restores Save progress after closing and reopening while a receiver job is still running.
 - Completed receiver saves create archive metadata with file hash and size.
 - Local library renders saved archive records.
+- Local privacy page explains local storage and network visibility.
 - Local library supports search, filtering, sorting, and export links.
 - Archive metadata exports are available as JSON and CSV.
 - Duplicate source saves reuse an existing archive record instead of downloading the same source again.
@@ -121,9 +123,12 @@ Verified:
 - popup tests prove candidate cards can render media-specific titles instead of only source URLs
 - popup tests prove title-less network stream candidates use page-title fallback labels before falling back to source URLs
 - popup tests prove session-backed Save jobs restore and resume progress polling after popup reopen
+- popup tests prove downloadable candidates render before unsupported observations
 - receiver tests prove completed archive records preserve media-specific titles and expose them in library/export surfaces
+- receiver tests prove `/privacy` renders local privacy information
 - receiver tests prove `yt-dlp` progress-template parsing and job progress exposure
 - `npm run dew:check` passed on a throwaway port outside the sandbox
+- `Dew.command` passed shell syntax validation and has executable permissions
 - `npm run dew` launched the receiver on a throwaway port, and `/health`, `/library`, plus `/export/archive.json` responded
 - a real `yt-dlp` smoke against the larger Blender Big Buck Bunny MP4 emitted progress-template lines from 0% to 100%
 - a full receiver API smoke on a throwaway port saved the larger Blender Big Buck Bunny MP4 and recorded progress snapshots from 0% through 100% in `jobs.jsonl`

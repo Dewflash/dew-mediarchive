@@ -210,3 +210,18 @@
 - Ran extension `npm run test`: 5 files, 38 tests passed.
 - Ran extension `npm run typecheck`: passed.
 - Ran extension `npm run build`: passed.
+- Added `Dew.command` as a double-clickable macOS launcher for the personal MVP.
+- Added `--open` support to the launcher so it opens the local library after the receiver is ready.
+- Added local privacy page at `GET /privacy` and linked it from the library.
+- Updated receiver-unavailable popup copy to tell users to double-click `Dew.command`.
+- Updated popup ordering so downloadable candidates render above unsupported observations.
+- Added popup test coverage for candidate-first ordering.
+- Added receiver test coverage for the local privacy page.
+- Ran extension `npm run test`: 5 files, 39 tests passed.
+- Ran extension `npm run typecheck`: passed.
+- Ran extension `npm run build`: passed.
+- Ran receiver `npm run test`: 3 files, 23 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.
+- `Dew.command` passed `zsh -n` syntax validation and is executable.
+- Reran `DEW_RECEIVER_PORT=54988 npm run dew:check` outside the sandbox: passed.

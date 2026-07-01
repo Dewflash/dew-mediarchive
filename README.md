@@ -46,11 +46,12 @@ user-learnings.md  Plain-English decision notes for the project owner
 2. Open `chrome://extensions`.
 3. Enable Developer Mode.
 4. Load the built extension folder as an unpacked extension.
-5. Visit a page with authorized non-DRM media.
-6. Start playback.
-7. Open the Dew popup.
-8. Copy a detected media URL.
-9. Test it manually with `yt-dlp`.
+5. Double-click `Dew.command` from this repository root.
+6. Visit a page with authorized non-DRM media.
+7. Start playback.
+8. Open the Dew popup.
+9. Save a detected media candidate.
+10. View saved media in the local library.
 
 ## First Save Flow
 
@@ -77,7 +78,15 @@ http://127.0.0.1:47321/export/archive.csv
 
 ## Easy Launch
 
-From the repository root:
+For normal personal use, double-click:
+
+```text
+Dew.command
+```
+
+This starts the local receiver and opens the library page.
+
+Developer fallback from the repository root:
 
 ```bash
 npm run dew
@@ -95,6 +104,12 @@ If the default port is busy, choose another one:
 
 ```bash
 DEW_RECEIVER_PORT=47322 npm run dew
+```
+
+Privacy information is available while the receiver is running:
+
+```text
+http://127.0.0.1:47321/privacy
 ```
 
 ## Extension Commands

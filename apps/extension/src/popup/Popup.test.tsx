@@ -105,6 +105,28 @@ describe("Popup", () => {
     expect(screen.getByText("cdn.example.test/video.mp4")).toBeInTheDocument();
   });
 
+  it("shows downloadable candidates before unsupported observations", async () => {
+    storageGet.mockResolvedValue({
+      "media-snapshot:7": createSnapshot([
+        createUnsupported("unsupported-1", "blob:https://example.test/video"),
+        createCandidate("media-1", "https://cdn.example.test/video.mp4", {
+          mediaTitle: "Downloadable clip"
+        })
+      ])
+    });
+
+    render(<Popup />);
+
+    expect(await screen.findByText("2 items found")).toBeInTheDocument();
+    const downloadableTitle = screen.getByText("Downloadable clip");
+    const unsupportedTitle = screen.getByText("Video 1");
+
+    expect(
+      downloadableTitle.compareDocumentPosition(unsupportedTitle) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it("uses page titles for title-less network candidates", async () => {
     storageGet.mockResolvedValue({
       "media-snapshot:7": createSnapshot([
@@ -419,7 +441,7 @@ describe("Popup", () => {
 
     expect(
       await screen.findByText(
-        "Local receiver is not running. Start it with npm run dew, then retry."
+        "Local receiver is not running. Double-click Dew.command, then retry."
       )
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
@@ -593,6 +615,18 @@ function createCandidate(
       detectorVersion: "test"
     },
     ...overrides
+  };
+}
+
+function createUnsupported(
+  id: string,
+  url: string
+): MediaDetectionSnapshot["candidates"][number] {
+  return {
+    ...createCandidate(id, url),
+    status: "unsupported",
+    unsupportedReason: "unsupported-scheme",
+    message: "Only http and https media URLs are supported."
   };
 }
 

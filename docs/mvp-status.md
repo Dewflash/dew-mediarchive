@@ -19,6 +19,7 @@ mvp-extension
 - Per-tab session snapshot storage in `chrome.storage.session`.
 - Badge count updates for supported candidates.
 - Popup states for loading, empty, error, candidates, unsupported media, Copy success, and Copy failure.
+- Popup orders downloadable candidates before unsupported observations.
 - Popup Save action for candidate media.
 - Popup Save states for receiver unavailable, queued, downloading, completed, and failed jobs.
 - Popup shows receiver download progress with a progress bar when `yt-dlp` reports percent progress.
@@ -41,15 +42,17 @@ mvp-extension
 - Export endpoints at `GET /export/archive.json` and `GET /export/archive.csv`.
 - Archive records include source URL, page context, media title, output path, byte size, and SHA-256 hash.
 - Local library page at `GET /library`.
+- Local privacy page at `GET /privacy`.
 - Local library search, media-type filtering, sorting, source links, and export links.
 - Root receiver route redirects to `/library`.
+- Double-clickable `Dew.command` launcher that starts the receiver and opens the local library.
 - Root `npm run dew` launcher and `npm run dew:check` verification command.
 - Manual verification guide in `docs/mvp-manual-test.md`.
 - Architecture, adapter, archive, security, verification, learning, and changelog docs.
 
 ## What Is Proven
 
-- Extension `npm run test` passes: 5 files, 38 tests.
+- Extension `npm run test` passes: 5 files, 39 tests.
 - `npm run typecheck` passes.
 - `npm run build` passes.
 - The extension builds to `apps/extension/dist`.
@@ -76,7 +79,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 3 files, 22 tests.
+- Receiver `npm run test` passes: 3 files, 23 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -103,6 +106,7 @@ queued -> downloading -> completed
 - Receiver tests prove the local library renders empty and populated archive states.
 - Receiver tests prove the local library escapes untrusted archive metadata.
 - Receiver tests prove the local library can search, filter, and sort archive records.
+- Receiver tests prove the local privacy page renders.
 - Receiver tests prove JSON and CSV archive export.
 - Receiver tests prove CSV formula escaping.
 - Receiver tests prove duplicate source saves reuse an existing archive record.
@@ -113,11 +117,13 @@ queued -> downloading -> completed
 - Popup tests prove detected cards show media-specific titles.
 - Popup tests prove title-less network stream candidates use page-title fallback labels instead of duplicating the source URL.
 - Popup tests prove saved receiver jobs restore after popup reopen and resume progress polling.
+- Popup tests prove downloadable candidates render above unsupported observations.
 - Receiver tests prove media-specific titles are preserved in archive records, library rendering, search, JSON export, and CSV export.
 - Popup tests prove completed saves link to the local library.
 - Popup tests prove duplicate saves show an already-saved state.
 - User manually confirmed `http://127.0.0.1:47321/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed.
 - `npm run dew:check` passed on a throwaway port outside the sandbox.
+- `Dew.command` passed shell syntax validation and has executable permissions.
 - `npm run dew` launched the receiver on a throwaway port, and `/health` plus `/library` responded.
 - A real `yt-dlp` smoke against the larger Blender Big Buck Bunny MP4 emitted `dew-progress` lines from 0% to 100% with `--progress`.
 - A full receiver API smoke on a throwaway port saved the larger Blender Big Buck Bunny MP4 and recorded progress snapshots from 0% through 100% in `jobs.jsonl`.

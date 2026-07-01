@@ -85,6 +85,12 @@ export function renderLibraryPage(
       font-weight: 700;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
     .toolbar {
       display: grid;
       grid-template-columns: minmax(180px, 1fr) 150px 150px auto;
@@ -290,7 +296,10 @@ export function renderLibraryPage(
   <main>
     <header>
       <h1>Dew MediArchive</h1>
-      <p class="count">${records.length} saved item${records.length === 1 ? "" : "s"}</p>
+      <div class="header-actions">
+        <a href="/privacy">Privacy</a>
+        <p class="count">${records.length} saved item${records.length === 1 ? "" : "s"}</p>
+      </div>
     </header>
     <form class="toolbar" method="get" action="/library">
       <div class="field">

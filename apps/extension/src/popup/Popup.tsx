@@ -151,7 +151,7 @@ export function Popup() {
       return [];
     }
 
-    return popupState.snapshot?.candidates ?? [];
+    return sortMediaItems(popupState.snapshot?.candidates ?? []);
   }, [popupState]);
 
   async function copyMediaUrl(media: DetectedMedia) {
@@ -572,6 +572,16 @@ function getMediaLabel(media: DetectedMedia): string {
 
 function isMediaCandidate(media: DetectedMedia): media is MediaCandidate {
   return media.status === "candidate";
+}
+
+function sortMediaItems(mediaItems: DetectedMedia[]): DetectedMedia[] {
+  return [...mediaItems].sort((left, right) => {
+    if (left.status === right.status) {
+      return 0;
+    }
+
+    return left.status === "candidate" ? -1 : 1;
+  });
 }
 
 function getMediaTitle(media: DetectedMedia, mediaItems: DetectedMedia[]): string {

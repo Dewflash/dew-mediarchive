@@ -129,6 +129,22 @@ describe("receiver server", () => {
     expect(html).toContain("Dew MediArchive");
     expect(html).toContain("0 saved items");
     expect(html).toContain("No saved media found");
+    expect(html).toContain("/privacy");
+  });
+
+  it("renders the local privacy page", async () => {
+    const response = await fetch(`${baseUrl}/privacy`, {
+      headers: {
+        Origin: "chrome-extension://example"
+      }
+    });
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/html");
+    expect(html).toContain("Privacy");
+    expect(html).toContain("Dew does not upload your archive");
+    expect(html).toContain("Back to library");
   });
 
   it("rejects normal website origins", async () => {

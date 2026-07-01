@@ -161,7 +161,7 @@ async function fetchReceiver(
   } catch {
     throwIfAborted(init?.signal);
     throw new Error(
-      "Local receiver is not running. Start it with npm run dew, then retry."
+      "Local receiver is not running. Double-click Dew.command, then retry."
     );
   }
 }

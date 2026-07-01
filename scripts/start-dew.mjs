@@ -7,6 +7,7 @@ import { createServer } from "node:net";
 import { fileURLToPath } from "node:url";
 
 const isCheckOnly = process.argv.includes("--check");
+const shouldOpenLibrary = process.argv.includes("--open");
 const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 const receiverDist = join(repoRoot, "apps", "receiver", "dist", "index.js");
 const config = createLauncherConfig(process.env);
@@ -48,6 +49,9 @@ const portState = await getPortState(config.host, config.port);
 
 if (portState === "dew-running") {
   console.log(`Dew receiver is already running: ${libraryUrl}`);
+  if (shouldOpenLibrary) {
+    openLibrary(libraryUrl);
+  }
   process.exit(0);
 }
 
@@ -72,10 +76,36 @@ const receiverProcess = spawn(process.execPath, [receiverDist], {
   stdio: "inherit"
 });
 
+if (shouldOpenLibrary) {
+  await waitForDewReceiver(config.host, config.port);
+  openLibrary(libraryUrl);
+}
+
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.on(signal, () => {
     receiverProcess.kill(signal);
   });
+}
+
+async function waitForDewReceiver(host, port) {
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    if (await isDewReceiverRunning(host, port)) {
+      return;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+
+  console.warn("Dew receiver started, but the library was not ready to open yet.");
+}
+
+function openLibrary(url) {
+  const openProcess = spawn("open", [url], {
+    detached: true,
+    stdio: "ignore"
+  });
+
+  openProcess.unref();
 }
 
 receiverProcess.on("exit", (code, signal) => {

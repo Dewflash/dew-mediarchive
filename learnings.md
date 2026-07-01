@@ -47,6 +47,8 @@
 - Keep media-specific titles separate from page titles and source URLs. `mediaTitle` helps users distinguish multiple videos on one page; `pageTitle` remains provenance for the browser page; `url` remains the real downloadable source.
 - Network-only stream candidates may not have element context. The popup should use page title as a readable fallback before using the raw source URL as the title.
 - Popup state is not durable by itself. Any user-visible long-running receiver job needs a session-backed job id so the popup can restore progress after being closed.
+- For the personal MVP, a double-click launcher is enough to remove the normal Terminal workflow without taking on full app packaging yet.
+- Downloadable candidates should render before unsupported observations. Unsupported items are useful transparency, but they should not lead the user's decision flow.
 
 ## Mistakes To Avoid
 
@@ -80,3 +82,4 @@
 - Do not overwrite `pageTitle` with a guessed media label. That would make provenance worse and still would not solve multi-video identification cleanly.
 - Do not show the same manifest URL twice in a media card unless no title, page title, or element index exists.
 - Do not create a second receiver job just because the popup reopened. Resume polling the existing job id when one is known.
+- Do not hide unsupported observations entirely while the detector is still maturing; keep them visible below the actionable candidates.
