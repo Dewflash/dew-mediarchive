@@ -57,6 +57,7 @@
 - Stream detection should avoid exposing internal playback plumbing as separate user choices. Ignore fragments/chunks, prefer master playlists, and keep only the highest-quality variant when no master has appeared.
 - Chrome tabs can close between media detection and badge updates. Treat `No tab with id` badge failures as a harmless lifecycle race, but keep other badge errors visible.
 - Cross-page download visibility belongs to the receiver/library, not the current tab popup. The receiver job store is the global truth for queued/downloading/failed saves.
+- Failed download cleanup should remove only the receiver job record. It should not touch archive records or saved files.
 
 ## Mistakes To Avoid
 
@@ -93,3 +94,4 @@
 - Do not hide unsupported observations entirely while the detector is still maturing; keep them visible below the actionable candidates.
 - Do not swallow all background badge errors. Only the known closed-tab race should be ignored.
 - Do not make failed receiver jobs auto-refresh the library forever. Refresh only while queued/downloading work can actually change quickly.
+- Do not allow queued/downloading jobs to be cleared from the library; only terminal failed job records are safe to clear there.

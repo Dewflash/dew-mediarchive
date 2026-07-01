@@ -307,7 +307,65 @@ describe("receiver server", () => {
     expect(html).toContain("Active downloads");
     expect(html).toContain("failed");
     expect(html).toContain("Download failed.");
+    expect(html).toContain("Clear failed");
+    expect(html).toContain("Job record only. No media file exists.");
+    expect(html).toContain(`/downloads/${job.id}/remove`);
     expect(html).not.toContain("http-equiv=\"refresh\"");
+  });
+
+  it("clears failed job records from the local library", async () => {
+    const job = await jobStore.create({
+      url: "https://cdn.example.test/broken.mp4",
+      pageTitle: "Broken page",
+      kind: "mp4"
+    });
+
+    await jobStore.update(job.id, {
+      error: "Download failed.",
+      status: "failed"
+    });
+
+    const clearResponse = await fetch(
+      `${baseUrl}/downloads/${encodeURIComponent(job.id)}/remove`,
+      {
+        method: "POST",
+        redirect: "manual"
+      }
+    );
+    const downloadsResponse = await fetch(`${baseUrl}/downloads`);
+    const downloadsBody = (await downloadsResponse.json()) as {
+      jobs: DownloadJob[];
+    };
+    const libraryResponse = await fetch(`${baseUrl}/library`);
+    const libraryHtml = await libraryResponse.text();
+
+    expect(clearResponse.status).toBe(303);
+    expect(clearResponse.headers.get("location")).toBe("/library");
+    expect(jobStore.get(job.id)).toBeUndefined();
+    expect(downloadsBody.jobs).toHaveLength(0);
+    expect(libraryHtml).not.toContain("Broken page");
+    await expect(readFile(config.jobsPath, "utf8")).resolves.toBe("");
+  });
+
+  it("does not clear non-failed download jobs", async () => {
+    const job = await jobStore.create({
+      url: "https://cdn.example.test/pending.mp4",
+      pageTitle: "Pending page",
+      kind: "mp4"
+    });
+
+    const clearResponse = await fetch(
+      `${baseUrl}/downloads/${encodeURIComponent(job.id)}/remove`,
+      {
+        method: "POST"
+      }
+    );
+
+    expect(clearResponse.status).toBe(409);
+    await expect(clearResponse.json()).resolves.toMatchObject({
+      error: "Only failed download jobs can be cleared."
+    });
+    expect(jobStore.get(job.id)).toBeDefined();
   });
 
   it("writes an archive record for completed downloads", async () => {

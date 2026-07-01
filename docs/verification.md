@@ -16,6 +16,7 @@
 - Receiver job records expose `yt-dlp` progress when progress is available.
 - The local library shows queued, downloading, and failed receiver jobs before completion writes archive records.
 - The local library auto-refreshes only while queued/downloading receiver jobs are active.
+- The local library can clear failed receiver job records without touching archive records or saved files.
 - Popup renders Save progress when the receiver reports it.
 - Popup restores Save progress after closing and reopening while a receiver job is still running.
 - Popup can clear detected media and session-backed Save progress for the current tab.
@@ -107,7 +108,7 @@ Verified:
 - extension typecheck passed
 - extension build passed
 - popup Save tests prove receiver POST, completed save state, receiver unavailable state, and receiver failure retry state
-- receiver tests passed: 3 files, 29 tests
+- receiver tests passed: 3 files, 31 tests
 - receiver typecheck passed
 - receiver build passed
 - receiver health endpoint returned `{ ok: true, name: "dew-mediarchive-receiver", version: "0.1.0" }`
@@ -121,6 +122,7 @@ Verified:
 - receiver tests prove `/library` renders active download jobs with progress before they become archive records
 - receiver tests prove completed jobs do not duplicate in the active download section
 - receiver tests prove failed jobs remain visible without causing library auto-refresh
+- receiver tests prove failed job clearing removes the job record and cannot clear non-failed jobs
 - receiver tests prove `/library` escapes untrusted archive metadata
 - user manually confirmed `/library` shows the saved MDN flower archive item after the receiver was rebuilt/restarted and a new archive-backed Save existed
 - receiver tests prove `/library` search, kind filtering, and sort query handling

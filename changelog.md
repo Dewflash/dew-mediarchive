@@ -258,3 +258,10 @@
 - Ran receiver `npm run test`: 3 files, 29 tests passed.
 - Ran receiver `npm run typecheck`: passed.
 - Ran receiver `npm run build`: passed.
+- Added a failed-job clear action to the local library.
+- Added `POST /downloads/:id/remove` for failed receiver jobs only.
+- Clearing a failed job rewrites `jobs.jsonl` without that job record and leaves archives/files untouched.
+- Added receiver regression coverage for clearing failed jobs and rejecting non-failed job clears.
+- Ran receiver `npm run test`: 3 files, 31 tests passed.
+- Ran receiver `npm run typecheck`: passed.
+- Ran receiver `npm run build`: passed.

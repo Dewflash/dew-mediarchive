@@ -182,6 +182,32 @@ async function handleRequest(
     return;
   }
 
+  const downloadJobIdToRemove = matchDownloadJobRemovePath(url.pathname);
+
+  if (request.method === "POST" && downloadJobIdToRemove) {
+    const job = jobStore.get(downloadJobIdToRemove);
+
+    if (!job) {
+      sendJson(response, 404, { error: "Download job was not found." });
+      return;
+    }
+
+    if (job.status !== "failed") {
+      sendJson(response, 409, {
+        error: "Only failed download jobs can be cleared."
+      });
+      return;
+    }
+
+    await jobStore.remove(downloadJobIdToRemove);
+
+    response.writeHead(303, {
+      Location: "/library"
+    });
+    response.end();
+    return;
+  }
+
   const archiveRecordIdToRemove = matchArchiveRemovePath(url.pathname);
 
   if (request.method === "POST" && archiveRecordIdToRemove) {
@@ -456,6 +482,19 @@ function isAllowedOrigin(origin: string | undefined): boolean {
 function matchDownloadJobPath(pathname: string): string | undefined {
   const match = /^\/downloads\/([^/]+)$/.exec(pathname);
   return match?.[1];
+}
+
+function matchDownloadJobRemovePath(pathname: string): string | undefined {
+  const match = /^\/downloads\/([^/]+)\/remove$/.exec(pathname);
+  if (!match) {
+    return undefined;
+  }
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return undefined;
+  }
 }
 
 function matchArchiveRemovePath(pathname: string): string | undefined {

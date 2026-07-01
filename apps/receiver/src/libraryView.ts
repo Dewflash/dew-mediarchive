@@ -154,10 +154,23 @@ export function renderLibraryPage(
       gap: 6px;
     }
 
+    .clear-job-form {
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
     .remove-button {
       background: #fee2e2;
       border-color: #fecaca;
       color: #991b1b;
+      width: 100%;
+    }
+
+    .clear-job-button {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: #334155;
       width: 100%;
     }
 
@@ -425,6 +438,12 @@ export function renderLibraryPage(
         color: #fecaca;
       }
 
+      .clear-job-button {
+        background: #111827;
+        border-color: #475569;
+        color: #f8fafc;
+      }
+
       .file-status {
         background: #12351f;
         color: #86efac;
@@ -587,8 +606,20 @@ function renderDownloadJob(job: DownloadJob): string {
   <div>
     <span class="${statusClass}">${escapeHtml(job.status)}</span>
     <p class="meta">${escapeHtml(formatTimestamp(job.updatedAt))}</p>
+    ${renderFailedJobActions(job)}
   </div>
 </article>`;
+}
+
+function renderFailedJobActions(job: DownloadJob): string {
+  if (job.status !== "failed") {
+    return "";
+  }
+
+  return `<form class="clear-job-form" method="post" action="${escapeHtml(`/downloads/${encodeURIComponent(job.id)}/remove`)}">
+  <button class="clear-job-button" type="submit">Clear failed</button>
+  <span class="action-note">Job record only. No media file exists.</span>
+</form>`;
 }
 
 function renderProgress(progress: DownloadProgress): string {

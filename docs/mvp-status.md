@@ -48,6 +48,7 @@ mvp-extension
 - Local library search, media-type filtering, sorting, source links, and export links.
 - Local library shows queued, downloading, and failed receiver jobs before completed saves become archive records.
 - Local library auto-refreshes while queued/downloading receiver jobs are active.
+- Local library can clear failed receiver job records.
 - Local library marks archive records whose saved media file is missing from disk.
 - Local library can remove archive history records without deleting saved media files.
 - Root receiver route redirects to `/library`.
@@ -88,7 +89,7 @@ duration=1.000000
 size=17122
 ```
 
-- Receiver `npm run test` passes: 3 files, 29 tests.
+- Receiver `npm run test` passes: 3 files, 31 tests.
 - Receiver `npm run typecheck` passes.
 - Receiver `npm run build` passes.
 - Receiver smoke test saved the MDN flower MP4 through `yt-dlp`.
@@ -116,6 +117,7 @@ queued -> downloading -> completed
 - Receiver tests prove the local library renders active download jobs with progress before they become archive records.
 - Receiver tests prove completed jobs do not duplicate in the active download section.
 - Receiver tests prove failed jobs remain visible without causing library auto-refresh.
+- Receiver tests prove failed job clearing removes the job record and cannot clear non-failed jobs.
 - Receiver tests prove the local library escapes untrusted archive metadata.
 - Receiver tests prove the local library can search, filter, and sort archive records.
 - Receiver tests prove the local library marks records whose saved media file is missing.

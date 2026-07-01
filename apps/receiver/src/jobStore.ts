@@ -1,4 +1,4 @@
-import { mkdir, readFile, appendFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { DownloadJob, DownloadRequest } from "./types.js";
 
@@ -83,6 +83,26 @@ export class FileJobStore {
     return [...this.jobs.values()].sort((left, right) =>
       right.createdAt.localeCompare(left.createdAt)
     );
+  }
+
+  async remove(jobId: string): Promise<boolean> {
+    const hadJob = this.jobs.delete(jobId);
+
+    if (!hadJob) {
+      return false;
+    }
+
+    this.writeQueue = this.writeQueue.then(async () => {
+      await mkdir(dirname(this.jobsPath), { recursive: true });
+      await writeFile(
+        this.jobsPath,
+        this.list().map((job) => JSON.stringify(job)).join("\n"),
+        "utf8"
+      );
+    });
+
+    await this.writeQueue;
+    return true;
   }
 
   private async save(job: DownloadJob): Promise<void> {
